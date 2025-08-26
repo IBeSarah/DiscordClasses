@@ -1,106 +1,110 @@
 const fs = require('fs');
 const _ = require('lodash');
-const axios = require('axios');
 const levenshtein = require('fast-levenshtein');
+const axios = require('axios');
 
-const mode = process.argv[2] || 'summary'; // summary or full
-const current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
-const previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+const previousFile = 'previous.json';
+const currentFile = 'current.json';
 
-function diffModules(prev, curr) {
-    const added = {};
-    const removed = {};
-    const renamed = {};
-    const moved = {};
-
-    const prevModules = Object.keys(prev);
-    const currModules = Object.keys(curr);
-
-    // Added modules
-    currModules.forEach(mod => {
-        if (!prevModules.includes(mod)) added[mod] = curr[mod];
-    });
-
-    // Removed modules
-    prevModules.forEach(mod => {
-        if (!currModules.includes(mod)) removed[mod] = prev[mod];
-    });
-
-    // Existing modules: check inside
-    prevModules.forEach(mod => {
-        if (currModules.includes(mod)) {
-            const prevKeys = Object.keys(prev[mod]);
-            const currKeys = Object.keys(curr[mod]);
-            const addKeys = currKeys.filter(k => !prevKeys.includes(k));
-            const remKeys = prevKeys.filter(k => !currKeys.includes(k));
-            const renKeys = prevKeys.filter(pk => {
-                const closest = currKeys.find(ck => levenshtein.get(pk, ck) === 1);
-                return closest && prev[mod][pk] !== curr[mod][closest];
-            });
-
-            if (addKeys.length) added[mod] = _.pick(curr[mod], addKeys);
-            if (remKeys.length) removed[mod] = _.pick(prev[mod], remKeys);
-            if (renKeys.length) renamed[mod] = _.pick(curr[mod], renKeys);
-        }
-    });
-
-    // Detect moved modules (name unchanged but content changed completely)
-    prevModules.forEach(mod => {
-        if (currModules.includes(mod)) {
-            if (!_.isEqual(prev[mod], curr[mod])) {
-                moved[mod] = { from: prev[mod], to: curr[mod] };
-            }
-        }
-    });
-
-    return { added, removed, renamed, moved };
+function parseJson(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-function formatGitHubDiff(diff) {
-    let output = '';
+const oldData = parseJson(previousFile);
+const newData = parseJson(currentFile);
 
-    for (const type of ['added', 'removed', 'renamed', 'moved']) {
-        const data = diff[type];
-        for (const mod of Object.keys(data)) {
-            const content = type === 'moved' ? data[mod].to : data[mod];
-            if (!content || Object.keys(content).length === 0) continue;
-            output += `# ${type.charAt(0).toUpperCase() + type.slice(1)} in module ${mod}\n\`\`\`diff\n`;
-            if (type === 'added' || type === 'renamed') {
-                for (const k in content) output += `+ "${k}": "${content[k]}"\n`;
-            } else if (type === 'removed') {
-                for (const k in content) output += `- "${k}": "${content[k]}"\n`;
-            } else if (type === 'moved') {
-                output += JSON.stringify(content, null, 2) + '\n';
-            }
-            output += '```\n\n';
-        }
+const added = {};
+const removed = {};
+const renamed = {};
+const moved = {};
+
+// Detect added, removed, renamed, and moved modules/keys
+for (const moduleKey of _.union(Object.keys(oldData), Object.keys(newData))) {
+  const oldModule = oldData[moduleKey] || {};
+  const newModule = newData[moduleKey] || {};
+
+  const oldKeys = Object.keys(oldModule);
+  const newKeys = Object.keys(newModule);
+
+  // Added keys
+  const addedKeys = _.difference(newKeys, oldKeys);
+  if (addedKeys.length) added[moduleKey] = addedKeys.map(k => ({ [k]: newModule[k] }));
+
+  // Removed keys
+  const removedKeys = _.difference(oldKeys, newKeys);
+  if (removedKeys.length) removed[moduleKey] = removedKeys.map(k => ({ [k]: oldModule[k] }));
+
+  // Renamed keys
+  for (const oldKey of removedKeys) {
+    let closestMatch = null;
+    let minDistance = Infinity;
+    for (const newKey of addedKeys) {
+      const distance = levenshtein.get(oldKey, newKey);
+      if (distance < minDistance && oldModule[oldKey] === newModule[newKey]) {
+        minDistance = distance;
+        closestMatch = newKey;
+      }
     }
-    return output;
+    if (closestMatch) {
+      renamed[moduleKey] = renamed[moduleKey] || [];
+      renamed[moduleKey].push({ from: oldKey, to: closestMatch });
+      _.remove(added[moduleKey], a => a[closestMatch]);
+      _.remove(removed[moduleKey], r => r[oldKey]);
+    }
+  }
+
+  // Moved module (if module exists in both but changed content)
+  if (!_.isEqual(oldModule, newModule) && !added[moduleKey] && !removed[moduleKey] && !renamed[moduleKey]) {
+    moved[moduleKey] = { from: oldModule, to: newModule };
+  }
 }
 
-function formatDiscordSummary(diff) {
-    let summary = '';
-    for (const type of ['added', 'removed', 'renamed', 'moved']) {
-        const data = diff[type];
-        for (const mod of Object.keys(data)) {
-            const count = Object.keys(data[type] && data[type][mod] ? data[type][mod] : {}).length;
-            if (count > 0) summary += `Module ${mod}: ${type.charAt(0).toUpperCase() + type.slice(1)}: ${count}\n`;
-        }
+// Generate GitHub diff text
+let githubDiff = '';
+const appendSection = (title, obj, sign) => {
+  for (const moduleKey in obj) {
+    if (!obj[moduleKey] || obj[moduleKey].length === 0) continue;
+    githubDiff += `# ${title} from module ${moduleKey}\n\`\`\`diff\n`;
+    if (title === 'Renamed') {
+      obj[moduleKey].forEach(r => {
+        githubDiff += `- "${r.from}": "${oldData[moduleKey][r.from]}"\n`;
+        githubDiff += `+ "${r.to}": "${newData[moduleKey][r.to]}"\n`;
+      });
+    } else if (title === 'Moved') {
+      githubDiff += `Module ${moduleKey} changed from:\n${JSON.stringify(obj[moduleKey].from, null, 2)}\n`;
+      githubDiff += `to:\n${JSON.stringify(obj[moduleKey].to, null, 2)}\n`;
+    } else {
+      obj[moduleKey].forEach(kv => {
+        const key = Object.keys(kv)[0];
+        githubDiff += `${sign} "${key}": "${kv[key]}"\n`;
+      });
     }
-    summary += `\nView full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-    return summary;
-}
+    githubDiff += '```\n\n';
+  }
+};
 
-const diff = diffModules(previous, current);
+appendSection('Added', added, '+');
+appendSection('Removed', removed, '-');
+appendSection('Renamed', renamed, '');
+appendSection('Moved', moved, '');
 
-if (mode === 'full') {
-    const githubDiff = formatGitHubDiff(diff);
-    if (githubDiff.trim()) fs.writeFileSync('full_diff.txt', githubDiff, 'utf8');
-} else if (mode === 'summary') {
-    const discordDiff = formatDiscordSummary(diff);
-    if (discordDiff.trim() && process.env.DISCORD_WEBHOOK_URL) {
-        axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordDiff })
-            .then(() => console.log('Discord post succeeded'))
-            .catch(err => console.error('Discord post failed:', err.response?.data || err));
-    }
+fs.writeFileSync('full_diff.txt', githubDiff, 'utf8');
+
+// Generate Discord summary
+const summarize = (obj) => {
+  return Object.entries(obj)
+    .map(([mod, items]) => `${mod}: ${items.length}`)
+    .join(', ');
+};
+
+let discordSummary = '';
+if (Object.keys(added).length) discordSummary += `Added: ${summarize(added)}\n`;
+if (Object.keys(removed).length) discordSummary += `Removed: ${summarize(removed)}\n`;
+if (Object.keys(renamed).length) discordSummary += `Renamed: ${summarize(renamed)}\n`;
+if (Object.keys(moved).length) discordSummary += `Moved: ${summarize(moved)}\n`;
+
+if (discordSummary) {
+  discordSummary += `\nView full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+  axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordSummary }).catch(console.error);
 }
