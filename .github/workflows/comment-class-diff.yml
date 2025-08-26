@@ -32,15 +32,32 @@ jobs:
             const _ = require('lodash');
             const levenshtein = require('fast-levenshtein');
 
-            const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-            const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+            let prev = {};
+            let curr = {};
+
+            try {
+              const prevRaw = fs.readFileSync('previous.json', 'utf8');
+              console.log("Previous JSON first 100 chars:", prevRaw.slice(0,100));
+              prev = JSON.parse(prevRaw);
+            } catch(e) {
+              console.warn("Failed to parse previous.json, using empty object", e);
+            }
+
+            try {
+              const currRaw = fs.readFileSync('current.json', 'utf8');
+              console.log("Current JSON first 100 chars:", currRaw.slice(0,100));
+              curr = JSON.parse(currRaw);
+            } catch(e) {
+              console.warn("Failed to parse current.json, using empty object", e);
+            }
 
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
+            // Convert module object to array of "key: value" strings
             function moduleItems(obj) {
               if (!obj) return [];
-              return Object.entries(obj).map(([k, v]) => `${k}: ${v}`);
+              return Object.entries(obj).map(([k,v]) => `${k}: ${v}`);
             }
 
             function detectRenames(removed, added) {
@@ -52,20 +69,21 @@ jobs:
                 let bestDist = Infinity;
                 unmatchedAdded.forEach(add => {
                   const dist = levenshtein.get(rem, add);
-                  if (dist < bestDist && dist <= Math.max(rem.length, add.length) * 0.4) {
+                  if (dist < bestDist && dist <= Math.max(rem.length, add.length)*0.4) {
                     bestDist = dist;
                     bestMatch = add;
                   }
                 });
                 if (bestMatch) {
-                  renames.push({ from: rem, to: bestMatch });
+                  renames.push({from: rem, to: bestMatch});
                   unmatchedAdded.delete(bestMatch);
                 }
               });
 
-              const newRemoved = removed.filter(r => !renames.some(x => x.from === r));
+              const newRemoved = removed.filter(r => !renames.some(x=>x.from===r));
               const newAdded = Array.from(unmatchedAdded);
-              return { renames, newRemoved, newAdded };
+
+              return {renames, newRemoved, newAdded};
             }
 
             function compareModules(prevObj, currObj) {
@@ -81,7 +99,7 @@ jobs:
                 let removed = _.difference(prevItems, currItems);
                 let added = _.difference(currItems, prevItems);
 
-                const { renames, newRemoved, newAdded } = detectRenames(removed, added);
+                const {renames, newRemoved, newAdded} = detectRenames(removed, added);
                 removed = newRemoved;
                 added = newAdded;
 
@@ -91,11 +109,11 @@ jobs:
 
                   if (removed.length) {
                     section += '#### Removed\n';
-                    removed.forEach(item => section += `-"${item}"\n`);
+                    removed.forEach(it => section += `-"${it}"\n`);
                   }
                   if (added.length) {
                     section += '#### Added\n';
-                    added.forEach(item => section += `+"${item}"\n`);
+                    added.forEach(it => section += `+"${it}"\n`);
                   }
                   if (renames.length) {
                     section += '#### Renamed\n';
@@ -106,10 +124,7 @@ jobs:
                 }
               });
 
-              const summaryText = summary.length
-                ? `**Summary:**\n${summary.join('\n')}\n\n`
-                : '';
-
+              const summaryText = summary.length ? `**Summary:**\n${summary.join('\n')}\n\n` : '';
               return summaryText + sections.join('\n');
             }
 
@@ -123,7 +138,7 @@ jobs:
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
-              while (start < text.length) {
+              while(start < text.length) {
                 chunks.push(text.slice(start, start + maxLength));
                 start += maxLength;
               }
@@ -132,16 +147,16 @@ jobs:
 
             const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
 
-            for (let i = 0; i < chunks.length; i++) {
-              const comment = chunks.length > 1
-                ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+            for(let i=0; i<chunks.length; i++){
+              const comment = chunks.length>1
+                ? `${header}**Part ${i+1} of ${chunks.length}**\n\n${chunks[i]}`
                 : `${header}${chunks[i]}`;
 
-              console.log(`Posting comment part ${i + 1}/${chunks.length}`);
+              console.log(`Posting comment part ${i+1}/${chunks.length}`);
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: comment,
+                body: comment
               });
             }
