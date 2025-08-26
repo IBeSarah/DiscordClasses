@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json  # Only trigger when this file changes
 
 jobs:
   post-diff:
@@ -25,7 +25,7 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash axios
 
-      - name: Run diff script and post to Discord
+      - name: Post diff to Discord and save full diff for GitHub
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -39,6 +39,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+
+            const MAX_COMMENT_LENGTH = 65000;
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
 
             if (!diffText.trim()) {
@@ -46,8 +48,6 @@ jobs:
               return;
             }
 
-            // Split text into 65k chunks
-            const MAX_COMMENT_LENGTH = 65000;
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
