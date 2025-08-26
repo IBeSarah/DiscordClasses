@@ -25,7 +25,7 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Run diff script
+      - name: Run diff and post to Discord
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -39,38 +39,35 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const MAX = 65000;
+            const raw = fs.readFileSync('full_diff.txt', 'utf8');
 
-            const MAX_COMMENT_LENGTH = 65000;
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
-
-            if (!diffText.trim()) {
-              console.log("No diff to post");
+            if (!raw.trim() || /No class changes detected/i.test(raw)) {
+              console.log('No diff to post');
               return;
             }
 
-            function splitText(text, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < text.length) {
-                chunks.push(text.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
+            // Split on headings "# " to avoid breaking diff fences
+            const sections = raw.split(/\n(?=# )/g);
 
-            const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
+            const chunks = [];
+            let buf = '';
+            for (const sec of sections) {
+              if ((buf + sec + '\n').length > MAX) {
+                if (buf.trim()) chunks.push(buf);
+                buf = '';
+              }
+              buf += sec + '\n';
+            }
+            if (buf.trim()) chunks.push(buf);
 
             for (let i = 0; i < chunks.length; i++) {
-              const body = chunks.length > 1
-                ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
-                : chunks[i];
-
+              const header = chunks.length > 1 ? `**Part ${i+1} of ${chunks.length}**\n\n` : '';
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body,
+                body: header + chunks[i],
               });
-
-              console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
+              console.log(`Posted GitHub comment part ${i+1}/${chunks.length}`);
             }
