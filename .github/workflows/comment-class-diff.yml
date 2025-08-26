@@ -17,72 +17,45 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up diff files
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Set up JSON files safely
         run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+          git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
+          # Normalize JSON for consistent formatting
+          jq -S . previous.json > prev_normalized.json
+          jq -S . current.json > curr_normalized.json
 
       - name: Create diff
         run: |
-          diff -u previous.json current.json > diff.txt || true
+          diff -u prev_normalized.json curr_normalized.json > diff.txt || true
+          head -n 50 diff.txt  # optional: preview first 50 lines in logs
 
       - name: Post diff to Discord
         run: |
-          node -e "
-          const fs = require('fs');
-          const axios = require('axios');
-          const diff = fs.readFileSync('diff.txt', 'utf8').slice(0, 2000);
-          const url = process.env.DISCORD_WEBHOOK_URL;
-          const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-          const content = `🧩 **Changes in discordclasses.json:**\n\`\`\`diff\n${diff}\n\`\`\`\nFull commit here: ${commitUrl}`;
-          axios.post(url, { content }).then(() => console.log('Discord webhook sent')).catch(err => console.error('Failed to send Discord webhook:', err));
-          "
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
+          DIFF=$(head -c 2000 diff.txt)
+          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
+          CONTENT="**Changes in discordclasses.json:**\n\`\`\`diff\n${DIFF}\n\`\`\`\nFull commit here: ${COMMIT_URL}"
+          # Ensure total content ≤ 2000 chars
+          CONTENT=$(echo "$CONTENT" | head -c 2000)
+          curl -H "Content-Type: application/json" \
+               -d "{\"content\": \"$CONTENT\"}" \
+               $WEBHOOK_URL
 
-      - name: Post full diff as GitHub comment
+      - name: Post full diff as GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
-
             const diff = fs.readFileSync('diff.txt', 'utf8');
             if (!diff.trim()) return;
-
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
-            const chunkPrefix = '```diff\n';
-            const chunkSuffix = '\n```';
-
-            function splitDiff(fullText, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
-
-            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
-
-            for (let i = 0; i < rawChunks.length; i++) {
-              const partHeader = rawChunks.length > 1
-                ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
-                : header;
-
-              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
-
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: commentBody,
-              });
-
-              console.log(`Posted comment part ${i + 1}/${rawChunks.length}`);
-            }
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `🧩 **Full changes in discordclasses.json:**\n\n\`\`\`diff\n${diff}\n\`\`\``
+            });
