@@ -1,0 +1,43 @@
+name: Comment Class Diff
+
+on:
+  push:
+    paths:
+      - 'DiscordClasses/discordclasses.json'  # Change this to your file path
+  pull_request:
+    paths:
+      - 'DiscordClasses/discordclasses.json'
+
+jobs:
+  post-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get current and previous version of the file
+        run: |
+          git show HEAD:DiscordClasses/discordclasses.json > current.json
+          git show HEAD^:DiscordClasses/discordclasses.json > previous.json || echo '{}' > previous.json
+
+      - name: Generate JSON diff
+        id: diff
+        run: |
+          npm install -g json-diff
+          DIFF=$(json-diff previous.json current.json --color=never || true)
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          echo "$DIFF" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Post comment to commit
+        uses: peter-evans/commit-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            🧩 **Changes in `discordclasses.json`**:
+
+            ```diff
+            ${{ steps.diff.outputs.diff }}
+            ```
+
