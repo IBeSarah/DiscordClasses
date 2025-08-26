@@ -1,9 +1,6 @@
 name: Comment Class Diff
 
-on:
-  push:
-    paths:
-      - 'discordclasses.json'
+on: push
 
 jobs:
   post-diff:
@@ -15,7 +12,12 @@ jobs:
 
       - name: Get current and previous version of the file
         run: |
+          echo "Current file content:"
+          git show HEAD:discordclasses.json || echo "File not found at HEAD"
           git show HEAD:discordclasses.json > current.json
+
+          echo "Previous file content:"
+          git show HEAD^:discordclasses.json || echo "File not found at HEAD^"
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Generate unified diff
