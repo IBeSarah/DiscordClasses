@@ -1,4 +1,3 @@
-// diff_and_post.js
 const fs = require('fs');
 const axios = require('axios');
 const _ = require('lodash');
@@ -13,12 +12,9 @@ const serverUrl = process.env.GITHUB_SERVER_URL;
 // File paths
 const prevFile = 'previous.json';
 const currFile = 'current.json';
+const fullDiffFile = 'full_diff.txt';
 
-// Discord & GitHub limits
-const MAX_DISCORD_LENGTH = 2000;
-const MAX_GITHUB_LENGTH = 65536;
-
-// Load JSON safely
+// Helpers
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -27,102 +23,61 @@ function loadJson(file) {
   }
 }
 
-// Generate diff arrays
+// Simple diff generator
 function generateDiff(prev, curr) {
   const added = [];
   const removed = [];
   const renamed = [];
   const moved = [];
 
-  // Flatten modules
-  function flatten(obj) {
-    const res = {};
-    for (const key in obj) {
-      for (const subKey in obj[key]) {
-        res[`${key}.${subKey}`] = obj[key][subKey];
-      }
-    }
-    return res;
+  for (const key in curr) {
+    if (!(key in prev)) added.push(`${key} added to Module \`${curr[key]}\``);
   }
 
-  const prevFlat = flatten(prev);
-  const currFlat = flatten(curr);
-
-  // Added & Removed
-  for (const key in currFlat) if (!prevFlat[key]) added.push(`${key}`);
-  for (const key in prevFlat) if (!currFlat[key]) removed.push(`${key}`);
-
-  // Moved & Renamed (simplified: if value matches but module changed => moved, if key changed but value similar => renamed)
-  for (const keyCurr in currFlat) {
-    for (const keyPrev in prevFlat) {
-      if (currFlat[keyCurr] === prevFlat[keyPrev] && keyCurr !== keyPrev) moved.push(`${keyPrev} -> ${keyCurr}`);
-      else if (levenshtein.get(currFlat[keyCurr], prevFlat[keyPrev]) <= 2 && keyCurr !== keyPrev) renamed.push(`${keyPrev} -> ${keyCurr}`);
-    }
+  for (const key in prev) {
+    if (!(key in curr)) removed.push(`${key} removed from Module \`${prev[key]}\``);
   }
 
-  return { added, removed, renamed, moved };
+  // Example placeholders for renamed/moved
+  // Extend this with real logic if needed
+  // For moved/renamed, you could compare values and use Levenshtein distance
+
+  let diffText = '';
+  if (added.length) diffText += `### Added\n${added.map(a => '+ ' + a).join('\n')}\n`;
+  if (removed.length) diffText += `### Removed\n${removed.map(r => '- ' + r).join('\n')}\n`;
+  if (renamed.length) diffText += `### Renamed\n${renamed.map(r => '* ' + r).join('\n')}\n`;
+  if (moved.length) diffText += `### Moved\n${moved.map(m => '* ' + m).join('\n')}\n`;
+
+  return diffText;
 }
 
-// Format diff for Discord/GitHub
-function formatDiff(diffObj) {
-  let result = '';
-  if (diffObj.removed.length) result += `### Removed\n* ${diffObj.removed.join('\n* ')}\n`;
-  if (diffObj.added.length) result += `### Added\n* ${diffObj.added.join('\n* ')}\n`;
-  if (diffObj.renamed.length) result += `### Renamed\n* ${diffObj.renamed.join('\n* ')}\n`;
-  if (diffObj.moved.length) result += `### Moved\n* ${diffObj.moved.join('\n* ')}\n`;
-  return result || 'No changes';
-}
+// Load files
+const prevJson = loadJson(prevFile);
+const currJson = loadJson(currFile);
 
-// Split text into chunks for GitHub
-function splitChunks(text, maxLength) {
+// Generate diff
+const fullDiff = generateDiff(prevJson, currJson);
+
+// Write full diff for GitHub
+fs.writeFileSync(fullDiffFile, fullDiff, 'utf8');
+
+// Post to Discord (truncate to 2000 chars)
+async function postToDiscord(text) {
+  if (!webhookUrl || !text.trim()) return;
+  const DISCORD_MAX = 2000;
   const chunks = [];
-  let start = 0;
-  while (start < text.length) {
-    chunks.push(text.slice(start, start + maxLength));
-    start += maxLength;
-  }
-  return chunks;
-}
-
-async function postToDiscord(content) {
-  // Truncate for Discord
-  let discordContent = content;
-  if (discordContent.length > MAX_DISCORD_LENGTH) {
-    discordContent = discordContent.slice(0, MAX_DISCORD_LENGTH - 20) + '\n... (truncated)';
+  for (let i = 0; i < text.length; i += DISCORD_MAX) {
+    chunks.push(text.slice(i, i + DISCORD_MAX));
   }
 
-  try {
-    await axios.post(webhookUrl, { content: "```diff\n" + discordContent + "\n```" });
-    console.log('Posted to Discord');
-  } catch (err) {
-    console.error('Discord post failed:', err.response?.data || err.message);
+  for (const chunk of chunks) {
+    try {
+      await axios.post(webhookUrl, { content: chunk });
+    } catch (err) {
+      console.error('Discord webhook error:', err.response?.data || err.message);
+    }
   }
 }
 
-// Main
-(async () => {
-  const prevJson = loadJson(prevFile);
-  const currJson = loadJson(currFile);
-
-  const diffObj = generateDiff(prevJson, currJson);
-  const diffText = formatDiff(diffObj) + `\nFull commit here: ${serverUrl}/${repo}/commit/${commitSha}`;
-
-  // Discord
-  await postToDiscord(diffText);
-
-  // GitHub comments
-  const chunks = splitChunks(diffText, MAX_GITHUB_LENGTH);
-  const { Octokit } = require('@octokit/rest');
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-
-  for (let i = 0; i < chunks.length; i++) {
-    const body = chunks.length > 1 ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}` : chunks[i];
-    await octokit.rest.repos.createCommitComment({
-      owner: repo.split('/')[0],
-      repo: repo.split('/')[1],
-      commit_sha: commitSha,
-      body,
-    });
-    console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
-  }
-})();
+// Run
+postToDiscord(fullDiff);
