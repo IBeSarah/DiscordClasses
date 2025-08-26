@@ -47,8 +47,11 @@ jobs:
               return;
             }
 
+            // Convert all headings ### to H1 #
+            const replaced = raw.replace(/^### /gm, '# ');
+
             // Split on headings "# " to avoid breaking diff fences
-            const sections = raw.split(/\n(?=# )/g);
+            const sections = replaced.split(/\n(?=# )/g);
 
             const chunks = [];
             let buf = '';
