@@ -39,16 +39,18 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65000;
 
-            if (!fs.existsSync('full_diff.txt')) {
-              console.log("No full diff to post");
+            const MAX_COMMENT_LENGTH = 65000;
+            let diffText = '';
+            try {
+              diffText = fs.readFileSync('full_diff.txt', 'utf8');
+            } catch (err) {
+              console.log('full_diff.txt not found, nothing to post.');
               return;
             }
 
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8').trim();
-            if (!diffText) {
-              console.log("Full diff file is empty");
+            if (!diffText.trim()) {
+              console.log("No diff to post");
               return;
             }
 
@@ -66,7 +68,7 @@ jobs:
 
             for (let i = 0; i < chunks.length; i++) {
               const body = chunks.length > 1
-                ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+                ? `# Part ${i + 1} of ${chunks.length}\n\n${chunks[i]}`
                 : chunks[i];
 
               await github.rest.repos.createCommitComment({
