@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2  # Needed to access previous commit
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash fast-levenshtein axios @octokit/rest
 
       - name: Set up JSON files safely
         run: |
@@ -27,17 +27,11 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
           node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      - name: Compute diff and post to Discord
-        run: node diff_and_post.js
+      - name: Compute diff and post to Discord & GitHub
+        run: node diff_and_post_all.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-
-      - name: Post GitHub commit comment
-        run: node post_commit_comment.js
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
