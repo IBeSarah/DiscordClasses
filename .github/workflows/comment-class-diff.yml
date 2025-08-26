@@ -8,16 +8,6 @@ on:
 jobs:
   post-diff:
     runs-on: ubuntu-latest
-name: Post JSON module diff
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  post-diff:
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -112,11 +102,11 @@ jobs:
                 let prevItems = moduleItems(prevObj[mod]);
                 let currItems = moduleItems(currObj[mod]);
 
-                const movedFromThis = moves.filter(m => m.from===mod).map(m => m.item);
-                const movedToThis = moves.filter(m => m.to===mod).map(m => m.item);
+                const movedFromThis = moves.filter(m => m.from===mod);
+                const movedToThis = moves.filter(m => m.to===mod);
 
-                prevItems = prevItems.filter(x => !movedFromThis.includes(x));
-                currItems = currItems.filter(x => !movedToThis.includes(x));
+                prevItems = prevItems.filter(x => !movedFromThis.some(m=>m.item===x));
+                currItems = currItems.filter(x => !movedToThis.some(m=>m.item===x));
 
                 let removed = _.difference(prevItems, currItems);
                 let added = _.difference(currItems, prevItems);
@@ -126,8 +116,16 @@ jobs:
                 added = newAdded;
 
                 if (removed.length || added.length || renames.length || movedFromThis.length || movedToThis.length) {
-                  // Improved summary line
-                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length} / moved:${movedFromThis.length}`);
+
+                  // Prepare detailed moved summary including renames
+                  const movedSummary = movedFromThis.map(m => {
+                    const rename = renames.find(r => r.from === m.item);
+                    if(rename) return `"${m.item}"→${m.to} (renamed to "${rename.to}")`;
+                    return `"${m.item}"→${m.to}`;
+                  }).join(', ');
+
+                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length} / moved: ${movedSummary || 'none'}`);
+
                   let section = `### Module: ${mod}\n`;
 
                   if (removed.length) {
@@ -144,9 +142,10 @@ jobs:
                   }
                   if (movedFromThis.length) {
                     section += '#### Moved\n';
-                    movedFromThis.forEach(it => {
-                      const move = moves.find(m => m.item===it && m.from===mod);
-                      section += `"${it}" to module ${move.to}\n`;
+                    movedFromThis.forEach(m => {
+                      const rename = renames.find(r => r.from===m.item);
+                      const display = rename ? `"${m.item}" to module ${m.to} (renamed to "${rename.to}")` : `"${m.item}" to module ${m.to}`;
+                      section += display + '\n';
                     });
                   }
 
@@ -155,185 +154,6 @@ jobs:
               });
 
               const summaryText = summary.length ? `**Summary of changes:**\n${summary.join('\n')}\n\n` : '';
-              return summaryText + sections.join('\n');
-            }
-
-            const diffText = compareModules(prev, curr);
-
-            if(!diffText.trim()) {
-              console.log("No changes to post");
-              return;
-            }
-
-            function splitText(text, maxLength) {
-              const chunks = [];
-              let start=0;
-              while(start<text.length){
-                chunks.push(text.slice(start, start+maxLength));
-                start+=maxLength;
-              }
-              return chunks;
-            }
-
-            const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
-
-            for(let i=0; i<chunks.length; i++){
-              const comment = chunks.length>1
-                ? `${header}**Part ${i+1} of ${chunks.length}**\n\n${chunks[i]}`
-                : `${header}${chunks[i]}`;
-
-              console.log(`Posting comment part ${i+1}/${chunks.length}`);
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: comment
-              });
-            }
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein
-
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
-
-      - name: Post structured module diff
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const _ = require('lodash');
-            const levenshtein = require('fast-levenshtein');
-
-            let prev = {};
-            let curr = {};
-
-            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) { console.warn("Failed to parse previous.json"); }
-            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) { console.warn("Failed to parse current.json"); }
-
-            const MAX_COMMENT_LENGTH = 65536;
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
-
-            function moduleItems(obj) {
-              if (!obj) return [];
-              return Object.entries(obj).map(([k,v]) => `${k}: ${v}`);
-            }
-
-            // Detect renames based on Levenshtein
-            function detectRenames(removed, added) {
-              const renames = [];
-              const unmatchedAdded = new Set(added);
-              removed.forEach(rem => {
-                let bestMatch = null;
-                let bestDist = Infinity;
-                unmatchedAdded.forEach(add => {
-                  const dist = levenshtein.get(rem, add);
-                  if (dist < bestDist && dist <= Math.max(rem.length, add.length)*0.4) {
-                    bestDist = dist;
-                    bestMatch = add;
-                  }
-                });
-                if(bestMatch) {
-                  renames.push({from: rem, to: bestMatch});
-                  unmatchedAdded.delete(bestMatch);
-                }
-              });
-              const newRemoved = removed.filter(r => !renames.some(x=>x.from===r));
-              const newAdded = Array.from(unmatchedAdded);
-              return {renames, newRemoved, newAdded};
-            }
-
-            function detectMoves(allPrev, allCurr) {
-              const moves = [];
-              // Flatten previous and current items to module -> items
-              const prevFlat = {};
-              Object.entries(allPrev).forEach(([mod, obj]) => {
-                prevFlat[mod] = moduleItems(obj);
-              });
-              const currFlat = {};
-              Object.entries(allCurr).forEach(([mod, obj]) => {
-                currFlat[mod] = moduleItems(obj);
-              });
-
-              Object.entries(prevFlat).forEach(([fromMod, items]) => {
-                items.forEach(item => {
-                  Object.entries(currFlat).forEach(([toMod, currItems]) => {
-                    if(fromMod !== toMod && currItems.includes(item)) {
-                      moves.push({item, from: fromMod, to: toMod});
-                      // Remove from currFlat[toMod] so it's not counted as added
-                      currFlat[toMod] = currItems.filter(x=>x!==item);
-                      // Remove from prevFlat[fromMod] so it's not counted as removed
-                      prevFlat[fromMod] = prevFlat[fromMod].filter(x=>x!==item);
-                    }
-                  });
-                });
-              });
-
-              return moves;
-            }
-
-            function compareModules(prevObj, currObj) {
-              const sections = [];
-              const summary = [];
-              const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
-
-              // Detect moves globally
-              const moves = detectMoves(prevObj, currObj);
-
-              allModules.forEach(mod => {
-                const prevItems = moduleItems(prevObj[mod]);
-                const currItems = moduleItems(currObj[mod]);
-
-                let removed = _.difference(prevItems, currItems);
-                let added = _.difference(currItems, prevItems);
-
-                // Filter out moved items
-                const moduleMoves = moves.filter(m => m.from===mod || m.to===mod);
-                removed = removed.filter(r => !moduleMoves.some(m => m.from===mod && m.item===r));
-                added = added.filter(a => !moduleMoves.some(m => m.to===mod && m.item===a));
-
-                const {renames, newRemoved, newAdded} = detectRenames(removed, added);
-                removed = newRemoved;
-                added = newAdded;
-
-                if (removed.length || added.length || renames.length || moduleMoves.length) {
-                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length} / moved:${moduleMoves.filter(m=>m.from===mod).length}`);
-                  let section = `### Module: ${mod}\n`;
-
-                  if (removed.length) {
-                    section += '#### Removed\n';
-                    removed.forEach(it => section += `-"${it}"\n`);
-                  }
-                  if (added.length) {
-                    section += '#### Added\n';
-                    added.forEach(it => section += `+"${it}"\n`);
-                  }
-                  if (renames.length) {
-                    section += '#### Renamed\n';
-                    renames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
-                  }
-                  if (moduleMoves.length) {
-                    section += '#### Moved\n';
-                    moduleMoves.forEach(m => {
-                      if(m.from===mod) section += `"${m.item}" to module ${m.to}\n`;
-                      if(m.to===mod && !added.includes(m.item)) section += `"${m.item}" from module ${m.from}\n`;
-                    });
-                  }
-
-                  sections.push(section);
-                }
-              });
-
-              const summaryText = summary.length ? `**Summary:**\n${summary.join('\n')}\n\n` : '';
               return summaryText + sections.join('\n');
             }
 
