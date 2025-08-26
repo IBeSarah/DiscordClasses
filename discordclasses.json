@@ -1,6 +1,5 @@
 {
   "315": {
-	  "derp": "derp",
     "closeButton": "closeButton_ae16b8",
     "container": "container_ae16b8",
     "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b8"
@@ -20803,6 +20802,7 @@
   },
   "796914": {
     "lockIcon": "lockIcon__9a648",
+    "lockIconText": "lockIconText__9a648",
     "paymentModalLockIcon": "paymentModalLockIcon__9a648"
   },
   "796959": {
