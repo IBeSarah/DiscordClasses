@@ -17,16 +17,18 @@ jobs:
         with:
           fetch-depth: 2  # Needed to compare with previous commit
 
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
-      - name: Post diff to Discord and generate full diff
+      - name: Install Node dependencies
+        run: npm install lodash axios
+
+      - name: Run diff and post
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
 
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
@@ -36,10 +38,12 @@ jobs:
             const fs = require('fs');
 
             const MAX_COMMENT_LENGTH = 65000;
-            if (!fs.existsSync('full_diff.txt')) return console.log("No diff file found");
-
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
-            if (!diffText.trim()) return console.log("No diff to post");
+
+            if (!diffText.trim()) {
+              console.log("No diff to post");
+              return;
+            }
 
             function splitText(text, maxLength) {
               const chunks = [];
