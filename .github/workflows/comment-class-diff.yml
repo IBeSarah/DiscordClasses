@@ -1,119 +1,136 @@
-name: Post Categorized Diff Comments
+name: post-diff
 
 on:
   push:
     paths:
-      - discordclasses.json
+      - 'discordclasses.json'
 
 jobs:
-  post-diff-comments:
+  post-diff:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 300  # to get previous commits
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 300
 
-    - name: Save current discordclasses.json
-      run: |
-        git show HEAD:discordclasses.json > current.json
+      - name: Get current and previous file content
+        run: |
+          git show HEAD:discordclasses.json > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-    - name: Save previous discordclasses.json (HEAD^)
-      run: |
-        git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+      - name: Post diff comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
 
-    - name: Post categorized diff as commit comments
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const fs = require('fs');
+            // Load JSON files
+            const current = JSON.parse(fs.readFileSync('current.json', 'utf-8'));
+            const previous = JSON.parse(fs.readFileSync('previous.json', 'utf-8'));
 
-          const previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-          const current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+            // Containers for diff lines
+            const added = [];
+            const removed = [];
+            const renamed = [];
 
-          const MAX_COMMENT_LENGTH = 65536;
-          const header = (section) => `### ${section}\n\`\`\`diff\n`;
-          const footer = '\n```\n';
-
-          function escapeLine(str) {
-            return str.replace(/\r?\n/g, ' ');
-          }
-
-          const added = [];
-          const removed = [];
-          const renamed = [];
-
-          const prevKeys = new Set(Object.keys(previous));
-          const currKeys = new Set(Object.keys(current));
-
-          for (const key of currKeys) {
-            if (!prevKeys.has(key)) {
-              added.push(`+ "${key}": ${JSON.stringify(current[key])}`);
+            // Helper to compare nested objects for renames
+            function detectNestedRenames(key, prevObj, currObj) {
+              const renames = [];
+              const keys = new Set([...Object.keys(prevObj), ...Object.keys(currObj)]);
+              for (const nestedKey of keys) {
+                const oldVal = prevObj[nestedKey];
+                const newVal = currObj[nestedKey];
+                if (oldVal !== undefined && newVal !== undefined && oldVal !== newVal) {
+                  renames.push({
+                    key: nestedKey,
+                    original: oldVal,
+                    renamed: newVal,
+                    parentKey: key
+                  });
+                }
+              }
+              return renames;
             }
-          }
 
-          for (const key of prevKeys) {
-            if (!currKeys.has(key)) {
-              removed.push(`- "${key}": ${JSON.stringify(previous[key])}`);
-            }
-          }
-
-          for (const key of prevKeys) {
-            if (currKeys.has(key)) {
-              const prevVal = JSON.stringify(previous[key]);
-              const currVal = JSON.stringify(current[key]);
-              if (prevVal !== currVal) {
-                renamed.push(
-                  `-original : ${key} : ${escapeLine(prevVal)}\n+renamed: ${key} : ${escapeLine(currVal)}`
-                );
+            // Check for added and renamed keys
+            for (const key of Object.keys(current)) {
+              if (!(key in previous)) {
+                added.push(`${key} : ${JSON.stringify(current[key])}`);
+              } else {
+                if (JSON.stringify(previous[key]) !== JSON.stringify(current[key])) {
+                  if (
+                    typeof previous[key] === 'object' && previous[key] !== null &&
+                    typeof current[key] === 'object' && current[key] !== null
+                  ) {
+                    // Nested renames inside objects
+                    const nestedRenames = detectNestedRenames(key, previous[key], current[key]);
+                    if (nestedRenames.length > 0) {
+                      renamed.push(...nestedRenames);
+                    } else {
+                      // If no nested rename detected, just treat as rename whole key
+                      renamed.push({
+                        key: key,
+                        original: previous[key],
+                        renamed: current[key]
+                      });
+                    }
+                  } else {
+                    // Simple rename (value changed)
+                    renamed.push({
+                      key: key,
+                      original: previous[key],
+                      renamed: current[key]
+                    });
+                  }
+                }
               }
             }
-          }
 
-          const sections = [];
-
-          if (added.length) {
-            sections.push({title: 'Added', content: added.join('\n')});
-          }
-          if (removed.length) {
-            sections.push({title: 'Removed', content: removed.join('\n')});
-          }
-          if (renamed.length) {
-            sections.push({title: 'Renamed', content: renamed.join('\n\n')});
-          }
-
-          if (sections.length === 0) {
-            console.log('No changes to post');
-            return;
-          }
-
-          const comments = [];
-          for (const {title, content} of sections) {
-            const baseHeader = `🧩 **Changes in \`discordclasses.json\` - ${title}:**\n\n`;
-            const maxContentLength = MAX_COMMENT_LENGTH - baseHeader.length - header(title).length - footer.length;
-
-            const lines = content.split('\n');
-            let chunk = '';
-            for (const line of lines) {
-              if ((chunk + line + '\n').length > maxContentLength) {
-                comments.push(baseHeader + header(title) + chunk + footer);
-                chunk = '';
+            // Check for removed keys
+            for (const key of Object.keys(previous)) {
+              if (!(key in current)) {
+                removed.push(`${key} : ${JSON.stringify(previous[key])}`);
               }
-              chunk += line + '\n';
             }
-            if (chunk.length > 0) {
-              comments.push(baseHeader + header(title) + chunk + footer);
-            }
-          }
 
-          for (let i = 0; i < comments.length; i++) {
+            // Format diff sections
+            function formatDiffSection(title, lines) {
+              if (lines.length === 0) return '';
+              let output = `### ${title}\n\`\`\`diff\n`;
+              for (const line of lines) {
+                if (typeof line === 'string') {
+                  output += `+ ${line}\n`;
+                } else if (line.parentKey) {
+                  // For nested rename inside an object
+                  output += `- original: "${line.parentKey}.${line.key}":"${line.original}"\n`;
+                  output += `+ renamed: "${line.parentKey}.${line.key}":"${line.renamed}"\n`;
+                } else {
+                  output += `- original: "${line.key}":${JSON.stringify(line.original)}\n`;
+                  output += `+ renamed: "${line.key}":${JSON.stringify(line.renamed)}\n`;
+                }
+              }
+              output += '```\n';
+              return output;
+            }
+
+            const commentBody =
+              formatDiffSection('Added', added) +
+              formatDiffSection('Removed', removed) +
+              formatDiffSection('Renamed', renamed);
+
+            if (!commentBody) {
+              console.log('No changes detected.');
+              return;
+            }
+
+            // Post comment on commit (you can adjust this to issue comment or elsewhere)
+            const commitSha = process.env.GITHUB_SHA;
             await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: comments[i],
+              commit_sha: commitSha,
+              body: commentBody
             });
-            console.log(`Posted comment ${i + 1} of ${comments.length}`);
-          }
+
+            console.log('Diff comment posted successfully.');
