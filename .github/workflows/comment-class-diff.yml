@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Required to compare with previous commit
+          fetch-depth: 2
 
       - name: Set up diff files
         run: |
@@ -26,7 +26,24 @@ jobs:
         run: |
           diff -u previous.json current.json > diff.txt || true
 
-      - name: Post diff as commit comment
+      - name: Post diff to Discord
+        run: |
+          node -e "
+          const fs = require('fs');
+          const axios = require('axios');
+          const diff = fs.readFileSync('diff.txt', 'utf8').slice(0, 2000);
+          const url = process.env.DISCORD_WEBHOOK_URL;
+          const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+          const content = `🧩 **Changes in discordclasses.json:**\n\`\`\`diff\n${diff}\n\`\`\`\nFull commit here: ${commitUrl}`;
+          axios.post(url, { content }).then(() => console.log('Discord webhook sent')).catch(err => console.error('Failed to send Discord webhook:', err));
+          "
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+
+      - name: Post full diff as GitHub comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,10 +52,7 @@ jobs:
             const MAX_COMMENT_LENGTH = 65536;
 
             const diff = fs.readFileSync('diff.txt', 'utf8');
-            if (!diff.trim()) {
-              console.log("No diff to post");
-              return;
-            }
+            if (!diff.trim()) return;
 
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
             const chunkPrefix = '```diff\n';
