@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # ✅ only trigger when this file changes
+      - "discordclasses.json"
 
 jobs:
   post-diff:
@@ -15,7 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # required for diffing last commit
+          fetch-depth: 2  # required for previous commit
+
+      - name: Get previous and current versions
+        run: |
+          git show HEAD^:discordclasses.json > previous.json || echo "{}" > previous.json
+          cp discordclasses.json current.json
 
       - name: Run diff script
         run: node diff_and_post.js > full_diff.txt
@@ -26,10 +31,12 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           CONTENT=$(cat full_diff.txt)
-          PAYLOAD=$(jq -Rs . <<< "$CONTENT")
-          curl -H "Content-Type: application/json" \
-               -d "{\"content\": $PAYLOAD}" \
-               $DISCORD_WEBHOOK
+          if [ -n "$CONTENT" ]; then
+            PAYLOAD=$(jq -Rs . <<< "$CONTENT")
+            curl -H "Content-Type: application/json" \
+                 -d "{\"content\": $PAYLOAD}" \
+                 $DISCORD_WEBHOOK
+          fi
 
       - name: Comment on GitHub commit
         if: success()
