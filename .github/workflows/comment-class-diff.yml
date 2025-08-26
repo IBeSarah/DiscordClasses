@@ -28,7 +28,6 @@ jobs:
             const current = JSON.parse(fs.readFileSync('current.json', 'utf-8'));
             const previous = JSON.parse(fs.readFileSync('previous.json', 'utf-8'));
 
-            // Escape string values to avoid breaking JSON/Markdown
             function escapeValue(val) {
               if (typeof val === 'string') {
                 return val.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -47,18 +46,14 @@ jobs:
               const matchedCurr = new Set();
               const matchedPrev = new Set();
 
-              // Detect renames
               for (const oldKey of prevKeys) {
                 for (const newKey of currKeys) {
                   if (oldKey !== newKey && !matchedCurr.has(newKey)) {
                     const prevObj = prev[oldKey];
                     const currObj = curr[newKey];
-                    if (
-                      typeof prevObj === 'object' &&
-                      typeof currObj === 'object' &&
-                      JSON.stringify(Object.keys(prevObj).sort()) === JSON.stringify(Object.keys(currObj).sort())
-                    ) {
-                      renames.push({ from: oldKey, to: newKey, prevObj, currObj });
+                    if (typeof prevObj === 'object' && typeof currObj === 'object' &&
+                        JSON.stringify(Object.keys(prevObj).sort()) === JSON.stringify(Object.keys(currObj).sort())) {
+                      renames.push({ from: oldKey, to: newKey, prevObj: prevObj, currObj: currObj });
                       matchedCurr.add(newKey);
                       matchedPrev.add(oldKey);
                     }
@@ -66,21 +61,19 @@ jobs:
                 }
               }
 
-              // Added modules
               for (const newKey of currKeys) {
                 if (!matchedCurr.has(newKey) && !prevKeys.includes(newKey)) {
                   addedModules.push({ id: newKey, obj: curr[newKey] });
                 }
               }
 
-              // Removed modules
               for (const oldKey of prevKeys) {
                 if (!matchedPrev.has(oldKey) && !currKeys.includes(oldKey)) {
                   removedModules.push({ id: oldKey, obj: prev[oldKey] });
                 }
               }
 
-              return { renames, addedModules, removedModules };
+              return { renames: renames, addedModules: addedModules, removedModules: removedModules };
             }
 
             function diffModule(prevObj, currObj) {
@@ -88,7 +81,7 @@ jobs:
               const removed = [];
               const renamed = [];
 
-              const keys = new Set([...Object.keys(prevObj), ...Object.keys(currObj)]);
+              const keys = new Set(Object.keys(prevObj).concat(Object.keys(currObj)));
               for (const k of keys) {
                 const oldVal = prevObj[k];
                 const newVal = currObj[k];
@@ -98,84 +91,91 @@ jobs:
                 } else if (newVal === undefined) {
                   removed.push({ key: k, val: oldVal });
                 } else if (oldVal !== newVal) {
-                  renamed.push({ key: k, oldVal, newVal });
+                  renamed.push({ key: k, oldVal: oldVal, newVal: newVal });
                 }
               }
 
-              return { added, removed, renamed };
+              return { added: added, removed: removed, renamed: renamed };
             }
 
-            function formatModuleDiff(title, moduleId, changes, autoExpand = true) {
-              const addedCount = changes.added?.length || 0;
-              const removedCount = changes.removed?.length || 0;
-              const renamedCount = changes.renamed?.length || 0;
-              const totalCount = addedCount + removedCount + renamedCount;
+            function formatModuleDiff(title, moduleId, changes, autoExpand) {
+              if (autoExpand === undefined) autoExpand = true;
 
+              const addedCount = changes.added ? changes.added.length : 0;
+              const removedCount = changes.removed ? changes.removed.length : 0;
+              const renamedCount = changes.renamed ? changes.renamed.length : 0;
+              const totalCount = addedCount + removedCount + renamedCount;
               const shouldExpand = autoExpand && totalCount <= 20;
 
               const parts = [];
-              if (addedCount) parts.push(`${addedCount} added`);
-              if (removedCount) parts.push(`${removedCount} removed`);
-              if (renamedCount) parts.push(`${renamedCount} renamed`);
-              const summaryCounts = parts.length ? ` (${parts.join(", ")})` : "";
+              if (addedCount) parts.push(addedCount + " added");
+              if (removedCount) parts.push(removedCount + " removed");
+              if (renamedCount) parts.push(renamedCount + " renamed");
+              const summaryCounts = parts.length ? " (" + parts.join(", ") + ")" : "";
 
-              let output = `<details${shouldExpand ? " open" : ""}>\n`;
-              output += `<summary>${title} module ${moduleId}${summaryCounts}</summary>\n\n`;
+              let output = "<details" + (shouldExpand ? " open" : "") + ">\n";
+              output += "<summary>" + title + " module " + moduleId + summaryCounts + "</summary>\n\n";
 
               if (addedCount) {
-                output += `#### Added in ${moduleId}\n\`\`\`diff\n`;
-                for (const a of changes.added) {
-                  output += `+ "${a.key}": "${escapeValue(a.val)}"\n`;
+                output += "#### Added in " + moduleId + "\n```diff\n";
+                for (let i = 0; i < changes.added.length; i++) {
+                  const a = changes.added[i];
+                  output += "+ \"" + a.key + "\": \"" + escapeValue(a.val) + "\"\n";
                 }
                 output += "```\n\n";
               }
 
               if (removedCount) {
-                output += `#### Removed from ${moduleId}\n\`\`\`diff\n`;
-                for (const r of changes.removed) {
-                  output += `- "${r.key}": "${escapeValue(r.val)}"\n`;
+                output += "#### Removed from " + moduleId + "\n```diff\n";
+                for (let i = 0; i < changes.removed.length; i++) {
+                  const r = changes.removed[i];
+                  output += "- \"" + r.key + "\": \"" + escapeValue(r.val) + "\"\n";
                 }
                 output += "```\n\n";
               }
 
               if (renamedCount) {
-                output += `#### Renamed in ${moduleId}\n\`\`\`diff\n`;
-                for (const rn of changes.renamed) {
-                  output += `- "${rn.key}": "${escapeValue(rn.oldVal)}"\n`;
-                  output += `+ "${rn.key}": "${escapeValue(rn.newVal)}"\n`;
+                output += "#### Renamed in " + moduleId + "\n```diff\n";
+                for (let i = 0; i < changes.renamed.length; i++) {
+                  const rn = changes.renamed[i];
+                  output += "- \"" + rn.key + "\": \"" + escapeValue(rn.oldVal) + "\"\n";
+                  output += "+ \"" + rn.key + "\": \"" + escapeValue(rn.newVal) + "\"\n";
                 }
                 output += "```\n\n";
               }
 
-              output += `</details>\n\n`;
+              output += "</details>\n\n";
               return output;
             }
 
             function formatPureRename(from, to) {
-              return `<details open>\n<summary>Renamed module ${from} to ${to} (no internal changes)</summary>\n\n</details>\n\n`;
+              return "<details open>\n<summary>Renamed module " + from + " to " + to + " (no internal changes)</summary>\n\n</details>\n\n";
             }
 
             const { renames, addedModules, removedModules } = detectModuleChanges(previous, current);
 
             let commentBody = "";
 
-            for (const { from, to, prevObj, currObj } of renames) {
-              const changes = diffModule(prevObj, currObj);
+            for (let i = 0; i < renames.length; i++) {
+              const r = renames[i];
+              const changes = diffModule(r.prevObj, r.currObj);
               if (changes.added.length === 0 && changes.removed.length === 0 && changes.renamed.length === 0) {
-                commentBody += formatPureRename(from, to);
+                commentBody += formatPureRename(r.from, r.to);
               } else {
-                commentBody += formatModuleDiff("Renamed", to, changes);
+                commentBody += formatModuleDiff("Renamed", r.to, changes);
               }
             }
 
-            for (const { id, obj } of addedModules) {
-              const added = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
-              commentBody += formatModuleDiff("Added", id, { added });
+            for (let i = 0; i < addedModules.length; i++) {
+              const m = addedModules[i];
+              const added = Object.keys(m.obj).map(function(k){ return { key: k, val: m.obj[k] }; });
+              commentBody += formatModuleDiff("Added", m.id, { added: added });
             }
 
-            for (const { id, obj } of removedModules) {
-              const removed = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
-              commentBody += formatModuleDiff("Removed", id, { removed });
+            for (let i = 0; i < removedModules.length; i++) {
+              const m = removedModules[i];
+              const removed = Object.keys(m.obj).map(function(k){ return { key: k, val: m.obj[k] }; });
+              commentBody += formatModuleDiff("Removed", m.id, { removed: removed });
             }
 
             if (!commentBody) {
