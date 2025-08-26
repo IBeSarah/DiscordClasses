@@ -23,7 +23,11 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios @octokit/rest
+        run: npm install lodash fast-levenshtein axios
+
+      - name: Generate full diff
+        run: |
+          diff -u previous.json current.json > full_diff.txt || echo '' > full_diff.txt
 
       - name: Post diff to Discord
         run: node diff_and_post.js
