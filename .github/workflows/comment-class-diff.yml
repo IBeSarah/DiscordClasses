@@ -12,31 +12,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository with last 2 commits
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2  # Required to compare with previous commit
 
-      # Install Node dependencies
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios @octokit/rest
-
-      # Generate current and previous JSON safely
-      - name: Set up JSON files
+      - name: Set up diff files
         run: |
-          git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          # Validate JSON
-          node -e "JSON.parse(require('fs').readFileSync('current.json'))"
-          node -e "JSON.parse(require('fs').readFileSync('previous.json'))"
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      # Run diff and post script
-      - name: Compute diff and post to Discord/GitHub
-        run: node diff_and_post.js
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
+      - name: Create diff
+        run: |
+          diff -u previous.json current.json > diff.txt || true
+
+      - name: Post diff as commit comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const MAX_COMMENT_LENGTH = 65536;
+
+            const diff = fs.readFileSync('diff.txt', 'utf8');
+            if (!diff.trim()) {
+              console.log("No diff to post");
+              return;
+            }
+
+            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+            const chunkPrefix = '```diff\n';
+            const chunkSuffix = '\n```';
+
+            function splitDiff(fullText, maxLength) {
+              const chunks = [];
+              let start = 0;
+              while (start < fullText.length) {
+                chunks.push(fullText.slice(start, start + maxLength));
+                start += maxLength;
+              }
+              return chunks;
+            }
+
+            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
+
+            for (let i = 0; i < rawChunks.length; i++) {
+              const partHeader = rawChunks.length > 1
+                ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
+                : header;
+
+              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
+
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: commentBody,
+              });
+
+              console.log(`Posted comment part ${i + 1}/${rawChunks.length}`);
+            }
