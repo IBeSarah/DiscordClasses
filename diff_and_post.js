@@ -3,15 +3,14 @@ const _ = require('lodash');
 const levenshtein = require('fast-levenshtein');
 const axios = require('axios');
 
-// Read JSONs
-let prev = {}, curr = {};
-try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) {}
-try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) {}
+const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8') || '{}');
+const curr = JSON.parse(fs.readFileSync('current.json', 'utf8') || '{}');
 
-const MAX_COMMENT_LENGTH = 65536;   // GitHub
-const MAX_DISCORD_LENGTH = 2000;    // Discord
+const MAX_DISCORD_CHARS = 2000;
+const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+const linkText = `\n\nFull list of changes here: ${commitUrl}`;
+const maxDiffLength = MAX_DISCORD_CHARS - linkText.length;
 
-// ---- Helper functions (same as your existing diff logic) ---- //
 function moduleItems(obj) {
   if (!obj) return [];
   return Object.entries(obj).map(([k,v]) => `${k}: ${v}`);
@@ -107,12 +106,6 @@ function compareModules(prevObj, currObj) {
         section += display + '\n';
       }); }
       section += '```\n';
-
-      // Collapse only if > 30 lines
-      const lines = section.split('\n');
-      if(lines.length > 30){
-        section = `<details><summary>Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}</summary>\n\n${section}</details>`;
-      }
       sections.push(section);
     }
   });
@@ -121,15 +114,16 @@ function compareModules(prevObj, currObj) {
   return summaryText + sections.join('\n');
 }
 
-// ---- Generate Diff ---- //
 const fullDiff = compareModules(prev, curr);
-fs.writeFileSync('current_diff.txt', fullDiff);
+if (!fullDiff.trim()) {
+  console.log('No changes to post');
+  process.exit(0);
+}
 
-// ---- Post to Discord (2000 char limit) ---- //
-const discordSnippet = fullDiff.length > MAX_DISCORD_LENGTH - 100
-  ? `${fullDiff.slice(0, MAX_DISCORD_LENGTH - 100)}\nFull list: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`
-  : fullDiff;
+// truncate to fit Discord limit
+const truncatedDiff = fullDiff.slice(0, maxDiffLength);
+const discordMessage = `**Changes in discordclasses.json:**\n${truncatedDiff}${linkText}`;
 
-axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordSnippet })
+axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
   .then(() => console.log('Discord webhook sent'))
   .catch(e => console.error('Failed to send Discord webhook:', e));
