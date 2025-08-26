@@ -15,14 +15,19 @@ jobs:
           echo "Current file content:"
           git show HEAD:discordclasses.json || echo "File not found at HEAD"
           git show HEAD:discordclasses.json > current.json
+          echo "----- current.json contents -----"
+          cat current.json
 
           echo "Previous file content:"
           git show HEAD^:discordclasses.json || echo "File not found at HEAD^"
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+          echo "----- previous.json contents -----"
+          cat previous.json
 
       - name: Generate unified diff
         run: |
           diff --unified=3 previous.json current.json || true > diff.txt
+          echo "----- diff.txt contents -----"
           cat diff.txt
 
       - name: Post diff comment
