@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - discordclasses.json   # ✅ only trigger when this file changes
 
 jobs:
   post-diff:
@@ -16,11 +18,7 @@ jobs:
           fetch-depth: 2  # required for diffing last commit
 
       - name: Run diff script
-        run: |
-          node diff_and_post.js > full_diff.txt
-
-      - name: Show diff file (debug)
-        run: cat full_diff.txt
+        run: node diff_and_post.js > full_diff.txt
 
       - name: Post to Discord
         if: success() && env.DISCORD_WEBHOOK != ''
@@ -28,7 +26,6 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           CONTENT=$(cat full_diff.txt)
-          # Discord needs JSON payload, escape properly
           PAYLOAD=$(jq -Rs . <<< "$CONTENT")
           curl -H "Content-Type: application/json" \
                -d "{\"content\": $PAYLOAD}" \
