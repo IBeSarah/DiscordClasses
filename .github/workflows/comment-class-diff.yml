@@ -17,33 +17,62 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Install Node dependencies
+        run: npm install lodash fast-levenshtein axios
 
       - name: Set up JSON files safely
         run: |
           git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          # Normalize JSON for consistent formatting
-          jq -S . previous.json > prev_normalized.json
-          jq -S . current.json > curr_normalized.json
+          node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
+          node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      - name: Create diff
-        run: |
-          diff -u prev_normalized.json curr_normalized.json > diff.txt || true
-          head -n 50 diff.txt  # optional: preview first 50 lines in logs
+      - name: Compute diff and post to Discord
+        run: node -e "
+          const fs = require('fs');
+          const _ = require('lodash');
+          const axios = require('axios');
+          const current = JSON.parse(fs.readFileSync('current.json'));
+          const previous = JSON.parse(fs.readFileSync('previous.json'));
+          
+          const MAX_CHARS = 2000;
+          const commitUrl = '${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}';
+          const webhook = process.env.DISCORD_WEBHOOK_URL;
 
-      - name: Post diff to Discord
-        run: |
-          DIFF=$(head -c 2000 diff.txt)
-          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-          WEBHOOK_URL="${{ secrets.DISCORD_WEBHOOK_URL }}"
-          CONTENT="**Changes in discordclasses.json:**\n\`\`\`diff\n${DIFF}\n\`\`\`\nFull commit here: ${COMMIT_URL}"
-          # Ensure total content ≤ 2000 chars
-          CONTENT=$(echo "$CONTENT" | head -c 2000)
-          curl -H "Content-Type: application/json" \
-               -d "{\"content\": \"$CONTENT\"}" \
-               $WEBHOOK_URL
+          const added = [];
+          const removed = [];
+          const moved = [];
+
+          const allKeys = _.union(Object.keys(current), Object.keys(previous));
+          for (const key of allKeys) {
+            const prev = previous[key] || {};
+            const curr = current[key] || {};
+            const prevKeys = Object.keys(prev);
+            const currKeys = Object.keys(curr);
+
+            // Added
+            currKeys.filter(k => !prevKeys.includes(k)).forEach(k => added.push(`${k} (added to module ${key})`));
+
+            // Removed
+            prevKeys.filter(k => !currKeys.includes(k)).forEach(k => removed.push(`${k} (removed from module ${key})`));
+
+            // Renamed/Moved
+            prevKeys.filter(k => currKeys.includes(k) && prev[k] !== curr[k])
+                    .forEach(k => moved.push(`${k} (from ${prev[k]} to ${curr[k]} in module ${key})`));
+          }
+
+          const summary = [];
+          if (added.length) summary.push('### Added\n' + added.map(a => '+' + a).join('\\n'));
+          if (removed.length) summary.push('### Removed\n' + removed.map(r => '-' + r).join('\\n'));
+          if (moved.length) summary.push('### Moved & Renamed\n' + moved.map(m => '+' + m).join('\\n'));
+
+          let message = `**Changes in discordclasses.json:**\\n` + summary.join('\\n\\n') + `\\nFull commit here: ${commitUrl}`;
+          if (message.length > MAX_CHARS) message = message.slice(0, MAX_CHARS - 3) + '...';
+
+          axios.post(webhook, { content: message }).catch(err => { console.error('Failed to send Discord webhook:', err); process.exit(1); });
+        "
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Post full diff as GitHub commit comment
         uses: actions/github-script@v6
@@ -51,11 +80,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const diff = fs.readFileSync('diff.txt', 'utf8');
-            if (!diff.trim()) return;
+            const diff = fs.readFileSync('current.json', 'utf8');
             await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: `🧩 **Full changes in discordclasses.json:**\n\n\`\`\`diff\n${diff}\n\`\`\``
+              body: `🧩 **Full changes in discordclasses.json:**\n\n\`\`\`json\n${diff}\n\`\`\``
             });
