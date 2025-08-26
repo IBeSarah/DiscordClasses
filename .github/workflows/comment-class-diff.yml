@@ -16,20 +16,21 @@ jobs:
           fetch-depth: 2
 
       - name: Install Node dependencies
-        run: npm install lodash
+        run: npm install lodash fast-levenshtein
 
       - name: Set up JSON files
         run: |
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Post structured module diff
+      - name: Post structured module diff with rename detection
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const _ = require('lodash');
+            const levenshtein = require('fast-levenshtein');
 
             const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
             const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
@@ -37,24 +38,48 @@ jobs:
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
+            function detectRenames(removed, added) {
+              const renames = [];
+              const unmatchedAdded = new Set(added);
+
+              removed.forEach(rem => {
+                let bestMatch = null;
+                let bestDist = Infinity;
+                unmatchedAdded.forEach(add => {
+                  const dist = levenshtein.get(rem, add);
+                  if (dist < bestDist && dist <= Math.max(rem.length, add.length) * 0.4) {
+                    bestDist = dist;
+                    bestMatch = add;
+                  }
+                });
+                if (bestMatch) {
+                  renames.push({ from: rem, to: bestMatch });
+                  unmatchedAdded.delete(bestMatch);
+                }
+              });
+
+              const newRemoved = removed.filter(r => !renames.some(x => x.from === r));
+              const newAdded = Array.from(unmatchedAdded);
+
+              return { renames, newRemoved, newAdded };
+            }
+
             function compareModules(prevObj, currObj) {
               const sections = [];
-
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
               allModules.forEach(moduleName => {
                 const prevItems = prevObj[moduleName] || [];
                 const currItems = currObj[moduleName] || [];
 
-                const removed = _.difference(prevItems, currItems);
-                const added = _.difference(currItems, prevItems);
+                let removed = _.difference(prevItems, currItems);
+                let added = _.difference(currItems, prevItems);
 
-                const renamed = [];
-                // naive renamed detection: if an item changed slightly, we could implement heuristics here
-                // for now, only exact string changes are detected via removed/added pairs
-                // advanced: compare by ID or some property to detect renames
+                const { renames, newRemoved, newAdded } = detectRenames(removed, added);
+                removed = newRemoved;
+                added = newAdded;
 
-                if (removed.length || added.length || renamed.length) {
+                if (removed.length || added.length || renames.length) {
                   let section = `### Module: ${moduleName}\n`;
                   if (removed.length) {
                     section += '#### Removed\n';
@@ -64,9 +89,9 @@ jobs:
                     section += '#### Added\n';
                     added.forEach(item => section += `+"${item}"\n`);
                   }
-                  if (renamed.length) {
+                  if (renames.length) {
                     section += '#### Renamed\n';
-                    renamed.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
+                    renames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
                   }
                   sections.push(section);
                 }
@@ -81,7 +106,6 @@ jobs:
               return;
             }
 
-            // Split if too long
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
