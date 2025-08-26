@@ -35,23 +35,21 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Post diff as GitHub commit comment
+      - name: Create GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const _ = require('lodash');
-            const diffText = fs.readFileSync('current.json','utf8'); // optional: can reuse compareModules output
+            const diffText = fs.readFileSync('current_diff.txt', 'utf8');
             if(!diffText.trim()) return;
-            const MAX_COMMENT_LENGTH = 65536;
-            const chunks = [];
-            for(let i=0;i<diffText.length;i+=MAX_COMMENT_LENGTH) chunks.push(diffText.slice(i,i+MAX_COMMENT_LENGTH));
-            for(const chunk of chunks){
+            // Split into multiple comments if > 65k
+            const MAX_GH_COMMENT = 65536;
+            for (let i = 0; i < diffText.length; i += MAX_GH_COMMENT) {
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: chunk
+                body: diffText.slice(i, i + MAX_GH_COMMENT)
               });
             }
