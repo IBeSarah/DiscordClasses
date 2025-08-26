@@ -1,77 +1,108 @@
-name: Comment Class Diff
+// diff_and_post_discord.js
+const fs = require('fs');
+const axios = require('axios');
+const _ = require('lodash');
+const levenshtein = require('fast-levenshtein');
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - discordclasses.json   # Only trigger when this file changes
+const MAX_DISCORD_LENGTH = 2000;
 
-jobs:
-  comment-diff:
-    runs-on: ubuntu-latest
+// Environment variables
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+const commitSha = process.env.GITHUB_SHA;
+const repo = process.env.GITHUB_REPOSITORY;
+const serverUrl = process.env.GITHUB_SERVER_URL;
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # Needed to compare with previous commit
+// File paths
+const prevFile = 'previous.json';
+const currFile = 'current.json';
 
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+// Helper functions
+function loadJson(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return {};
+  }
+}
 
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+// Detect Added/Removed keys per module
+function diffModules(prev, curr) {
+  const added = [];
+  const removed = [];
+  const renamed = [];
+  const moved = [];
 
-      - name: Post diff to Discord
-        run: node diff_and_post_discord.js
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
+  const allModules = _.union(Object.keys(prev), Object.keys(curr));
 
-      - name: Post full diff as GitHub commit comment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
+  allModules.forEach((mod) => {
+    const prevKeys = prev[mod] ? Object.keys(prev[mod]) : [];
+    const currKeys = curr[mod] ? Object.keys(curr[mod]) : [];
 
-            // Read and parse the diff
-            const diff = fs.readFileSync('full_diff.txt', 'utf8');
-            if (!diff.trim()) {
-              console.log("No diff to post");
-              return;
-            }
+    // Added keys
+    currKeys.forEach(k => {
+      if (!prevKeys.includes(k)) {
+        added.push(`+ ${k} added to Module \`${mod}\``);
+      }
+    });
 
-            // Function to split diff into chunks of 65k characters
-            function splitDiff(fullText, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
+    // Removed keys
+    prevKeys.forEach(k => {
+      if (!currKeys.includes(k)) {
+        removed.push(`- ${k} removed from Module \`${mod}\``);
+      }
+    });
 
-            const chunks = splitDiff(diff, MAX_COMMENT_LENGTH);
+    // Renamed keys (simple heuristic based on Levenshtein distance and value similarity)
+    prevKeys.forEach(pk => {
+      currKeys.forEach(ck => {
+        if (!prevKeys.includes(ck) && !currKeys.includes(pk)) {
+          const prevVal = prev[mod][pk];
+          const currVal = curr[mod][ck];
+          if (levenshtein.get(pk, ck) <= 3 && prevVal === currVal) {
+            renamed.push(`~ ${pk} renamed to ${ck} in Module \`${mod}\``);
+          }
+        }
+      });
+    });
 
-            for (let i = 0; i < chunks.length; i++) {
-              const commentBody = chunks.length > 1
-                ? `**Part ${i+1} of ${chunks.length}**\n\n` + chunks[i]
-                : chunks[i];
+    // Moved keys between modules (if key exists in both modules)
+    // Optional: implement if needed
+  });
 
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: commentBody,
-              });
+  return { added, removed, renamed, moved };
+}
 
-              console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
-            }
+// Load JSON
+const previous = loadJson(prevFile);
+const current = loadJson(currFile);
+
+const { added, removed, renamed, moved } = diffModules(previous, current);
+
+// Build message
+let message = '';
+if (removed.length) message += `### Removed\n${removed.join('\n')}\n`;
+if (added.length) message += `### Added\n${added.join('\n')}\n`;
+if (renamed.length) message += `### Renamed\n${renamed.join('\n')}\n`;
+if (moved.length) message += `### Moved\n${moved.join('\n')}\n`;
+
+message = message.trim();
+
+if (!message) {
+  console.log('No changes to post to Discord.');
+  process.exit(0);
+}
+
+// Add commit link
+const commitUrl = `${serverUrl}/${repo}/commit/${commitSha}`;
+const footer = `\nFull commit here: ${commitUrl}`;
+let finalMessage = message + footer;
+
+// Truncate to 2000 characters for Discord
+if (finalMessage.length > MAX_DISCORD_LENGTH) {
+  finalMessage = finalMessage.slice(0, MAX_DISCORD_LENGTH - 3) + '...';
+}
+
+// Send to Discord
+axios.post(webhookUrl, { content: finalMessage })
+  .then(() => console.log('Discord message posted successfully.'))
+  .catch(err => console.error('Error posting to Discord:', err.message));
