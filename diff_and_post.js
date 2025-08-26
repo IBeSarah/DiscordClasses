@@ -1,108 +1,88 @@
-// diff_and_post_discord.js
 const fs = require('fs');
-const axios = require('axios');
 const _ = require('lodash');
 const levenshtein = require('fast-levenshtein');
+const axios = require('axios');
 
 const MAX_DISCORD_LENGTH = 2000;
 
-// Environment variables
-const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-const commitSha = process.env.GITHUB_SHA;
-const repo = process.env.GITHUB_REPOSITORY;
-const serverUrl = process.env.GITHUB_SERVER_URL;
+const previousFile = 'previous.json';
+const currentFile = 'current.json';
 
-// File paths
-const prevFile = 'previous.json';
-const currFile = 'current.json';
+const previousData = JSON.parse(fs.readFileSync(previousFile, 'utf8'));
+const currentData = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
 
-// Helper functions
-function loadJson(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return {};
-  }
-}
+const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
 
-// Detect Added/Removed keys per module
 function diffModules(prev, curr) {
   const added = [];
   const removed = [];
   const renamed = [];
   const moved = [];
 
-  const allModules = _.union(Object.keys(prev), Object.keys(curr));
+  const prevModules = Object.keys(prev);
+  const currModules = Object.keys(curr);
 
-  allModules.forEach((mod) => {
-    const prevKeys = prev[mod] ? Object.keys(prev[mod]) : [];
-    const currKeys = curr[mod] ? Object.keys(curr[mod]) : [];
+  const allModules = new Set([...prevModules, ...currModules]);
 
-    // Added keys
+  allModules.forEach(moduleKey => {
+    const prevModule = prev[moduleKey] || {};
+    const currModule = curr[moduleKey] || {};
+
+    const prevKeys = Object.keys(prevModule);
+    const currKeys = Object.keys(currModule);
+
+    // Detect added
     currKeys.forEach(k => {
-      if (!prevKeys.includes(k)) {
-        added.push(`+ ${k} added to Module \`${mod}\``);
-      }
+      if (!prevKeys.includes(k)) added.push(`${k} added to Module \`${moduleKey}\``);
     });
 
-    // Removed keys
+    // Detect removed
     prevKeys.forEach(k => {
-      if (!currKeys.includes(k)) {
-        removed.push(`- ${k} removed from Module \`${mod}\``);
-      }
+      if (!currKeys.includes(k)) removed.push(`${k} removed from Module \`${moduleKey}\``);
     });
 
-    // Renamed keys (simple heuristic based on Levenshtein distance and value similarity)
+    // Detect renamed (simple heuristic: same value moved to a different key)
     prevKeys.forEach(pk => {
       currKeys.forEach(ck => {
-        if (!prevKeys.includes(ck) && !currKeys.includes(pk)) {
-          const prevVal = prev[mod][pk];
-          const currVal = curr[mod][ck];
-          if (levenshtein.get(pk, ck) <= 3 && prevVal === currVal) {
-            renamed.push(`~ ${pk} renamed to ${ck} in Module \`${mod}\``);
-          }
+        if (prevModule[pk] === currModule[ck] && pk !== ck) {
+          renamed.push(`${pk} renamed to ${ck} in Module \`${moduleKey}\``);
         }
       });
     });
 
-    // Moved keys between modules (if key exists in both modules)
-    // Optional: implement if needed
+    // Detect moved keys (same key exists in multiple modules, value changed module)
+    prevKeys.forEach(pk => {
+      currModules.forEach(cm => {
+        if (cm !== moduleKey && curr[cm][pk] === prevModule[pk]) {
+          moved.push(`${pk} moved from Module \`${moduleKey}\` to Module \`${cm}\``);
+        }
+      });
+    });
   });
 
   return { added, removed, renamed, moved };
 }
 
-// Load JSON
-const previous = loadJson(prevFile);
-const current = loadJson(currFile);
+const { added, removed, renamed, moved } = diffModules(previousData, currentData);
 
-const { added, removed, renamed, moved } = diffModules(previous, current);
+let message = '```diff\n';
 
-// Build message
-let message = '';
-if (removed.length) message += `### Removed\n${removed.join('\n')}\n`;
-if (added.length) message += `### Added\n${added.join('\n')}\n`;
-if (renamed.length) message += `### Renamed\n${renamed.join('\n')}\n`;
-if (moved.length) message += `### Moved\n${moved.join('\n')}\n`;
+if (removed.length) message += '### Removed\n' + removed.map(l => `- ${l}`).join('\n') + '\n';
+if (added.length) message += '### Added\n' + added.map(l => `+ ${l}`).join('\n') + '\n';
+if (renamed.length) message += '### Renamed\n' + renamed.map(l => `~ ${l}`).join('\n') + '\n';
+if (moved.length) message += '### Moved\n' + moved.map(l => `> ${l}`).join('\n') + '\n';
 
-message = message.trim();
+message += '```';
 
-if (!message) {
-  console.log('No changes to post to Discord.');
-  process.exit(0);
+// Truncate for Discord
+if (message.length + commitUrl.length + 12 > MAX_DISCORD_LENGTH) {
+  const allowedLength = MAX_DISCORD_LENGTH - commitUrl.length - 12;
+  message = message.slice(0, allowedLength) + '\n```';
 }
 
-// Add commit link
-const commitUrl = `${serverUrl}/${repo}/commit/${commitSha}`;
-const footer = `\nFull commit here: ${commitUrl}`;
-let finalMessage = message + footer;
+message += `\nFull details here: ${commitUrl}`;
 
-// Truncate to 2000 characters for Discord
-if (finalMessage.length > MAX_DISCORD_LENGTH) {
-  finalMessage = finalMessage.slice(0, MAX_DISCORD_LENGTH - 3) + '...';
-}
-
-// Send to Discord
-axios.post(webhookUrl, { content: finalMessage })
-  .then(() => console.log('Discord message posted successfully.'))
-  .catch(err => console.error('Error posting to Discord:', err.message));
+// Post to Discord
+axios.post(process.env.DISCORD_WEBHOOK_URL, { content: message })
+  .then(() => console.log('Posted diff to Discord'))
+  .catch(err => console.error('Failed to post to Discord:', err.message));
