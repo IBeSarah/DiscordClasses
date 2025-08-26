@@ -1,36 +1,38 @@
-name: Comment Class Diff
+name: Post Diff Comment
 
-on: push
+on:
+  push:
+    paths:
+      - 'discordclasses.json'
 
 jobs:
   post-diff:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # ✅ Ensures HEAD^ is available
 
-      - name: Get current and previous version of the file
+      - name: Get current and previous versions of discordclasses.json
         run: |
           echo "Current file content:"
           git show HEAD:discordclasses.json || echo "File not found at HEAD"
           git show HEAD:discordclasses.json > current.json
-          echo "----- current.json contents -----"
-          cat current.json
 
           echo "Previous file content:"
-          git show HEAD^:discordclasses.json || echo "File not found at HEAD^"
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
-          echo "----- previous.json contents -----"
-          cat previous.json
+          git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
 
-      - name: Generate unified diff
+      - name: Install json-diff
+        run: npm install -g json-diff
+
+      - name: Generate diff
         run: |
-          diff --unified=3 previous.json current.json || true > diff.txt
+          json-diff previous.json current.json > diff.txt || true
           echo "----- diff.txt contents -----"
           cat diff.txt
 
-      - name: Post diff comment
+      - name: Comment on commit
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
