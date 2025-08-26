@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json
+      - discordclasses.json   # Only trigger when this file changes
 
 jobs:
   post-diff:
@@ -26,7 +26,7 @@ jobs:
         run: npm install lodash fast-levenshtein axios
 
       - name: Post diff to Discord
-        run: node diff_and_post.js
+        run: node diff_and_post.js summary
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
@@ -34,43 +34,9 @@ jobs:
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
       - name: Post full diff as GitHub commit comments
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65000;
-            if (!fs.existsSync('full_diff.txt')) {
-              console.log("No diff to post");
-              return;
-            }
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
-            if (!diffText.trim()) {
-              console.log("No diff to post");
-              return;
-            }
-
-            function splitText(text, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < text.length) {
-                chunks.push(text.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
-
-            const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
-            for (let i = 0; i < chunks.length; i++) {
-              const body = chunks.length > 1
-                ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
-                : chunks[i];
-
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body,
-              });
-              console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
-            }
+        run: node diff_and_post.js github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
