@@ -26,7 +26,7 @@ jobs:
         run: npm install lodash fast-levenshtein axios
 
       - name: Post diff to Discord
-        run: node diff_and_post.js summary
+        run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
@@ -39,13 +39,17 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const MAX_COMMENT_LENGTH = 65000;
+            if (!fs.existsSync('full_diff.txt')) {
+              console.log("No diff to post");
+              return;
+            }
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
             if (!diffText.trim()) {
               console.log("No diff to post");
               return;
             }
 
-            const MAX_COMMENT_LENGTH = 65000;
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
@@ -57,7 +61,6 @@ jobs:
             }
 
             const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
-
             for (let i = 0; i < chunks.length; i++) {
               const body = chunks.length > 1
                 ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
@@ -69,6 +72,5 @@ jobs:
                 commit_sha: context.sha,
                 body,
               });
-
               console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
             }
