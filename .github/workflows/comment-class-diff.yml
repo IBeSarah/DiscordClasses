@@ -10,9 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Get current and previous version of discordclasses.json
+      - name: Get current and previous version of the file
         run: |
           git show HEAD:discordclasses.json > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
@@ -20,58 +21,24 @@ jobs:
       - name: Generate unified diff
         run: |
           diff --unified=3 previous.json current.json || true > diff.txt
+          cat diff.txt
 
-      - name: Read diff and split into chunks
-        id: prepare
-        run: |
-          MAX_CHUNK_SIZE=60000
-          DIFF_CONTENT=$(cat diff.txt)
-          echo "diff_length=${#DIFF_CONTENT}" >> $GITHUB_OUTPUT
-
-          # Split diff content into chunks of MAX_CHUNK_SIZE chars
-          i=0
-          start=0
-          chunk_count=0
-          while [ $start -lt ${#DIFF_CONTENT} ]; do
-            chunk="${DIFF_CONTENT:start:MAX_CHUNK_SIZE}"
-            echo "chunk_$i<<EOF" >> $GITHUB_OUTPUT
-            echo "$chunk" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-            start=$((start + MAX_CHUNK_SIZE))
-            i=$((i + 1))
-            chunk_count=$i
-          done
-
-          echo "chunk_count=$chunk_count" >> $GITHUB_OUTPUT
-
-      - name: Post comments with github-script
+      - name: Post diff comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const chunkCount = parseInt(process.env.CHUNK_COUNT || "0");
-            if (chunkCount === 0) {
-              console.log("No diff to post.");
+            const fs = require('fs');
+            const diff = fs.readFileSync('diff.txt', 'utf8');
+            if (!diff.trim()) {
+              console.log("No diff to post");
               return;
             }
-
-            for (let i = 0; i < chunkCount; i++) {
-              // Each chunk output is available as process.env[`CHUNK_${i}`]
-              const chunk = process.env[`CHUNK_${i}`];
-              const body = `🧩 **Changes in \`discordclasses.json\` (part ${i + 1}/${chunkCount}):**\n\n\`\`\`diff\n${chunk}\n\`\`\``;
-
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body,
-              });
-              console.log(`Posted comment part ${i + 1}/${chunkCount}`);
-            }
-        env:
-          CHUNK_COUNT: ${{ steps.prepare.outputs.chunk_count }}
-          # Dynamically set chunk outputs as env vars
-          CHUNK_0: ${{ steps.prepare.outputs.chunk_0 }}
-          CHUNK_1: ${{ steps.prepare.outputs.chunk_1 }}
-          CHUNK_2: ${{ steps.prepare.outputs.chunk_2 }}
-          # Add more if you expect more chunks, or generate dynamically in a matrix
+            const body = `🧩 **Changes in \`discordclasses.json\`:**\n\n\`\`\`diff\n${diff}\n\`\`\``;
+            await github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body,
+            });
+            console.log("Comment posted!");
