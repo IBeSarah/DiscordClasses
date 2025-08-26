@@ -15,7 +15,7 @@ jobs:
 
       - name: Get current and previous file content
         run: |
-          git show HEAD:discordclasses.json > current.json
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Post diff comment
@@ -24,6 +24,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const MAX_COMMENT_LENGTH = 60000; // safe margin
 
             const current = JSON.parse(fs.readFileSync('current.json', 'utf-8'));
             const previous = JSON.parse(fs.readFileSync('previous.json', 'utf-8'));
@@ -53,7 +54,7 @@ jobs:
                     const currObj = curr[newKey];
                     if (typeof prevObj === 'object' && typeof currObj === 'object' &&
                         JSON.stringify(Object.keys(prevObj).sort()) === JSON.stringify(Object.keys(currObj).sort())) {
-                      renames.push({ from: oldKey, to: newKey, prevObj: prevObj, currObj: currObj });
+                      renames.push({ from: oldKey, to: newKey, prevObj, currObj });
                       matchedCurr.add(newKey);
                       matchedPrev.add(oldKey);
                     }
@@ -73,7 +74,7 @@ jobs:
                 }
               }
 
-              return { renames: renames, addedModules: addedModules, removedModules: removedModules };
+              return { renames, addedModules, removedModules };
             }
 
             function diffModule(prevObj, currObj) {
@@ -86,24 +87,18 @@ jobs:
                 const oldVal = prevObj[k];
                 const newVal = currObj[k];
 
-                if (oldVal === undefined) {
-                  added.push({ key: k, val: newVal });
-                } else if (newVal === undefined) {
-                  removed.push({ key: k, val: oldVal });
-                } else if (oldVal !== newVal) {
-                  renamed.push({ key: k, oldVal: oldVal, newVal: newVal });
-                }
+                if (oldVal === undefined) added.push({ key: k, val: newVal });
+                else if (newVal === undefined) removed.push({ key: k, val: oldVal });
+                else if (oldVal !== newVal) renamed.push({ key: k, oldVal, newVal });
               }
 
-              return { added: added, removed: removed, renamed: renamed };
+              return { added, removed, renamed };
             }
 
-            function formatModuleDiff(title, moduleId, changes, autoExpand) {
-              if (autoExpand === undefined) autoExpand = true;
-
-              const addedCount = changes.added ? changes.added.length : 0;
-              const removedCount = changes.removed ? changes.removed.length : 0;
-              const renamedCount = changes.renamed ? changes.renamed.length : 0;
+            function formatModuleDiff(title, moduleId, changes, autoExpand=true) {
+              const addedCount = changes.added?.length || 0;
+              const removedCount = changes.removed?.length || 0;
+              const renamedCount = changes.renamed?.length || 0;
               const totalCount = addedCount + removedCount + renamedCount;
               const shouldExpand = autoExpand && totalCount <= 20;
 
@@ -118,29 +113,22 @@ jobs:
 
               if (addedCount) {
                 output += "#### Added in " + moduleId + "\n```diff\n";
-                for (let i = 0; i < changes.added.length; i++) {
-                  const a = changes.added[i];
-                  output += "+ \"" + a.key + "\": \"" + escapeValue(a.val) + "\"\n";
-                }
+                changes.added.forEach(a => { output += "+ \"" + a.key + "\": \"" + escapeValue(a.val) + "\"\n"; });
                 output += "```\n\n";
               }
 
               if (removedCount) {
                 output += "#### Removed from " + moduleId + "\n```diff\n";
-                for (let i = 0; i < changes.removed.length; i++) {
-                  const r = changes.removed[i];
-                  output += "- \"" + r.key + "\": \"" + escapeValue(r.val) + "\"\n";
-                }
+                changes.removed.forEach(r => { output += "- \"" + r.key + "\": \"" + escapeValue(r.val) + "\"\n"; });
                 output += "```\n\n";
               }
 
               if (renamedCount) {
                 output += "#### Renamed in " + moduleId + "\n```diff\n";
-                for (let i = 0; i < changes.renamed.length; i++) {
-                  const rn = changes.renamed[i];
+                changes.renamed.forEach(rn => {
                   output += "- \"" + rn.key + "\": \"" + escapeValue(rn.oldVal) + "\"\n";
                   output += "+ \"" + rn.key + "\": \"" + escapeValue(rn.newVal) + "\"\n";
-                }
+                });
                 output += "```\n\n";
               }
 
@@ -152,42 +140,50 @@ jobs:
               return "<details open>\n<summary>Renamed module " + from + " to " + to + " (no internal changes)</summary>\n\n</details>\n\n";
             }
 
+            // Build full comment
             const { renames, addedModules, removedModules } = detectModuleChanges(previous, current);
-
             let commentBody = "";
 
-            for (let i = 0; i < renames.length; i++) {
-              const r = renames[i];
+            renames.forEach(r => {
               const changes = diffModule(r.prevObj, r.currObj);
-              if (changes.added.length === 0 && changes.removed.length === 0 && changes.renamed.length === 0) {
-                commentBody += formatPureRename(r.from, r.to);
-              } else {
-                commentBody += formatModuleDiff("Renamed", r.to, changes);
-              }
-            }
-
-            for (let i = 0; i < addedModules.length; i++) {
-              const m = addedModules[i];
-              const added = Object.keys(m.obj).map(function(k){ return { key: k, val: m.obj[k] }; });
-              commentBody += formatModuleDiff("Added", m.id, { added: added });
-            }
-
-            for (let i = 0; i < removedModules.length; i++) {
-              const m = removedModules[i];
-              const removed = Object.keys(m.obj).map(function(k){ return { key: k, val: m.obj[k] }; });
-              commentBody += formatModuleDiff("Removed", m.id, { removed: removed });
-            }
-
-            if (!commentBody) {
-              console.log("No changes detected.");
-              return;
-            }
-
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: process.env.GITHUB_SHA,
-              body: commentBody
+              if (!changes.added.length && !changes.removed.length && !changes.renamed.length) commentBody += formatPureRename(r.from, r.to);
+              else commentBody += formatModuleDiff("Renamed", r.to, changes);
             });
 
-            console.log("Diff comment posted successfully.");
+            addedModules.forEach(m => {
+              const added = Object.keys(m.obj).map(k => ({ key: k, val: m.obj[k] }));
+              commentBody += formatModuleDiff("Added", m.id, { added });
+            });
+
+            removedModules.forEach(m => {
+              const removed = Object.keys(m.obj).map(k => ({ key: k, val: m.obj[k] }));
+              commentBody += formatModuleDiff("Removed", m.id, { removed });
+            });
+
+            if (!commentBody) { console.log("No changes detected."); return; }
+
+            // --- Split comment into chunks ---
+            function splitText(text, maxLength) {
+              const chunks = [];
+              let start = 0;
+              while (start < text.length) {
+                chunks.push(text.slice(start, start + maxLength));
+                start += maxLength;
+              }
+              return chunks;
+            }
+
+            const header = "🧩 **Changes in `discordclasses.json`:**\n\n";
+            const chunks = splitText(commentBody, MAX_COMMENT_LENGTH - header.length);
+
+            for (let i = 0; i < chunks.length; i++) {
+              const partHeader = chunks.length > 1 ? header + "**Part " + (i+1) + " of " + chunks.length + "**\n\n" : header;
+              const body = partHeader + chunks[i];
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: body
+              });
+              console.log("Posted comment part " + (i+1) + "/" + chunks.length);
+            }
