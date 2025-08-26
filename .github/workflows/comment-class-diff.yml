@@ -25,10 +25,9 @@ jobs:
 
       - name: Install GitHub CLI
         run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0 || true
-          sudo apt-add-repository https://cli.github.com/packages || true
-          sudo apt update
-          sudo apt install -y gh
+          GH_CLI_VERSION="2.37.1"
+          wget https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
+          sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
 
       - name: Authenticate GitHub CLI
         env:
@@ -43,7 +42,6 @@ jobs:
         run: |
           MAX_SIZE=60000
 
-          # Split diff.txt into chunks smaller than MAX_SIZE, using awk and csplit
           awk -v max=$MAX_SIZE '
           BEGIN {buf=""}
           {
@@ -57,7 +55,6 @@ jobs:
           END {if(buf) print buf}
           ' diff.txt | csplit -f part - '/---split---/' '{*}'
 
-          # Post each chunk as a separate commit comment
           for file in part*; do
             content=$(cat "$file")
             gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments -f body="🧩 **Changes in \`discordclasses.json\`:**\n\n\`\`\`diff\n$content\n\`\`\`"
