@@ -15,16 +15,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare with previous commit
+          fetch-depth: 2
 
-      - name: Install Node (if not already)
+      - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      - name: Install dependencies
+        run: npm install prettier axios
+
       - name: Normalize JSON
-        run: |
-          node normalize-json.js
+        run: node normalize-json.js
 
       - name: Set up diff files
         run: |
@@ -32,18 +34,15 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
 
       - name: Create diff
-        run: |
-          diff -u previous.json current.json > diff.txt || true
-          cat diff.txt  # optional for logs
+        run: diff -u previous.json current.json > diff.txt || true
 
-      - name: Post diff as commit comment
+      - name: Post diff as GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const MAX_COMMENT_LENGTH = 65536;
-
             const diff = fs.readFileSync('diff.txt', 'utf8');
             if (!diff.trim()) return;
 
@@ -61,24 +60,29 @@ jobs:
               return chunks;
             }
 
-            const rawChunks = splitDiff(
-              diff,
-              MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length
-            );
+            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
 
             for (let i = 0; i < rawChunks.length; i++) {
-              const partHeader = rawChunks.length > 1
-                ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
-                : header;
-
+              const partHeader = rawChunks.length > 1 ? `${header}**Part ${i+1} of ${rawChunks.length}**\n\n` : header;
               const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
-
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
                 body: commentBody,
               });
-
-              console.log(`Posted comment part ${i + 1}/${rawChunks.length}`);
             }
+
+      - name: Post diff to Discord (single message, 2000 chars)
+        run: |
+          node -e "
+          const fs = require('fs');
+          const axios = require('axios');
+          const commitUrl = '${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}';
+          const MAX_DISCORD_LENGTH = 2000 - ('Full commit here: ' + commitUrl).length - 1;
+          const diff = fs.readFileSync('diff.txt', 'utf8');
+          const content = diff.slice(0, MAX_DISCORD_LENGTH) + '\\nFull commit here: ' + commitUrl;
+          axios.post(process.env.DISCORD_WEBHOOK_URL, { content }).then(() => console.log('Discord message sent')).catch(console.error);
+          "
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
