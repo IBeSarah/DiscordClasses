@@ -35,21 +35,43 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Create GitHub commit comment
+      - name: Post GitHub comment with full diff
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const diffText = fs.readFileSync('current_diff.txt', 'utf8');
+            const _ = require('lodash');
+
+            const MAX_COMMENT_LENGTH = 65536;
+            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+
+            let diffText = fs.readFileSync('current_diff.txt', 'utf8');
             if(!diffText.trim()) return;
-            // Split into multiple comments if > 65k
-            const MAX_GH_COMMENT = 65536;
-            for (let i = 0; i < diffText.length; i += MAX_GH_COMMENT) {
+
+            // Split long comments into multiple if needed
+            function splitText(text, maxLength) {
+              const chunks = [];
+              let start=0;
+              while(start<text.length){
+                chunks.push(text.slice(start, start+maxLength));
+                start+=maxLength;
+              }
+              return chunks;
+            }
+
+            const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
+
+            for(let i=0; i<chunks.length; i++){
+              const comment = chunks.length>1
+                ? `${header}**Part ${i+1} of ${chunks.length}**\n\n${chunks[i]}`
+                : `${header}${chunks[i]}`;
+
+              console.log(`Posting comment part ${i+1}/${chunks.length}`);
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: diffText.slice(i, i + MAX_GH_COMMENT)
+                body: comment
               });
             }
