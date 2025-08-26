@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json  # Only trigger when this file changes
+      - discordclasses.json   # Only trigger when this file changes
 
 jobs:
   post-diff:
@@ -23,9 +23,9 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash axios
 
-      - name: Post diff to Discord and save full diff
+      - name: Post diff to Discord
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -33,34 +33,28 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Debug full_diff.txt
-        run: |
-          echo "Contents of full_diff.txt:"
-          ls -l full_diff.txt
-          cat full_diff.txt
-
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const path = require('path');
 
             const MAX_COMMENT_LENGTH = 65000;
-            const diffFilePath = path.resolve(process.cwd(), 'full_diff.txt');
+            const fullDiffFile = 'full_diff.txt';
 
-            if (!fs.existsSync(diffFilePath)) {
-              console.log("full_diff.txt does not exist, nothing to post");
+            if (!fs.existsSync(fullDiffFile)) {
+              console.log('No diff file found');
               return;
             }
 
-            const diffText = fs.readFileSync(diffFilePath, 'utf8');
-            if (!diffText.trim()) {
-              console.log("full_diff.txt is empty, nothing to post");
+            const diffText = fs.readFileSync(fullDiffFile, 'utf8').trim();
+            if (!diffText) {
+              console.log('No diff to post');
               return;
             }
 
+            // Split text into chunks of MAX_COMMENT_LENGTH
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
