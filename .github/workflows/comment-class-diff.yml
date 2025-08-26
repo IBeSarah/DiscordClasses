@@ -25,9 +25,8 @@ jobs:
 
       - name: Install GitHub CLI
         run: |
-          GH_CLI_VERSION="2.37.1"
-          wget https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_amd64.deb
-          sudo dpkg -i gh_${GH_CLI_VERSION}_linux_amd64.deb
+          wget https://github.com/cli/cli/releases/latest/download/gh_latest_linux_amd64.deb -O gh_latest_linux_amd64.deb
+          sudo dpkg -i gh_latest_linux_amd64.deb
 
       - name: Authenticate GitHub CLI
         env:
