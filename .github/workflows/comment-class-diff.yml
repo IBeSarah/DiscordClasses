@@ -22,9 +22,6 @@ jobs:
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Use public npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
@@ -42,12 +39,16 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-
             const MAX_COMMENT_LENGTH = 65000;
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
 
-            if (!diffText.trim()) {
-              console.log("No diff to post");
+            if (!fs.existsSync('full_diff.txt')) {
+              console.log("No full diff to post");
+              return;
+            }
+
+            const diffText = fs.readFileSync('full_diff.txt', 'utf8').trim();
+            if (!diffText) {
+              console.log("Full diff file is empty");
               return;
             }
 
