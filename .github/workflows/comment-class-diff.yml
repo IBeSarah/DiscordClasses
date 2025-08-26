@@ -1,4 +1,4 @@
-name: Post Discord Class Diff
+name: Comment Class Diff
 
 on:
   push:
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # needed to get previous commit
+          fetch-depth: 2  # Required to compare with previous commit
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20'
 
       - name: Save previous and current JSON
         run: |
@@ -26,12 +26,13 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install dependencies
-        run: npm install axios
+        run: |
+          npm install axios @octokit/rest
 
-      - name: Post summarized diff to Discord
+      - name: Post class diff
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: node diff_and_post.js
