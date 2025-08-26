@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 2
 
       - name: Install Node dependencies
-        run: npm install lodash
+        run: npm install lodash fast-levenshtein
 
       - name: Set up JSON files
         run: |
@@ -30,6 +30,7 @@ jobs:
           script: |
             const fs = require('fs');
             const _ = require('lodash');
+            const levenshtein = require('fast-levenshtein');
 
             const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
             const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
@@ -37,50 +38,79 @@ jobs:
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
-            function parseItems(arr) {
-              if (!arr) return [];
-              return arr.map(s => s.trim().replace(/^"?|"?$/g, '')); // remove surrounding quotes
+            function moduleItems(obj) {
+              if (!obj) return [];
+              return Object.entries(obj).map(([k, v]) => `${k}: ${v}`);
+            }
+
+            function detectRenames(removed, added) {
+              const renames = [];
+              const unmatchedAdded = new Set(added);
+
+              removed.forEach(rem => {
+                let bestMatch = null;
+                let bestDist = Infinity;
+                unmatchedAdded.forEach(add => {
+                  const dist = levenshtein.get(rem, add);
+                  if (dist < bestDist && dist <= Math.max(rem.length, add.length) * 0.4) {
+                    bestDist = dist;
+                    bestMatch = add;
+                  }
+                });
+                if (bestMatch) {
+                  renames.push({ from: rem, to: bestMatch });
+                  unmatchedAdded.delete(bestMatch);
+                }
+              });
+
+              const newRemoved = removed.filter(r => !renames.some(x => x.from === r));
+              const newAdded = Array.from(unmatchedAdded);
+              return { renames, newRemoved, newAdded };
             }
 
             function compareModules(prevObj, currObj) {
               const sections = [];
-              const moduleStats = {};
+              const summary = [];
 
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
               allModules.forEach(mod => {
-                const prevItems = parseItems(prevObj[mod]);
-                const currItems = parseItems(currObj[mod]);
+                const prevItems = moduleItems(prevObj[mod]);
+                const currItems = moduleItems(currObj[mod]);
 
-                const removed = _.difference(prevItems, currItems);
-                const added = _.difference(currItems, prevItems);
+                let removed = _.difference(prevItems, currItems);
+                let added = _.difference(currItems, prevItems);
 
-                moduleStats[mod] = {
-                  added: added.length,
-                  removed: removed.length,
-                  renamed: 0,
-                  moved: 0
-                };
+                const { renames, newRemoved, newAdded } = detectRenames(removed, added);
+                removed = newRemoved;
+                added = newAdded;
 
-                if (removed.length || added.length) {
+                if (removed.length || added.length || renames.length) {
+                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length}`);
                   let section = `### Module: ${mod}\n`;
+
                   if (removed.length) {
                     section += '#### Removed\n';
-                    removed.forEach(it => section += `-"${it}"\n`);
+                    removed.forEach(item => section += `-"${item}"\n`);
                   }
                   if (added.length) {
                     section += '#### Added\n';
-                    added.forEach(it => section += `+"${it}"\n`);
+                    added.forEach(item => section += `+"${item}"\n`);
                   }
+                  if (renames.length) {
+                    section += '#### Renamed\n';
+                    renames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
+                  }
+
                   sections.push(section);
                 }
               });
 
-              const summaryText = Object.entries(moduleStats)
-                .map(([mod, stats]) => `Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`)
-                .join('\n');
+              const summaryText = summary.length
+                ? `**Summary:**\n${summary.join('\n')}\n\n`
+                : '';
 
-              return `**Summary:**\n${summaryText}\n\n` + sections.join('\n');
+              return summaryText + sections.join('\n');
             }
 
             const diffText = compareModules(prev, curr);
@@ -107,9 +137,7 @@ jobs:
                 ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
                 : `${header}${chunks[i]}`;
 
-              console.log("Posting comment part:", i + 1);
-              console.log(comment); // debug
-
+              console.log(`Posting comment part ${i + 1}/${chunks.length}`);
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
