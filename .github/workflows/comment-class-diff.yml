@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json
+      - discordclasses.json   # Only trigger when this file changes
 
 jobs:
   post-diff:
@@ -25,50 +25,106 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Post diff to Discord & prepare GitHub diff
-        run: node diff_and_post.js
+      - name: Generate and post diff
+        run: |
+          node -e "
+          const fs = require('fs');
+          const _ = require('lodash');
+          const axios = require('axios');
+
+          const mode = process.argv[1]; // 'discord' or 'github'
+          const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+          const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+
+          const addedModules = {};
+          const removedModules = {};
+          const renamedModules = {};
+          const movedModules = {};
+
+          // Detect changes
+          for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
+            const oldMod = prev[key] || {};
+            const newMod = curr[key] || {};
+
+            // Added
+            for (const k of Object.keys(newMod)) {
+              if (!oldMod.hasOwnProperty(k)) {
+                addedModules[key] = addedModules[key] || [];
+                addedModules[key].push(k);
+              }
+            }
+
+            // Removed
+            for (const k of Object.keys(oldMod)) {
+              if (!newMod.hasOwnProperty(k)) {
+                removedModules[key] = removedModules[key] || [];
+                removedModules[key].push(k);
+              }
+            }
+
+            // Renamed (key exists in both, value changed)
+            for (const k of Object.keys(newMod)) {
+              if (oldMod[k] && oldMod[k] !== newMod[k]) {
+                renamedModules[key] = renamedModules[key] || [];
+                renamedModules[key].push(k);
+              }
+            }
+
+            // Moved (treat same as renamed for individual keys)
+            const changedKeys = Object.keys(newMod).filter(k => oldMod[k] && oldMod[k] !== newMod[k]);
+            if (changedKeys.length) {
+              movedModules[key] = changedKeys;
+            }
+          }
+
+          function formatDiffBlock(title, moduleId, keys, type) {
+            if (!keys || keys.length === 0) return '';
+            const lines = keys.map(k => {
+              switch(type) {
+                case 'added': return '+ \"'+k+'\": \"'+curr[moduleId][k]+'\"';
+                case 'removed': return '- \"'+k+'\": \"'+prev[moduleId][k]+'\"';
+                case 'renamed':
+                case 'moved':
+                  return '- \"'+k+'\": \"'+prev[moduleId][k]+'\"\n+ \"'+k+'\": \"'+curr[moduleId][k]+'\"';
+              }
+            }).join('\\n');
+            return `### ${title} in module ${moduleId}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
+          }
+
+          let output = '';
+          for (const [mod, keys] of Object.entries(addedModules)) output += formatDiffBlock('Added', mod, keys, 'added');
+          for (const [mod, keys] of Object.entries(removedModules)) output += formatDiffBlock('Removed', mod, keys, 'removed');
+          for (const [mod, keys] of Object.entries(renamedModules)) output += formatDiffBlock('Renamed', mod, keys, 'renamed');
+          for (const [mod, keys] of Object.entries(movedModules)) output += formatDiffBlock('Moved', mod, keys, 'moved');
+
+          if (!output) output = 'No changes detected.';
+
+          const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+
+          // Post to Discord
+          const summary = '**Module changes summary**\\n';
+          const shortSummary = Object.keys(addedModules).map(m => `Module ${m}: Added: ${addedModules[m]?.length || 0}`).join(', ')
+            + '\\n' + Object.keys(removedModules).map(m => `Module ${m}: Removed: ${removedModules[m]?.length || 0}`).join(', ')
+            + '\\n' + Object.keys(renamedModules).map(m => `Module ${m}: Renamed: ${renamedModules[m]?.length || 0}`).join(', ')
+            + '\\n' + Object.keys(movedModules).map(m => `Module ${m}: Moved: ${movedModules[m]?.length || 0}`).join(', ')
+            + '\\n\\nView full list of changes here: '+commitUrl;
+
+          axios.post(process.env.DISCORD_WEBHOOK_URL, { content: shortSummary })
+            .then(()=>console.log('Discord post successful'))
+            .catch(err=>console.error('Discord post failed:', err.message));
+
+          // Post full diff for GitHub
+          const MAX_LEN = 65000;
+          const chunks = [];
+          for (let i=0; i<output.length; i+=MAX_LEN) chunks.push(output.slice(i,i+MAX_LEN));
+          const { execSync } = require('child_process');
+          for (let i=0; i<chunks.length; i++) {
+            const body = chunks.length>1 ? `**Part ${i+1} of ${chunks.length}**\\n\\n${chunks[i]}` : chunks[i];
+            execSync(`gh api repos/${process.env.GITHUB_REPOSITORY}/commits/${process.env.GITHUB_SHA}/comments -f body='${body.replace(/'/g,\"'\\\\''\")}'`);
+          }
+          "
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Post GitHub diff as commit comments
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-
-            const MAX_COMMENT_LENGTH = 65000;
-            const diffFiles = fs.readdirSync('.').filter(f => f.startsWith('full_diff'));
-
-            for (const file of diffFiles) {
-              const diffText = fs.readFileSync(file, 'utf8');
-              const chunks = [];
-              let start = 0;
-              while (start < diffText.length) {
-                chunks.push(diffText.slice(start, start + MAX_COMMENT_LENGTH));
-                start += MAX_COMMENT_LENGTH;
-              }
-
-              for (let i = 0; i < chunks.length; i++) {
-                const body = chunks.length > 1
-                  ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
-                  : chunks[i];
-
-                await github.rest.repos.createCommitComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  commit_sha: context.sha,
-                  body,
-                });
-
-                console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
-              }
-
-              // Cleanup diff file
-              fs.unlinkSync(file);
-              console.log(`Deleted temporary diff file: ${file}`);
-            }
