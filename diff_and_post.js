@@ -15,16 +15,31 @@ const githubSha = process.env.GITHUB_SHA;
 const githubRepo = process.env.GITHUB_REPOSITORY;
 const githubServer = process.env.GITHUB_SERVER_URL;
 
-// Utility to detect renames (simple Levenshtein distance)
+// Rename detection threshold (max Levenshtein distance)
+const RENAME_THRESHOLD = 3;
+
+// Detect renames based on value similarity
 function detectRenames(prevModule, currModule) {
   const renames = [];
+  const usedCurrKeys = new Set();
+
   for (const keyPrev in prevModule) {
+    const valPrev = prevModule[keyPrev];
     for (const keyCurr in currModule) {
-      if (prevModule[keyPrev] === currModule[keyCurr] && keyPrev !== keyCurr) {
-        renames.push({ from: keyPrev, to: keyCurr, value: currModule[keyCurr] });
+      if (usedCurrKeys.has(keyCurr)) continue;
+
+      const valCurr = currModule[keyCurr];
+      if (keyPrev !== keyCurr) {
+        const dist = levenshtein.get(valPrev, valCurr);
+        if (dist <= RENAME_THRESHOLD) {
+          renames.push({ from: keyPrev, to: keyCurr, value: valCurr });
+          usedCurrKeys.add(keyCurr);
+          break;
+        }
       }
     }
   }
+
   return renames;
 }
 
@@ -40,7 +55,7 @@ for (const moduleId of _.union(Object.keys(prev), Object.keys(curr))) {
   const removedKeys = _.difference(Object.keys(prevModule), Object.keys(currModule));
   const renames = detectRenames(prevModule, currModule);
 
-  // Moved detection: if module exists but keys changed positions
+  // Moved detection: module exists but keys changed positions
   const moved = prev[moduleId] && curr[moduleId] && !_.isEqual(prevModule, currModule) && addedKeys.length === 0 && removedKeys.length === 0 ? 1 : 0;
 
   summary[moduleId] = {
