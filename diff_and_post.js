@@ -1,139 +1,81 @@
-const fs = require("fs");
-const _ = require("lodash");
-const levenshtein = require("fast-levenshtein");
-const axios = require("axios");
+const fs = require('fs');
+const _ = require('lodash');
+const axios = require('axios');
+const levenshtein = require('fast-levenshtein');
 
-const previousFile = "previous.json";
-const currentFile = "current.json";
+const previousJson = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+const currentJson = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
-function parseJson(file) {
-  const text = fs.readFileSync(file, "utf8");
-  return JSON.parse(text || "{}");
-}
+// Helpers
+function findRenamesAndChanges(oldModule, newModule) {
+  const renamed = [];
+  const removed = {};
+  const added = {};
 
-const oldData = parseJson(previousFile);
-const newData = parseJson(currentFile);
-
-const added = {};
-const removed = {};
-const renamed = [];
-const moved = [];
-
-// Step 1: Detect added and removed
-for (const [module, keys] of Object.entries(oldData)) {
-  if (!newData[module]) {
-    removed[module] = keys;
-    continue;
+  for (const [key, val] of Object.entries(oldModule)) {
+    if (!(key in newModule)) removed[key] = val;
   }
-  for (const [k, v] of Object.entries(keys)) {
-    if (!(k in newData[module])) {
-      removed[module] = removed[module] || {};
-      removed[module][k] = v;
-    }
+  for (const [key, val] of Object.entries(newModule)) {
+    if (!(key in oldModule)) added[key] = val;
   }
-}
 
-for (const [module, keys] of Object.entries(newData)) {
-  if (!oldData[module]) {
-    added[module] = keys;
-    continue;
-  }
-  for (const [k, v] of Object.entries(keys)) {
-    if (!(k in oldData[module])) {
-      added[module] = added[module] || {};
-      added[module][k] = v;
-    }
-  }
-}
-
-// Step 2: Detect renames
-for (const [remModule, remKeys] of Object.entries(removed)) {
-  for (const [k, v] of Object.entries(remKeys)) {
-    let found = false;
-    for (const [addModule, addKeys] of Object.entries(added)) {
-      for (const [ak, av] of Object.entries(addKeys)) {
-        const dist = levenshtein.get(String(v), String(av));
-        if (dist <= 3 && k !== ak) { // key name changed
-          renamed.push({
-            fromModule: remModule,
-            toModule: addModule,
-            fromKey: k,
-            toKey: ak,
-            value: av
-          });
-          delete added[addModule][ak];
-          delete removed[remModule][k];
-          found = true;
-          break;
-        }
-      }
-      if (found) break;
-    }
-  }
-}
-
-// Step 3: Detect moved keys (same key/value, different module)
-for (const [remModule, remKeys] of Object.entries(removed)) {
-  for (const [k, v] of Object.entries(remKeys)) {
-    for (const [addModule, addKeys] of Object.entries(added)) {
-      if (addKeys[k] && addKeys[k] === v) {
-        moved.push({
-          key: k,
-          value: v,
-          fromModule: remModule,
-          toModule: addModule
-        });
-        delete added[addModule][k];
-        delete removed[remModule][k];
+  // Detect renames (by value, simple heuristic)
+  for (const [addedKey, addedVal] of Object.entries(added)) {
+    for (const [removedKey, removedVal] of Object.entries(removed)) {
+      if (addedVal === removedVal) {
+        renamed.push({ from: removedKey, to: addedKey, module: addedVal });
+        delete removed[removedKey];
+        delete added[addedKey];
       }
     }
   }
+
+  return { renamed, removed, added };
 }
 
-// Step 4: Build GitHub diff
-let githubDiff = "";
-function diffSection(title, data, sign) {
-  for (const [mod, keys] of Object.entries(data)) {
-    githubDiff += `# ${title} in module ${mod}\n\`\`\`diff\n`;
-    for (const [k, v] of Object.entries(keys)) {
-      githubDiff += `${sign} "${k}": "${v}"\n`;
-    }
-    githubDiff += "```\n";
+// Aggregate changes
+const fullDiff = [];
+const discordSummaryData = {};
+const renamedOverall = [];
+
+for (const [mod, newModule] of Object.entries(currentJson)) {
+  const oldModule = previousJson[mod] || {};
+  const { renamed, removed, added } = findRenamesAndChanges(oldModule, newModule);
+
+  renamedOverall.push(...renamed);
+
+  if (Object.keys(removed).length) {
+    fullDiff.push(`### Removed from module ${mod}\n\`\`\`diff\n${Object.keys(removed).map(k => `- "${k}": "${removed[k]}"`).join('\n')}\n\`\`\``);
   }
-}
-
-diffSection("Added", added, "+");
-diffSection("Removed", removed, "-");
-
-if (renamed.length) {
-  for (const r of renamed) {
-    githubDiff += `# Renamed from module ${r.fromModule} → ${r.toModule}\n\`\`\`diff\n`;
-    githubDiff += `- "${r.fromKey}": "${r.value}"\n`;
-    githubDiff += `+ "${r.toKey}": "${r.value}"\n`;
-    githubDiff += "```\n";
+  if (Object.keys(added).length) {
+    fullDiff.push(`### Added in module ${mod}\n\`\`\`diff\n${Object.keys(added).map(k => `+ "${k}": "${added[k]}"`).join('\n')}\n\`\`\``);
   }
-}
-
-if (moved.length) {
-  for (const m of moved) {
-    githubDiff += `# Moved key "${m.key}" from module ${m.fromModule} → ${m.toModule}\n\`\`\`diff\n`;
-    githubDiff += `- "${m.key}": "${m.value}"\n`;
-    githubDiff += `+ "${m.key}": "${m.value}"\n`;
-    githubDiff += "```\n";
+  if (renamed.length) {
+    fullDiff.push(`### Renamed in module ${mod}\n\`\`\`diff\n${renamed.map(r => `- "${r.from}" => + "${r.to}"`).join('\n')}\n\`\`\``);
   }
+
+  // Discord summary
+  if (!discordSummaryData[mod]) discordSummaryData[mod] = {};
+  if (Object.keys(added).length) discordSummaryData[mod].Added = Object.keys(added).length;
+  if (Object.keys(removed).length) discordSummaryData[mod].Removed = Object.keys(removed).length;
+  if (renamed.length) discordSummaryData[mod].Renamed = renamed.length;
 }
 
-// Write full diff for GitHub
-fs.writeFileSync("full_diff.txt", githubDiff);
+// Save full diff for GitHub comments
+fs.writeFileSync('full_diff.txt', fullDiff.join('\n\n'));
 
-// Step 5: Post Discord summary
-const discordSummary = `
-### Added: ${Object.values(added).flatMap(Object.keys).length} items in modules ${Object.keys(added).join(", ")}
-### Removed: ${Object.values(removed).flatMap(Object.keys).length} items in modules ${Object.keys(removed).join(", ")}
-### Renamed: ${renamed.length} items
-### Moved: ${moved.length} items
-View full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}
-`;
+// Build Discord summary
+let discordMessage = '';
+for (const [mod, types] of Object.entries(discordSummaryData)) {
+  const parts = [];
+  if (types.Added) parts.push(`Added: ${types.Added}`);
+  if (types.Removed) parts.push(`Removed: ${types.Removed}`);
+  if (types.Renamed) parts.push(`Renamed: ${types.Renamed}`);
+  discordMessage += `Module ${mod}: ${parts.join(", ")}\n`;
+}
 
-axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordSummary })
+discordMessage += `\nView full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+
+// Post to Discord
+axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
   .catch(console.error);
