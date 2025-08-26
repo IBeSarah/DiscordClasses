@@ -1,20 +1,25 @@
+// normalize-json.js
 const fs = require('fs');
-const path = require('path');
 const prettier = require('prettier');
 
-const filePath = path.join(__dirname, 'discordclasses.json');
+const filePath = 'discordclasses.json';
 
-// Read the file
-let content = fs.readFileSync(filePath, 'utf8');
+try {
+  // Read JSON file
+  const rawData = fs.readFileSync(filePath, 'utf8');
+  const jsonData = JSON.parse(rawData);
 
-// Format using Prettier
-const formatted = prettier.format(content, {
-  parser: 'json',
-  tabWidth: 2,
-  useTabs: false,
-  endOfLine: 'lf',
-});
+  // Pretty-print using Prettier
+  const prettyJson = prettier.format(JSON.stringify(jsonData), {
+    parser: 'json',
+    printWidth: 80,
+    tabWidth: 2,
+  });
 
-// Write back the normalized content
-fs.writeFileSync(filePath, formatted, 'utf8');
-console.log('discordclasses.json normalized ✅');
+  // Write back normalized JSON
+  fs.writeFileSync(filePath, prettyJson, 'utf8');
+  console.log(`✅ ${filePath} normalized successfully.`);
+} catch (err) {
+  console.error(`❌ Failed to normalize ${filePath}:`, err.message);
+  process.exit(1);
+}
