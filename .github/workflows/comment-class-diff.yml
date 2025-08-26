@@ -1,4 +1,4 @@
-name: Post JSON module diff
+name: Comment DiscordClasses JSON Diff
 
 on:
   push:
@@ -17,73 +17,72 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      - name: Set up JSON files safely
+      - name: Install dependencies
+        run: npm install prettier axios
+
+      - name: Normalize JSON
+        run: node normalize-json.js
+
+      - name: Set up diff files
         run: |
           git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
-          node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      - name: Compute diff and post to Discord
-        run: node -e "
-          const fs = require('fs');
-          const _ = require('lodash');
-          const axios = require('axios');
-          const current = JSON.parse(fs.readFileSync('current.json'));
-          const previous = JSON.parse(fs.readFileSync('previous.json'));
-          
-          const MAX_CHARS = 2000;
-          const commitUrl = '${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}';
-          const webhook = process.env.DISCORD_WEBHOOK_URL;
+      - name: Create diff
+        run: diff -u previous.json current.json > diff.txt || true
 
-          const added = [];
-          const removed = [];
-          const moved = [];
-
-          const allKeys = _.union(Object.keys(current), Object.keys(previous));
-          for (const key of allKeys) {
-            const prev = previous[key] || {};
-            const curr = current[key] || {};
-            const prevKeys = Object.keys(prev);
-            const currKeys = Object.keys(curr);
-
-            // Added
-            currKeys.filter(k => !prevKeys.includes(k)).forEach(k => added.push(`${k} (added to module ${key})`));
-
-            // Removed
-            prevKeys.filter(k => !currKeys.includes(k)).forEach(k => removed.push(`${k} (removed from module ${key})`));
-
-            // Renamed/Moved
-            prevKeys.filter(k => currKeys.includes(k) && prev[k] !== curr[k])
-                    .forEach(k => moved.push(`${k} (from ${prev[k]} to ${curr[k]} in module ${key})`));
-          }
-
-          const summary = [];
-          if (added.length) summary.push('### Added\n' + added.map(a => '+' + a).join('\\n'));
-          if (removed.length) summary.push('### Removed\n' + removed.map(r => '-' + r).join('\\n'));
-          if (moved.length) summary.push('### Moved & Renamed\n' + moved.map(m => '+' + m).join('\\n'));
-
-          let message = `**Changes in discordclasses.json:**\\n` + summary.join('\\n\\n') + `\\nFull commit here: ${commitUrl}`;
-          if (message.length > MAX_CHARS) message = message.slice(0, MAX_CHARS - 3) + '...';
-
-          axios.post(webhook, { content: message }).catch(err => { console.error('Failed to send Discord webhook:', err); process.exit(1); });
-        "
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      - name: Post full diff as GitHub commit comment
+      - name: Post diff as GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const diff = fs.readFileSync('current.json', 'utf8');
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `🧩 **Full changes in discordclasses.json:**\n\n\`\`\`json\n${diff}\n\`\`\``
-            });
+            const MAX_COMMENT_LENGTH = 65536;
+            const diff = fs.readFileSync('diff.txt', 'utf8');
+            if (!diff.trim()) return;
+
+            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+            const chunkPrefix = '```diff\n';
+            const chunkSuffix = '\n```';
+
+            function splitDiff(fullText, maxLength) {
+              const chunks = [];
+              let start = 0;
+              while (start < fullText.length) {
+                chunks.push(fullText.slice(start, start + maxLength));
+                start += maxLength;
+              }
+              return chunks;
+            }
+
+            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
+
+            for (let i = 0; i < rawChunks.length; i++) {
+              const partHeader = rawChunks.length > 1 ? `${header}**Part ${i+1} of ${rawChunks.length}**\n\n` : header;
+              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: commentBody,
+              });
+            }
+
+      - name: Post diff to Discord (single message, 2000 chars)
+        run: |
+          node -e "
+          const fs = require('fs');
+          const axios = require('axios');
+          const commitUrl = '${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}';
+          const MAX_DISCORD_LENGTH = 2000 - ('Full commit here: ' + commitUrl).length - 1;
+          const diff = fs.readFileSync('diff.txt', 'utf8');
+          const content = diff.slice(0, MAX_DISCORD_LENGTH) + '\\nFull commit here: ' + commitUrl;
+          axios.post(process.env.DISCORD_WEBHOOK_URL, { content }).then(() => console.log('Discord message sent')).catch(console.error);
+          "
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
