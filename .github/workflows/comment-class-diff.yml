@@ -35,35 +35,21 @@ jobs:
             let prev = {};
             let curr = {};
 
-            try {
-              const prevRaw = fs.readFileSync('previous.json', 'utf8');
-              console.log("Previous JSON first 100 chars:", prevRaw.slice(0,100));
-              prev = JSON.parse(prevRaw);
-            } catch(e) {
-              console.warn("Failed to parse previous.json, using empty object", e);
-            }
-
-            try {
-              const currRaw = fs.readFileSync('current.json', 'utf8');
-              console.log("Current JSON first 100 chars:", currRaw.slice(0,100));
-              curr = JSON.parse(currRaw);
-            } catch(e) {
-              console.warn("Failed to parse current.json, using empty object", e);
-            }
+            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) { console.warn("Failed to parse previous.json"); }
+            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) { console.warn("Failed to parse current.json"); }
 
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
-            // Convert module object to array of "key: value" strings
             function moduleItems(obj) {
               if (!obj) return [];
               return Object.entries(obj).map(([k,v]) => `${k}: ${v}`);
             }
 
+            // Detect renames based on Levenshtein
             function detectRenames(removed, added) {
               const renames = [];
               const unmatchedAdded = new Set(added);
-
               removed.forEach(rem => {
                 let bestMatch = null;
                 let bestDist = Infinity;
@@ -74,23 +60,52 @@ jobs:
                     bestMatch = add;
                   }
                 });
-                if (bestMatch) {
+                if(bestMatch) {
                   renames.push({from: rem, to: bestMatch});
                   unmatchedAdded.delete(bestMatch);
                 }
               });
-
               const newRemoved = removed.filter(r => !renames.some(x=>x.from===r));
               const newAdded = Array.from(unmatchedAdded);
-
               return {renames, newRemoved, newAdded};
+            }
+
+            function detectMoves(allPrev, allCurr) {
+              const moves = [];
+              // Flatten previous and current items to module -> items
+              const prevFlat = {};
+              Object.entries(allPrev).forEach(([mod, obj]) => {
+                prevFlat[mod] = moduleItems(obj);
+              });
+              const currFlat = {};
+              Object.entries(allCurr).forEach(([mod, obj]) => {
+                currFlat[mod] = moduleItems(obj);
+              });
+
+              Object.entries(prevFlat).forEach(([fromMod, items]) => {
+                items.forEach(item => {
+                  Object.entries(currFlat).forEach(([toMod, currItems]) => {
+                    if(fromMod !== toMod && currItems.includes(item)) {
+                      moves.push({item, from: fromMod, to: toMod});
+                      // Remove from currFlat[toMod] so it's not counted as added
+                      currFlat[toMod] = currItems.filter(x=>x!==item);
+                      // Remove from prevFlat[fromMod] so it's not counted as removed
+                      prevFlat[fromMod] = prevFlat[fromMod].filter(x=>x!==item);
+                    }
+                  });
+                });
+              });
+
+              return moves;
             }
 
             function compareModules(prevObj, currObj) {
               const sections = [];
               const summary = [];
-
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
+
+              // Detect moves globally
+              const moves = detectMoves(prevObj, currObj);
 
               allModules.forEach(mod => {
                 const prevItems = moduleItems(prevObj[mod]);
@@ -99,12 +114,17 @@ jobs:
                 let removed = _.difference(prevItems, currItems);
                 let added = _.difference(currItems, prevItems);
 
+                // Filter out moved items
+                const moduleMoves = moves.filter(m => m.from===mod || m.to===mod);
+                removed = removed.filter(r => !moduleMoves.some(m => m.from===mod && m.item===r));
+                added = added.filter(a => !moduleMoves.some(m => m.to===mod && m.item===a));
+
                 const {renames, newRemoved, newAdded} = detectRenames(removed, added);
                 removed = newRemoved;
                 added = newAdded;
 
-                if (removed.length || added.length || renames.length) {
-                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length}`);
+                if (removed.length || added.length || renames.length || moduleMoves.length) {
+                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${renames.length} / moved:${moduleMoves.filter(m=>m.from===mod).length}`);
                   let section = `### Module: ${mod}\n`;
 
                   if (removed.length) {
@@ -119,6 +139,13 @@ jobs:
                     section += '#### Renamed\n';
                     renames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
                   }
+                  if (moduleMoves.length) {
+                    section += '#### Moved\n';
+                    moduleMoves.forEach(m => {
+                      if(m.from===mod) section += `"${m.item}" to module ${m.to}\n`;
+                      if(m.to===mod && !added.includes(m.item)) section += `"${m.item}" from module ${m.from}\n`;
+                    });
+                  }
 
                   sections.push(section);
                 }
@@ -130,17 +157,17 @@ jobs:
 
             const diffText = compareModules(prev, curr);
 
-            if (!diffText.trim()) {
+            if(!diffText.trim()) {
               console.log("No changes to post");
               return;
             }
 
             function splitText(text, maxLength) {
               const chunks = [];
-              let start = 0;
-              while(start < text.length) {
-                chunks.push(text.slice(start, start + maxLength));
-                start += maxLength;
+              let start=0;
+              while(start<text.length){
+                chunks.push(text.slice(start, start+maxLength));
+                start+=maxLength;
               }
               return chunks;
             }
