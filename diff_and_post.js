@@ -2,82 +2,131 @@ const fs = require('fs');
 const _ = require('lodash');
 const axios = require('axios');
 
-// Environment
-const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-const commitSha = process.env.GITHUB_SHA;
-const repo = process.env.GITHUB_REPOSITORY;
+const previousFile = 'previous.json';
+const currentFile = 'current.json';
 
-// Load JSON
-function loadJson(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return {};
-  }
+if (!fs.existsSync(previousFile) || !fs.existsSync(currentFile)) {
+    console.error('Missing previous.json or current.json for diffing');
+    process.exit(1);
 }
 
-const prev = loadJson('previous.json');
-const curr = loadJson('current.json');
+const previous = JSON.parse(fs.readFileSync(previousFile, 'utf8'));
+const current = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
 
-// Output arrays
-let discordOutput = [];
-let githubOutput = [];
+let githubDiff = '';
+let discordDiff = '```diff\n';
 
-// Compare keys
-const allModules = _.union(Object.keys(prev), Object.keys(curr));
+const addedKeys = [];
+const removedKeys = [];
+const movedKeys = [];
+const renamedKeys = [];
 
-allModules.forEach(mod => {
-  const prevKeys = prev[mod] || {};
-  const currKeys = curr[mod] || {};
+// Helper function to stringify objects with 2-space indentation
+function stringify(obj) {
+    return JSON.stringify(obj, null, 2);
+}
 
-  // Added
-  const addedKeys = _.difference(Object.keys(currKeys), Object.keys(prevKeys));
-  if (addedKeys.length) {
-    const line = `### Added\n${addedKeys.map(k => `+ ${k}`).join('\n')}`;
-    discordOutput.push(line);
-    githubOutput.push(line);
-  }
+// Loop through all modules
+const allModules = new Set([...Object.keys(previous), ...Object.keys(current)]);
+allModules.forEach(module => {
+    const prevModule = previous[module] || {};
+    const currModule = current[module] || {};
 
-  // Removed
-  const removedKeys = _.difference(Object.keys(prevKeys), Object.keys(currKeys));
-  if (removedKeys.length) {
-    const line = `### Removed\n${removedKeys.map(k => `- ${k}`).join('\n')}`;
-    discordOutput.push(line);
-    githubOutput.push(line);
-  }
+    const prevKeys = Object.keys(prevModule);
+    const currKeys = Object.keys(currModule);
 
-  // Renamed (simple heuristic: key exists but value changed)
-  const renamedKeys = Object.keys(prevKeys).filter(k => currKeys[k] && currKeys[k] !== prevKeys[k]);
-  if (renamedKeys.length) {
-    const line = `### Renamed\n${renamedKeys.map(k => `* ${k}: ${prevKeys[k]} → ${currKeys[k]}`).join('\n')}`;
-    discordOutput.push(line);
-    githubOutput.push(line);
-  }
+    // Added keys
+    currKeys.forEach(key => {
+        if (!prevKeys.includes(key)) {
+            addedKeys.push({ module, key, value: currModule[key] });
+        }
+    });
 
-  // Moved module
-  if (prev[mod] && curr[mod] && !_.isEqual(prev[mod], curr[mod])) {
-    const line = `### Moved\nModule ${mod} changed`;
-    discordOutput.push(line);
-    githubOutput.push(`Module ${mod} moved from previous state to current state`);
-  }
+    // Removed keys
+    prevKeys.forEach(key => {
+        if (!currKeys.includes(key)) {
+            removedKeys.push({ module, key, value: prevModule[key] });
+        }
+    });
+
+    // Moved keys (module removed from previous, added to another)
+    allModules.forEach(targetModule => {
+        if (targetModule === module) return;
+        const targetPrev = previous[targetModule] || {};
+        const targetCurr = current[targetModule] || {};
+        Object.keys(prevModule).forEach(key => {
+            if (prevModule[key] && targetCurr[key] && prevModule[key] === targetCurr[key]) {
+                movedKeys.push({ key, from: module, to: targetModule });
+            }
+        });
+    });
+
+    // Renamed keys (value matches, key changed)
+    Object.values(prevModule).forEach(prevVal => {
+        const oldKey = Object.keys(prevModule).find(k => prevModule[k] === prevVal);
+        const newKey = Object.keys(currModule).find(k => currModule[k] === prevVal && k !== oldKey);
+        if (newKey) {
+            renamedKeys.push({ module, oldKey, newKey });
+        }
+    });
 });
 
-// Final text
-const discordText = '```diff\n' + discordOutput.join('\n') + '\n```';
-const githubText = githubOutput.join('\n');
+// Generate GitHub diff
+if (addedKeys.length) {
+    githubDiff += '### Added\n';
+    addedKeys.forEach(a => {
+        githubDiff += `Module ${a.module}:\n${stringify(current[a.module])}\n+ "${a.key}": "${a.value}" added in module ${a.module}\n\n`;
+    });
+    discordDiff += '### Added\n';
+    addedKeys.forEach(a => {
+        discordDiff += `+ "${a.key}" added in module ${a.module}\n`;
+    });
+}
 
-// Write full_diff.txt for GitHub action
-fs.writeFileSync('full_diff.txt', githubText);
+if (removedKeys.length) {
+    githubDiff += '### Removed\n';
+    removedKeys.forEach(r => {
+        githubDiff += `Module ${r.module}:\n${stringify(previous[r.module])}\n- "${r.key}": "${r.value}" removed from module ${r.module}\n\n`;
+    });
+    discordDiff += '### Removed\n';
+    removedKeys.forEach(r => {
+        discordDiff += `- "${r.key}" removed from module ${r.module}\n`;
+    });
+}
+
+if (movedKeys.length) {
+    githubDiff += '### Moved\n';
+    movedKeys.forEach(m => {
+        githubDiff += `"${m.key}" moved from module ${m.from} to module ${m.to}\n\n`;
+        discordDiff += `"${m.key}" moved from module ${m.from} to module ${m.to}\n`;
+    });
+}
+
+if (renamedKeys.length) {
+    githubDiff += '### Renamed\n';
+    renamedKeys.forEach(r => {
+        githubDiff += `"${r.oldKey}" → "${r.newKey}" in module ${r.module}\n\n`;
+        discordDiff += `"${r.oldKey}" → "${r.newKey}" in module ${r.module}\n`;
+    });
+}
+
+discordDiff += '```';
+
+// Write GitHub diff to full_diff.txt
+fs.writeFileSync('full_diff.txt', githubDiff);
 
 // Post to Discord
 async function postToDiscord() {
-  if (!webhookUrl || !discordText.trim()) return;
-  try {
-    await axios.post(webhookUrl, { content: discordText });
-    console.log("Discord posted successfully");
-  } catch (e) {
-    console.error("Discord post failed:", e.message);
-  }
+    if (!process.env.DISCORD_WEBHOOK_URL) return console.error('DISCORD_WEBHOOK_URL not set');
+
+    try {
+        await axios.post(process.env.DISCORD_WEBHOOK_URL, {
+            content: discordDiff
+        });
+        console.log('Posted diff to Discord');
+    } catch (err) {
+        console.error('Error posting to Discord:', err.message);
+    }
 }
 
 postToDiscord();
