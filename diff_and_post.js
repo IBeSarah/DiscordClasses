@@ -21,7 +21,7 @@ function isObject(obj) {
 }
 
 function diffObjects(oldObj, newObj, path = "") {
-  let diffs = { added: [], removed: [], renamed: [], moved: [] };
+  let diffs = { added: [], removed: [], renamed: [], movedKeys: [], movedModules: [] };
 
   // Removed
   for (const key of Object.keys(oldObj)) {
@@ -58,13 +58,12 @@ let diffs = diffObjects(oldData, newData);
 
 // --- Detect moves ---
 function detectMoves(diffs, oldObj, newObj) {
-  let moved = [];
+  let movedKeys = [];
+  let movedModules = [];
 
   // Sub-key moves
   let removedMap = new Map();
-  for (const r of diffs.removed) {
-    removedMap.set(JSON.stringify(r.value), r);
-  }
+  for (const r of diffs.removed) removedMap.set(JSON.stringify(r.value), r);
 
   let newRemoved = [];
   let newAdded = [];
@@ -72,7 +71,7 @@ function detectMoves(diffs, oldObj, newObj) {
   for (const a of diffs.added) {
     const match = removedMap.get(JSON.stringify(a.value));
     if (match) {
-      moved.push(
+      movedKeys.push(
         `"${a.key}" moved from ${match.path || "(root)"} to ${a.path || "(root)"}`
       );
       removedMap.delete(JSON.stringify(a.value));
@@ -92,7 +91,7 @@ function detectMoves(diffs, oldObj, newObj) {
         JSON.stringify(oldObj[o]) === JSON.stringify(newObj[n]) &&
         o !== n
       ) {
-        moved.push(`module "${o}" moved to "${n}"`);
+        movedModules.push(`module "${o}" moved to "${n}"`);
       }
     }
   }
@@ -101,7 +100,8 @@ function detectMoves(diffs, oldObj, newObj) {
     added: newAdded,
     removed: newRemoved,
     renamed: diffs.renamed,
-    moved: moved
+    movedKeys,
+    movedModules
   };
 }
 
@@ -132,9 +132,16 @@ function formatDiffs(diffs) {
     );
   }
 
-  if (diffs.moved.length) {
-    output.push("### Moved", "```diff",
-      ...diffs.moved.map(l => `# ${l}`),
+  if (diffs.movedKeys.length) {
+    output.push("### Moved Keys", "```diff",
+      ...diffs.movedKeys.map(l => `# ${l}`),
+      "```"
+    );
+  }
+
+  if (diffs.movedModules.length) {
+    output.push("### Moved Modules", "```diff",
+      ...diffs.movedModules.map(l => `# ${l}`),
       "```"
     );
   }
