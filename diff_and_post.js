@@ -1,111 +1,69 @@
 const fs = require('fs');
-const _ = require('lodash');
-const levenshtein = require('fast-levenshtein');
 const axios = require('axios');
+const _ = require('lodash');
 
-const prevFile = 'previous.json';
-const currFile = 'current.json';
-const fullDiffFile = 'full_diff.txt';
+console.log("Starting diff_and_post.js");
 
-function parseJson(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return {};
-  }
+// Read the previous and current JSON files
+let previous, current;
+try {
+    previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+    console.log("Previous JSON loaded");
+} catch (err) {
+    console.error("Failed to read previous.json:", err);
+    previous = {};
 }
 
-const prev = parseJson(prevFile);
-const curr = parseJson(currFile);
+try {
+    current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+    console.log("Current JSON loaded");
+} catch (err) {
+    console.error("Failed to read current.json:", err);
+    current = {};
+}
 
-let discordSummary = [];
-let fullDiff = [];
+// Compute diff (simplified example, adjust your diff logic)
+const added = {};
+const removed = {};
+const renamed = {};
+const moved = {}; // optional if you track module moves
 
-function diffModules(prev, curr) {
-  const allModules = new Set([...Object.keys(prev), ...Object.keys(curr)]);
-  const matchedModules = new Set();
+for (const moduleKey in current) {
+    const oldModule = previous[moduleKey] || {};
+    const newModule = current[moduleKey];
 
-  allModules.forEach(module => {
-    const prevItems = prev[module] || {};
-    const currItems = curr[module] || {};
-
-    // Check for moved modules (same content, different key)
-    for (let prevModKey of Object.keys(prev)) {
-      if (matchedModules.has(prevModKey)) continue;
-      const prevMod = prev[prevModKey];
-      for (let currModKey of Object.keys(curr)) {
-        if (matchedModules.has(currModKey)) continue;
-        const currMod = curr[currModKey];
-        if (_.isEqual(prevMod, currMod) && prevModKey !== currModKey) {
-          // Moved
-          discordSummary.push(`Module ${prevModKey} → ${currModKey}: Moved`);
-          fullDiff.push(`### Moved module from ${prevModKey} to ${currModKey}\n\`\`\`diff\nModule contents unchanged\n\`\`\``);
-          matchedModules.add(prevModKey);
-          matchedModules.add(currModKey);
-        }
-      }
+    for (const key in newModule) {
+        if (!(key in oldModule)) added[key] = moduleKey;
+        else if (oldModule[key] !== newModule[key]) renamed[key] = moduleKey;
     }
 
-    if (matchedModules.has(module)) return; // skip moved modules
-
-    const added = [];
-    const removed = [];
-    const renamed = [];
-
-    // Added & Removed
-    for (let key of Object.keys(currItems)) {
-      if (!(key in prevItems)) added.push(key);
+    for (const key in oldModule) {
+        if (!(key in newModule)) removed[key] = moduleKey;
     }
-    for (let key of Object.keys(prevItems)) {
-      if (!(key in currItems)) removed.push(key);
-    }
+}
 
-    // Renamed detection
-    Object.keys(currItems).forEach(currKey => {
-      if (currKey in prevItems) return; // skip same key
-      for (let prevKey of Object.keys(prevItems)) {
-        if (removed.includes(prevKey)) {
-          const distance = levenshtein.get(prevItems[prevKey], currItems[currKey]);
-          if (distance <= Math.max(prevItems[prevKey].length, currItems[currKey].length) * 0.3) {
-            renamed.push({ from: prevKey, to: currKey });
-            _.remove(removed, r => r === prevKey);
-            _.remove(added, a => a === currKey);
-          }
-        }
-      }
+// Construct Discord message
+let message = "";
+if (Object.keys(added).length > 0) message += `### Added: ${Object.keys(added).length}\n`;
+if (Object.keys(removed).length > 0) message += `### Removed: ${Object.keys(removed).length}\n`;
+if (Object.keys(renamed).length > 0) message += `### Renamed: ${Object.keys(renamed).length}\n`;
+if (Object.keys(moved).length > 0) message += `### Moved: ${Object.keys(moved).length}\n`;
+
+message += `\nView full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+
+console.log("Prepared Discord message:\n", message);
+
+// Send to Discord with timeout
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+if (!webhookUrl) {
+    console.error("DISCORD_WEBHOOK_URL not set!");
+    process.exit(1);
+}
+
+axios.post(webhookUrl, { content: message }, { timeout: 10000 }) // 10s timeout
+    .then(() => {
+        console.log("Discord message sent successfully");
+    })
+    .catch(err => {
+        console.error("Discord post failed:", err.message || err);
     });
-
-    if (added.length) {
-      discordSummary.push(`Module ${module}: Added: ${added.length}`);
-      fullDiff.push(`### Added in module ${module}\n\`\`\`diff\n${added.map(k => `+ "${k}": "${currItems[k]}"`).join('\n')}\n\`\`\``);
-    }
-    if (removed.length) {
-      discordSummary.push(`Module ${module}: Removed: ${removed.length}`);
-      fullDiff.push(`### Removed from module ${module}\n\`\`\`diff\n${removed.map(k => `- "${k}": "${prevItems[k]}"`).join('\n')}\n\`\`\``);
-    }
-    if (renamed.length) {
-      discordSummary.push(`Module ${module}: Renamed: ${renamed.length}`);
-      fullDiff.push(`### Renamed in module ${module}\n\`\`\`diff\n${renamed.map(r => `- "${r.from}": "${prevItems[r.from]}"\n+ "${r.to}": "${currItems[r.to]}"`).join('\n')}\n\`\`\``);
-    }
-  });
-}
-
-diffModules(prev, curr);
-
-// Write full diff file
-fs.writeFileSync(fullDiffFile, fullDiff.join('\n\n'), 'utf8');
-
-// Post to Discord
-(async () => {
-  if (!discordSummary.length) return console.log('No changes to post to Discord');
-
-  const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-  const discordBody = discordSummary.join('\n') + `\n\nView full list of changes here: ${commitUrl}`;
-
-  try {
-    await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordBody });
-    console.log('Posted to Discord');
-  } catch (e) {
-    console.error('Discord post failed:', e.message);
-  }
-})();
