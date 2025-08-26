@@ -4,35 +4,74 @@ on:
   push:
     branches:
       - main
+    paths:
+      - discordclasses.json   # Only trigger when this file changes
 
 jobs:
-  post-diff:
+  comment-diff:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2  # Needed to compare with previous commit
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Save previous and current JSON
+      - name: Set up JSON files
         run: |
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Install dependencies
-        run: |
-          npm install axios @octokit/rest
+      - name: Install Node dependencies
+        run: npm install lodash fast-levenshtein axios
 
-      - name: Post class diff
+      - name: Post diff to Discord
+        run: node diff_and_post_discord.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: node diff_and_post.js
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+
+      - name: Post full diff as GitHub commit comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const MAX_COMMENT_LENGTH = 65536;
+
+            // Read and parse the diff
+            const diff = fs.readFileSync('full_diff.txt', 'utf8');
+            if (!diff.trim()) {
+              console.log("No diff to post");
+              return;
+            }
+
+            // Function to split diff into chunks of 65k characters
+            function splitDiff(fullText, maxLength) {
+              const chunks = [];
+              let start = 0;
+              while (start < fullText.length) {
+                chunks.push(fullText.slice(start, start + maxLength));
+                start += maxLength;
+              }
+              return chunks;
+            }
+
+            const chunks = splitDiff(diff, MAX_COMMENT_LENGTH);
+
+            for (let i = 0; i < chunks.length; i++) {
+              const commentBody = chunks.length > 1
+                ? `**Part ${i+1} of ${chunks.length}**\n\n` + chunks[i]
+                : chunks[i];
+
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: commentBody,
+              });
+
+              console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
+            }
