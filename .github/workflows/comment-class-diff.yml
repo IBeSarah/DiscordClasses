@@ -1,11 +1,9 @@
-name: Comment DiscordClasses JSON Diff
+name: Post Discord Class Diff
 
 on:
   push:
     branches:
       - main
-    paths:
-      - discordclasses.json
 
 jobs:
   post-diff:
@@ -15,74 +13,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2  # needed to get previous commit
 
-      - name: Install Node
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: 20
+
+      - name: Save previous and current JSON
+        run: |
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install dependencies
-        run: npm install prettier axios
+        run: npm install axios
 
-      - name: Normalize JSON
-        run: node normalize-json.js
-
-      - name: Set up diff files
-        run: |
-          git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-
-      - name: Create diff
-        run: diff -u previous.json current.json > diff.txt || true
-
-      - name: Post diff as GitHub commit comment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
-            const diff = fs.readFileSync('diff.txt', 'utf8');
-            if (!diff.trim()) return;
-
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
-            const chunkPrefix = '```diff\n';
-            const chunkSuffix = '\n```';
-
-            function splitDiff(fullText, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
-
-            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
-
-            for (let i = 0; i < rawChunks.length; i++) {
-              const partHeader = rawChunks.length > 1 ? `${header}**Part ${i+1} of ${rawChunks.length}**\n\n` : header;
-              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: commentBody,
-              });
-            }
-
-      - name: Post diff to Discord (single message, 2000 chars)
-        run: |
-          node -e "
-          const fs = require('fs');
-          const axios = require('axios');
-          const commitUrl = '${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}';
-          const MAX_DISCORD_LENGTH = 2000 - ('Full commit here: ' + commitUrl).length - 1;
-          const diff = fs.readFileSync('diff.txt', 'utf8');
-          const content = diff.slice(0, MAX_DISCORD_LENGTH) + '\\nFull commit here: ' + commitUrl;
-          axios.post(process.env.DISCORD_WEBHOOK_URL, { content }).then(() => console.log('Discord message sent')).catch(console.error);
-          "
+      - name: Post summarized diff to Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: node diff_and_post.js
