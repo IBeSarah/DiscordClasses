@@ -23,9 +23,9 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash axios
+        run: npm install lodash fast-levenshtein axios
 
-      - name: Post diff to Discord
+      - name: Post diff to Discord and write full diff
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -41,20 +41,19 @@ jobs:
             const fs = require('fs');
 
             const MAX_COMMENT_LENGTH = 65000;
-            const fullDiffFile = 'full_diff.txt';
+            const diffFile = 'full_diff.txt';
 
-            if (!fs.existsSync(fullDiffFile)) {
-              console.log('No diff file found');
+            if (!fs.existsSync(diffFile)) {
+              console.log("No diff file found");
               return;
             }
 
-            const diffText = fs.readFileSync(fullDiffFile, 'utf8').trim();
-            if (!diffText) {
-              console.log('No diff to post');
+            const diffText = fs.readFileSync(diffFile, 'utf8');
+            if (!diffText.trim()) {
+              console.log("No diff to post");
               return;
             }
 
-            // Split text into chunks of MAX_COMMENT_LENGTH
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
