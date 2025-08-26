@@ -1,73 +1,105 @@
-name: Post diff
+- name: Post categorized diff as commit comment
+  uses: actions/github-script@v6
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    script: |
+      const fs = require('fs');
 
-on:
-  push:
-    branches:
-      - main
+      // Read previous and current JSON files
+      const previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+      const current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
-jobs:
-  post-diff:
-    runs-on: ubuntu-latest
+      const MAX_COMMENT_LENGTH = 65536;
+      const header = (section) => `### ${section}\n\`\`\`diff\n`;
+      const footer = '\n```\n';
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # Required to compare with previous commit
+      // Helpers
+      function escapeLine(str) {
+        return str.replace(/\r?\n/g, ' '); // flatten multiline for comment readability
+      }
 
-      - name: Set up diff files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+      // Track changes
+      const added = [];
+      const removed = [];
+      const renamed = [];
 
-      - name: Create diff
-        run: |
-          diff -u previous.json current.json > diff.txt || true
-          cat diff.txt  # optional, remove if you don't want output in logs
+      // Keys in previous and current
+      const prevKeys = new Set(Object.keys(previous));
+      const currKeys = new Set(Object.keys(current));
 
-      - name: Post diff as commit comment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
+      // Find added keys
+      for (const key of currKeys) {
+        if (!prevKeys.has(key)) {
+          added.push(`+ "${key}": ${JSON.stringify(current[key])}`);
+        }
+      }
 
-            const diff = fs.readFileSync('diff.txt', 'utf8');
-            if (!diff.trim()) {
-              console.log("No diff to post");
-              return;
-            }
+      // Find removed keys
+      for (const key of prevKeys) {
+        if (!currKeys.has(key)) {
+          removed.push(`- "${key}": ${JSON.stringify(previous[key])}`);
+        }
+      }
 
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
-            const chunkPrefix = '```diff\n';
-            const chunkSuffix = '\n```';
+      // Find renamed/changed keys (present in both, value changed)
+      for (const key of prevKeys) {
+        if (currKeys.has(key)) {
+          const prevVal = JSON.stringify(previous[key]);
+          const currVal = JSON.stringify(current[key]);
+          if (prevVal !== currVal) {
+            renamed.push(
+              `-original : ${key} : ${escapeLine(prevVal)}\n+renamed: ${key} : ${escapeLine(currVal)}`
+            );
+          }
+        }
+      }
 
-            function splitDiff(fullText, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
+      // Compose full comment sections
+      const sections = [];
 
-            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
+      if (added.length) {
+        sections.push({title: 'Added', content: added.join('\n')});
+      }
+      if (removed.length) {
+        sections.push({title: 'Removed', content: removed.join('\n')});
+      }
+      if (renamed.length) {
+        sections.push({title: 'Renamed', content: renamed.join('\n\n')});
+      }
 
-            for (let i = 0; i < rawChunks.length; i++) {
-              const partHeader = rawChunks.length > 1
-                ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
-                : header;
+      if (sections.length === 0) {
+        console.log('No changes to post');
+        return;
+      }
 
-              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
+      // Split large sections into multiple comments if needed
+      const comments = [];
+      for (const {title, content} of sections) {
+        const baseHeader = `🧩 **Changes in \`discordclasses.json\` - ${title}:**\n\n`;
+        const maxContentLength = MAX_COMMENT_LENGTH - baseHeader.length - header(title).length - footer.length;
 
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: commentBody,
-              });
+        // Split content into chunks respecting line breaks
+        const lines = content.split('\n');
+        let chunk = '';
+        for (const line of lines) {
+          if ((chunk + line + '\n').length > maxContentLength) {
+            comments.push(baseHeader + header(title) + chunk + footer);
+            chunk = '';
+          }
+          chunk += line + '\n';
+        }
+        if (chunk.length > 0) {
+          comments.push(baseHeader + header(title) + chunk + footer);
+        }
+      }
 
-              console.log(`Posted comment part ${i + 1}/${rawChunks.length}`);
-            }
+      // Post comments sequentially
+      for (let i = 0; i < comments.length; i++) {
+        await github.rest.repos.createCommitComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          commit_sha: context.sha,
+          body: comments[i],
+        });
+        console.log(`Posted comment ${i + 1} of ${comments.length}`);
+      }
