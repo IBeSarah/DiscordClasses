@@ -1,4 +1,4 @@
-name: Post JSON Module Diff
+name: Post JSON module diff
 
 on:
   push:
@@ -12,26 +12,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare with previous commit
+          fetch-depth: 2
 
-      # Install Node dependencies
       - name: Install Node dependencies
-        run: npm install lodash axios
+        run: npm install lodash fast-levenshtein axios
 
-      # Extract JSON files safely
       - name: Set up JSON files safely
         run: |
           git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          # Ensure JSON is valid
           node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
           node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      # Compute diff and post to Discord
       - name: Compute diff and post to Discord
         run: node diff_and_post.js
         env:
@@ -40,18 +35,30 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      # Create GitHub commit comment (with collapsing for large sections)
       - name: Create GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const comment = fs.readFileSync('current_diff.txt', 'utf8').trim();
-            if (!comment) return;
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: comment
-            });
+            const diffText = fs.readFileSync('current_diff.txt', 'utf8');
+            if(!diffText.trim()) return;
+            const MAX_COMMENT_LENGTH = 65536;
+            function splitText(text, maxLength) {
+              const chunks = [];
+              let start=0;
+              while(start<text.length){
+                chunks.push(text.slice(start, start+maxLength));
+                start+=maxLength;
+              }
+              return chunks;
+            }
+            const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
+            for(const chunk of chunks){
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: chunk
+              });
+            }
