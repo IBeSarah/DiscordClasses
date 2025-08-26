@@ -1,4 +1,4 @@
-name: Post diff
+name: Post JSON module diff
 
 on:
   push:
@@ -13,61 +13,98 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Required to compare with previous commit
+          fetch-depth: 2
 
-      - name: Set up diff files
+      - name: Install Node dependencies
+        run: npm install lodash
+
+      - name: Set up JSON files
         run: |
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Create diff
-        run: |
-          diff -u previous.json current.json > diff.txt || true
-          cat diff.txt  # optional, remove if you don't want output in logs
-
-      - name: Post diff as commit comment
+      - name: Post structured module diff
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
+            const _ = require('lodash');
 
-            const diff = fs.readFileSync('diff.txt', 'utf8');
-            if (!diff.trim()) {
-              console.log("No diff to post");
+            const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+            const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+
+            const MAX_COMMENT_LENGTH = 65536;
+            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+
+            function compareModules(prevObj, currObj) {
+              const sections = [];
+
+              const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
+
+              allModules.forEach(moduleName => {
+                const prevItems = prevObj[moduleName] || [];
+                const currItems = currObj[moduleName] || [];
+
+                const removed = _.difference(prevItems, currItems);
+                const added = _.difference(currItems, prevItems);
+
+                const renamed = [];
+                // naive renamed detection: if an item changed slightly, we could implement heuristics here
+                // for now, only exact string changes are detected via removed/added pairs
+                // advanced: compare by ID or some property to detect renames
+
+                if (removed.length || added.length || renamed.length) {
+                  let section = `### Module: ${moduleName}\n`;
+                  if (removed.length) {
+                    section += '#### Removed\n';
+                    removed.forEach(item => section += `-"${item}"\n`);
+                  }
+                  if (added.length) {
+                    section += '#### Added\n';
+                    added.forEach(item => section += `+"${item}"\n`);
+                  }
+                  if (renamed.length) {
+                    section += '#### Renamed\n';
+                    renamed.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
+                  }
+                  sections.push(section);
+                }
+              });
+
+              return sections.join('\n');
+            }
+
+            const diffText = compareModules(prev, curr);
+            if (!diffText.trim()) {
+              console.log("No changes to post");
               return;
             }
 
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
-            const chunkPrefix = '```diff\n';
-            const chunkSuffix = '\n```';
-
-            function splitDiff(fullText, maxLength) {
+            // Split if too long
+            function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
+              while (start < text.length) {
+                chunks.push(text.slice(start, start + maxLength));
                 start += maxLength;
               }
               return chunks;
             }
 
-            const rawChunks = splitDiff(diff, MAX_COMMENT_LENGTH - header.length - chunkPrefix.length - chunkSuffix.length);
+            const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
 
-            for (let i = 0; i < rawChunks.length; i++) {
-              const partHeader = rawChunks.length > 1
-                ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
-                : header;
-
-              const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
+            for (let i = 0; i < chunks.length; i++) {
+              const comment = chunks.length > 1
+                ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+                : `${header}${chunks[i]}`;
 
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: commentBody,
+                body: comment,
               });
 
-              console.log(`Posted comment part ${i + 1}/${rawChunks.length}`);
+              console.log(`Posted comment part ${i + 1}/${chunks.length}`);
             }
