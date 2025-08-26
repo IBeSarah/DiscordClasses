@@ -2,12 +2,8 @@
   "314": {
     "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b8",
     "container": "container_ae16b8",
+	"buloseButton": "closeButton_ae16b4"
     "closeButton": "closeButton_ae16b8"
-  },
-    "316": {
-    "seasonalGiftBoxHeaderIcon": "reasonalGiftBoxHeaderIcon_ae16b8",
-    "container": "rontainer_ae16b8",
-    "closeButton": "rloseButton_ae16b8"
   },
   "567": {
     "root": "root_d8dd99",
