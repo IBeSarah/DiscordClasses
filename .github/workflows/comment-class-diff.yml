@@ -25,7 +25,9 @@ jobs:
 
       - name: Install GitHub CLI
         run: |
-          wget https://github.com/cli/cli/releases/latest/download/gh_latest_linux_amd64.deb -O gh_latest_linux_amd64.deb
+          LATEST_TAG=$(curl --silent "https://api.github.com/repos/cli/cli/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+          echo "Latest GH CLI version: $LATEST_TAG"
+          wget "https://github.com/cli/cli/releases/download/${LATEST_TAG}/gh_${LATEST_TAG#v}_linux_amd64.deb" -O gh_latest_linux_amd64.deb
           sudo dpkg -i gh_latest_linux_amd64.deb
 
       - name: Authenticate GitHub CLI
