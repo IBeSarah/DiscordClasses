@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json
 
 jobs:
   post-diff:
@@ -67,4 +67,8 @@ jobs:
 
                 console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
               }
+
+              // Cleanup diff file
+              fs.unlinkSync(file);
+              console.log(`Deleted temporary diff file: ${file}`);
             }
