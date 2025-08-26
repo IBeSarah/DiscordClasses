@@ -1,4 +1,4 @@
-name: Post JSON Module Diff
+name: Post JSON module diff
 
 on:
   push:
@@ -12,44 +12,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository with last 2 commits
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
+      # Install Node dependencies
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash fast-levenshtein axios @octokit/rest
 
-      - name: Set up JSON files safely
+      # Generate current and previous JSON safely
+      - name: Set up JSON files
         run: |
           git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
-          node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
+          # Validate JSON
+          node -e "JSON.parse(require('fs').readFileSync('current.json'))"
+          node -e "JSON.parse(require('fs').readFileSync('previous.json'))"
 
-      - name: Compute diff and post to Discord
+      # Run diff and post script
+      - name: Compute diff and post to Discord/GitHub
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
-
-      - name: Create GitHub commit comment
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const diffText = fs.readFileSync('current_diff.txt', 'utf8');
-            if(!diffText.trim()) return;
-            const MAX_LENGTH = 65536;
-            // Split into multiple comments if necessary
-            for(let i=0; i<diffText.length; i+=MAX_LENGTH){
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: diffText.slice(i, i+MAX_LENGTH)
-              });
-            }
