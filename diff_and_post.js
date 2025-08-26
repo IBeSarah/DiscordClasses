@@ -1,96 +1,77 @@
-const fs = require('fs');
-const _ = require('lodash');
+const fs = require("fs");
+const axios = require("axios");
+const { Octokit } = require("@octokit/rest");
 
-const mode = process.argv[2] || 'discord'; // 'discord' or 'github'
+const mode = process.argv[2] || "discord";
 
-const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+// Load diff text
+const diffText = fs.existsSync("full_diff.txt")
+  ? fs.readFileSync("full_diff.txt", "utf8")
+  : "";
 
-const addedModules = {};
-const removedModules = {};
-const renamedModules = {};
-const movedModules = {};
-
-for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
-  const oldMod = prev[key] || {};
-  const newMod = curr[key] || {};
-
-  // Added
-  for (const k of Object.keys(newMod)) {
-    if (!oldMod.hasOwnProperty(k)) {
-      addedModules[key] = addedModules[key] || [];
-      addedModules[key].push(k);
-    }
+async function postToDiscord() {
+  if (!diffText.trim()) {
+    console.log("No diff to post to Discord.");
+    return;
   }
 
-  // Removed
-  for (const k of Object.keys(oldMod)) {
-    if (!newMod.hasOwnProperty(k)) {
-      removedModules[key] = removedModules[key] || [];
-      removedModules[key].push(k);
-    }
+  const webhook = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhook) {
+    console.error("Missing DISCORD_WEBHOOK_URL env variable");
+    process.exit(1);
   }
 
-  // Renamed (value changed for same key)
-  for (const k of Object.keys(newMod)) {
-    if (oldMod[k] && oldMod[k] !== newMod[k]) {
-      renamedModules[key] = renamedModules[key] || [];
-      renamedModules[key].push(k);
-    }
+  const sha = process.env.GITHUB_SHA;
+  const repo = process.env.GITHUB_REPOSITORY;
+  const serverUrl = process.env.GITHUB_SERVER_URL;
+
+  const shortSummary = diffText
+    .split("\n")
+    .filter((line) => line.startsWith("Module"))
+    .join("\n");
+
+  const body = {
+    content: `\`\`\`\n${shortSummary}\n\`\`\`\n\nView full list of changes here: ${serverUrl}/${repo}/commit/${sha}`,
+  };
+
+  await axios.post(webhook, body);
+  console.log("✅ Posted summary to Discord");
+}
+
+async function postToGitHub() {
+  if (!diffText.trim()) {
+    console.log("No diff to post to GitHub.");
+    return;
   }
 
-  // Moved is treated same as value changed (optional: could merge with renamed)
-  // Here we only track changed keys
-  const changedKeys = Object.keys(newMod).filter(k => oldMod[k] && oldMod[k] !== newMod[k]);
-  if (changedKeys.length) {
-    movedModules[key] = changedKeys;
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) {
+    console.error("Missing GITHUB_TOKEN env variable");
+    process.exit(1);
   }
+
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
+  const sha = process.env.GITHUB_SHA;
+
+  const octokit = new Octokit({ auth: token });
+
+  await octokit.repos.createCommitComment({
+    owner,
+    repo,
+    commit_sha: sha,
+    body: diffText,
+  });
+
+  console.log("✅ Posted full diff as GitHub commit comment");
 }
 
-function formatDiffBlock(title, moduleId, keys, type) {
-  if (!keys || keys.length === 0) return '';
-  const lines = keys.map(k => {
-    switch (type) {
-      case 'added': return `+ "${k}": "${curr[moduleId][k]}"`;
-      case 'removed': return `- "${k}": "${prev[moduleId][k]}"`;
-      case 'renamed':
-      case 'moved':
-        return `- "${k}": "${prev[moduleId][k]}"\n+ "${k}": "${curr[moduleId][k]}"`;
-    }
-  }).join('\n');
-
-  return `### ${title} in module ${moduleId}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
-}
-
-let output = '';
-
-// Build GitHub/Discord output
-for (const [mod, keys] of Object.entries(addedModules)) {
-  output += formatDiffBlock('Added', mod, keys, 'added');
-}
-for (const [mod, keys] of Object.entries(removedModules)) {
-  output += formatDiffBlock('Removed', mod, keys, 'removed');
-}
-for (const [mod, keys] of Object.entries(renamedModules)) {
-  output += formatDiffBlock('Renamed', mod, keys, 'renamed');
-}
-for (const [mod, keys] of Object.entries(movedModules)) {
-  output += formatDiffBlock('Moved', mod, keys, 'moved');
-}
-
-if (!output) {
-  output = 'No changes detected.';
-}
-
-// Output
-if (mode === 'discord') {
-  const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-  const summary = `**Module changes summary**\n${output}\nView full list of changes here: ${commitUrl}`;
-  const axios = require('axios');
-  axios.post(process.env.DISCORD_WEBHOOK_URL, { content: summary })
-    .then(() => console.log('Discord post successful'))
-    .catch(err => console.error('Discord post failed:', err.message));
-} else {
-  fs.writeFileSync('full_diff.txt', output);
-  console.log('GitHub diff ready in full_diff.txt');
-}
+(async () => {
+  if (mode === "discord") {
+    await postToDiscord();
+  } else if (mode === "github") {
+    await postToGitHub();
+  } else {
+    console.error(`Unknown mode: ${mode}`);
+    process.exit(1);
+  }
+})();
