@@ -17,18 +17,21 @@ jobs:
         with:
           fetch-depth: 2  # Needed to compare with previous commit
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
+      - name: Set up JSON files
+        run: |
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash axios
+        run: npm install lodash fast-levenshtein axios
 
-      - name: Run diff and post
+      - name: Post diff to Discord
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
 
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
