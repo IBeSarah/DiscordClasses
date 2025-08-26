@@ -23,15 +23,34 @@ let fullDiff = [];
 
 function diffModules(prev, curr) {
   const allModules = new Set([...Object.keys(prev), ...Object.keys(curr)]);
+  const matchedModules = new Set();
 
   allModules.forEach(module => {
     const prevItems = prev[module] || {};
     const currItems = curr[module] || {};
 
+    // Check for moved modules (same content, different key)
+    for (let prevModKey of Object.keys(prev)) {
+      if (matchedModules.has(prevModKey)) continue;
+      const prevMod = prev[prevModKey];
+      for (let currModKey of Object.keys(curr)) {
+        if (matchedModules.has(currModKey)) continue;
+        const currMod = curr[currModKey];
+        if (_.isEqual(prevMod, currMod) && prevModKey !== currModKey) {
+          // Moved
+          discordSummary.push(`Module ${prevModKey} → ${currModKey}: Moved`);
+          fullDiff.push(`### Moved module from ${prevModKey} to ${currModKey}\n\`\`\`diff\nModule contents unchanged\n\`\`\``);
+          matchedModules.add(prevModKey);
+          matchedModules.add(currModKey);
+        }
+      }
+    }
+
+    if (matchedModules.has(module)) return; // skip moved modules
+
     const added = [];
     const removed = [];
     const renamed = [];
-    const moved = [];
 
     // Added & Removed
     for (let key of Object.keys(currItems)) {
@@ -56,7 +75,6 @@ function diffModules(prev, curr) {
       }
     });
 
-    // Only add sections if there’s something
     if (added.length) {
       discordSummary.push(`Module ${module}: Added: ${added.length}`);
       fullDiff.push(`### Added in module ${module}\n\`\`\`diff\n${added.map(k => `+ "${k}": "${currItems[k]}"`).join('\n')}\n\`\`\``);
