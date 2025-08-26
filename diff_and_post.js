@@ -1,7 +1,6 @@
 const fs = require('fs');
-const axios = require('axios');
 const _ = require('lodash');
-const levenshtein = require('fast-levenshtein');
+const axios = require('axios');
 
 // Environment variables
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
@@ -12,8 +11,9 @@ const serverUrl = process.env.GITHUB_SERVER_URL;
 // File paths
 const prevFile = 'previous.json';
 const currFile = 'current.json';
+const fullDiffFile = 'full_diff.txt';
 
-// Helper to load JSON safely
+// Load JSON safely
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -22,7 +22,10 @@ function loadJson(file) {
   }
 }
 
-// Compute diff between two objects
+const prevJson = loadJson(prevFile);
+const currJson = loadJson(currFile);
+
+// Compute diff
 function computeDiff(prev, curr) {
   const added = [];
   const removed = [];
@@ -32,23 +35,28 @@ function computeDiff(prev, curr) {
   const prevKeys = Object.keys(prev);
   const currKeys = Object.keys(curr);
 
-  // Added
+  // Added & modified
   currKeys.forEach(k => {
-    if (!prevKeys.includes(k)) added.push(k);
+    if (!prevKeys.includes(k)) {
+      added.push(`${k}: ${curr[k]}`);
+    } else if (!_.isEqual(prev[k], curr[k])) {
+      removed.push(`${k}: ${prev[k]}`);
+      added.push(`${k}: ${curr[k]}`);
+    }
   });
 
-  // Removed
+  // Removed keys
   prevKeys.forEach(k => {
-    if (!currKeys.includes(k)) removed.push(k);
+    if (!currKeys.includes(k)) removed.push(`${k}: ${prev[k]}`);
   });
 
-  // Renamed / moved (simple heuristic)
+  // Renamed heuristic
   prevKeys.forEach(prevKey => {
     const prevVal = prev[prevKey];
     currKeys.forEach(currKey => {
       const currVal = curr[currKey];
-      if (prevKey !== currKey && prevVal === currVal) {
-        renamed.push({from: prevKey, to: currKey});
+      if (prevKey !== currKey && _.isEqual(prevVal, currVal)) {
+        renamed.push({ from: prevKey, to: currKey });
       }
     });
   });
@@ -56,63 +64,62 @@ function computeDiff(prev, curr) {
   return { added, removed, renamed, moved };
 }
 
-// Format diff as Markdown H3 with code block
+// Format diff for output
 function formatDiff(diff) {
-  let text = '```diff\n';
+  let output = '```diff\n';
+
   if (diff.added.length) {
-    text += '### Added\n';
-    diff.added.forEach(k => {
-      text += `+ ${k}\n`;
-    });
+    output += '### Added\n';
+    diff.added.forEach(a => output += `+ ${a}\n`);
   }
+
   if (diff.removed.length) {
-    text += '### Removed\n';
-    diff.removed.forEach(k => {
-      text += `- ${k}\n`;
-    });
+    output += '### Removed\n';
+    diff.removed.forEach(r => output += `- ${r}\n`);
   }
+
   if (diff.renamed.length) {
-    text += '### Renamed\n';
-    diff.renamed.forEach(r => {
-      text += `* ${r.from} -> ${r.to}\n`;
-    });
+    output += '### Renamed\n';
+    diff.renamed.forEach(r => output += `* ${r.from} -> ${r.to}\n`);
   }
+
   if (diff.moved.length) {
-    text += '### Moved\n';
-    diff.moved.forEach(m => {
-      text += `* ${m}\n`;
-    });
+    output += '### Moved\n';
+    diff.moved.forEach(m => output += `* ${m}\n`);
   }
-  text += '```';
-  return text;
+
+  output += '```';
+  return output;
 }
 
-// Load JSON files
-const prevJson = loadJson(prevFile);
-const currJson = loadJson(currFile);
+// Split text into chunks for Discord (<=2000) or GitHub (<=65000)
+function splitText(text, maxLength) {
+  const chunks = [];
+  let start = 0;
+  while (start < text.length) {
+    chunks.push(text.slice(start, start + maxLength));
+    start += maxLength;
+  }
+  return chunks;
+}
 
-// Compute diff
+// Generate diffs
 const diff = computeDiff(prevJson, currJson);
-const fullDiffText = formatDiff(diff);
+const formattedDiff = formatDiff(diff);
 
-// Write full diff for GitHub workflow
-fs.writeFileSync('full_diff.txt', fullDiffText, 'utf8');
-console.log('Saved full diff to full_diff.txt');
+// Save full diff for GitHub
+fs.writeFileSync(fullDiffFile, formattedDiff, 'utf8');
 
-// Post to Discord truncated at 2000 characters
-async function postToDiscord(content) {
-  if (!webhookUrl) return console.log('No DISCORD_WEBHOOK_URL set');
-
-  try {
-    await axios.post(webhookUrl, { content });
-    console.log('Posted diff to Discord');
-  } catch (err) {
-    console.error('Failed to post to Discord', err);
-  }
+// Post to Discord (truncate 2000)
+if (webhookUrl) {
+  const discordChunks = splitText(formattedDiff, 2000);
+  discordChunks.forEach(async chunk => {
+    try {
+      await axios.post(webhookUrl, { content: chunk });
+    } catch (err) {
+      console.error('Discord post error:', err.response?.data || err.message);
+    }
+  });
 }
 
-// Discord truncation
-const discordMessage = fullDiffText.length > 2000 ? fullDiffText.slice(0, 2000) + '\n[Truncated]' : fullDiffText;
-
-// Run
-postToDiscord(discordMessage);
+console.log('Diff processing complete.');
