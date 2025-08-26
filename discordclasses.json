@@ -1,12 +1,13 @@
 {
   "315": {
-    "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b8",
-    "container": "container_ae16b8",
-    "closeButton": "closeButton_ae16b8"
+    "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b7",
+	"thing1": "Thing1_933"
   },
   "567": {
     "root": "root_d8dd99",
-    "header": "header_d8dd99"
+    "header": "header_d8dd99",
+	"container": "container_ae16b8",
+    "closeButton": "closeButton_ae16b8"
   },
   "715": {
     "container": "container_d9c882",
