@@ -64,14 +64,20 @@ jobs:
               return { renames, newRemoved, newAdded };
             }
 
+            function extractNames(moduleData) {
+              if (!moduleData) return [];
+              if (Array.isArray(moduleData)) return moduleData.map(x => (x && x.name) || x);
+              if (typeof moduleData === 'object') return [moduleData.name || moduleData];
+              return [moduleData];
+            }
+
             function compareModules(prevObj, currObj) {
               const sections = [];
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
               allModules.forEach(moduleName => {
-                // Extract the names if module items are objects
-                const prevItems = (prevObj[moduleName] || []).map(x => x.name || x);
-                const currItems = (currObj[moduleName] || []).map(x => x.name || x);
+                const prevItems = extractNames(prevObj[moduleName]);
+                const currItems = extractNames(currObj[moduleName]);
 
                 let removed = _.difference(prevItems, currItems);
                 let added = _.difference(currItems, prevItems);
