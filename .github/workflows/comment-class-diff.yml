@@ -135,7 +135,8 @@ jobs:
 
                   summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}`);
 
-                  let section = `### Module: ${mod}\n`;
+                  // Build collapsible section
+                  let section = `<details>\n<summary>Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}</summary>\n\n`;
 
                   if (removed.length) {
                     section += '#### Removed\n';
@@ -161,6 +162,7 @@ jobs:
                     });
                   }
 
+                  section += '\n</details>\n';
                   sections.push(section);
                 }
               });
