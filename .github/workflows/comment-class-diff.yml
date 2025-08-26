@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json  # Only trigger when this file changes
 
 jobs:
   post-diff:
@@ -25,7 +25,7 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Generate diff and post to Discord
+      - name: Post diff to Discord and save full diff
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -33,11 +33,11 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Ensure full_diff.txt exists
+      - name: Debug full_diff.txt
         run: |
-          if [ ! -f full_diff.txt ]; then
-            echo "" > full_diff.txt
-          fi
+          echo "Contents of full_diff.txt:"
+          ls -l full_diff.txt
+          cat full_diff.txt
 
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
@@ -45,12 +45,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const path = require('path');
 
             const MAX_COMMENT_LENGTH = 65000;
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
+            const diffFilePath = path.resolve(process.cwd(), 'full_diff.txt');
 
+            if (!fs.existsSync(diffFilePath)) {
+              console.log("full_diff.txt does not exist, nothing to post");
+              return;
+            }
+
+            const diffText = fs.readFileSync(diffFilePath, 'utf8');
             if (!diffText.trim()) {
-              console.log("No diff to post");
+              console.log("full_diff.txt is empty, nothing to post");
               return;
             }
 
