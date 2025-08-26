@@ -3,8 +3,8 @@ const { execSync } = require('child_process');
 const _ = require('lodash');
 const axios = require('axios');
 
-// Load JSON directly from Git
-function loadJsonFromGit(ref = 'HEAD') {
+// Load JSON from Git
+function loadJson(ref = 'HEAD') {
   try {
     const raw = execSync(`git show ${ref}:discordclasses.json`, { encoding: 'utf8' });
     return JSON.parse(raw);
@@ -14,8 +14,8 @@ function loadJsonFromGit(ref = 'HEAD') {
   }
 }
 
-const previous = loadJsonFromGit('HEAD^');
-const current = loadJsonFromGit('HEAD');
+const previous = loadJson('HEAD^');
+const current = loadJson('HEAD');
 
 function getModuleDiff(prev, curr) {
   const added = {};
@@ -23,25 +23,36 @@ function getModuleDiff(prev, curr) {
   const moved = {};
   const renamed = {};
 
-  for (const moduleId of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
+  const allModules = new Set([...Object.keys(prev), ...Object.keys(curr)]);
+
+  allModules.forEach(moduleId => {
     const oldObj = prev[moduleId] || {};
     const newObj = curr[moduleId] || {};
 
-    // Detect added keys
-    for (const key of Object.keys(newObj)) if (!oldObj[key]) added[key] = moduleId;
-    // Detect removed keys
-    for (const key of Object.keys(oldObj)) if (!newObj[key]) removed[key] = moduleId;
+    const moduleAdded = {};
+    const moduleRemoved = {};
+    const moduleRenamed = {};
 
-    // Detect renamed keys (same key, different value)
-    for (const key of Object.keys(newObj)) {
-      if (oldObj[key] && oldObj[key] !== newObj[key]) renamed[key] = moduleId;
+    // Added keys
+    Object.keys(newObj).forEach(key => {
+      if (!oldObj.hasOwnProperty(key)) moduleAdded[key] = newObj[key];
+      else if (oldObj[key] !== newObj[key]) moduleRenamed[key] = { old: oldObj[key], new: newObj[key] };
+    });
+
+    // Removed keys
+    Object.keys(oldObj).forEach(key => {
+      if (!newObj.hasOwnProperty(key)) moduleRemoved[key] = oldObj[key];
+    });
+
+    if (!_.isEqual(oldObj, newObj)) {
+      moved[moduleId] = { old: oldObj, new: newObj, added: moduleAdded, removed: moduleRemoved, renamed: moduleRenamed };
     }
 
-    // Detect moved modules (only if the object changed)
-    if (!_.isEqual(oldObj, newObj) && Object.keys(oldObj).length && Object.keys(newObj).length) {
-      moved[moduleId] = { old: oldObj, new: newObj };
-    }
-  }
+    // Collect per-module added/removed/renamed globally
+    Object.assign(added, Object.fromEntries(Object.keys(moduleAdded).map(k => [k, moduleId])));
+    Object.assign(removed, Object.fromEntries(Object.keys(moduleRemoved).map(k => [k, moduleId])));
+    Object.assign(renamed, Object.fromEntries(Object.keys(moduleRenamed).map(k => [k, moduleId])));
+  });
 
   return { added, removed, moved, renamed };
 }
@@ -75,25 +86,30 @@ for (const [moduleId, val] of Object.entries(diff.moved)) {
   fullDiff += `- ${JSON.stringify(val.old, null, 2)}\n`;
   fullDiff += `+ ${JSON.stringify(val.new, null, 2)}\n`;
   fullDiff += '```\n';
-}
-for (const [key, moduleId] of Object.entries(diff.added)) {
-  fullDiff += `# Added in module ${moduleId}\n`;
-  fullDiff += '```diff\n';
-  fullDiff += `+ "${key}": "${current[moduleId][key]}"\n`;
-  fullDiff += '```\n';
-}
-for (const [key, moduleId] of Object.entries(diff.removed)) {
-  fullDiff += `# Removed from module ${moduleId}\n`;
-  fullDiff += '```diff\n';
-  fullDiff += `- "${key}": "${previous[moduleId][key]}"\n`;
-  fullDiff += '```\n';
-}
-for (const [key, moduleId] of Object.entries(diff.renamed)) {
-  fullDiff += `# Renamed in module ${moduleId}\n`;
-  fullDiff += '```diff\n';
-  fullDiff += `- "${key}": "${previous[moduleId][key]}"\n`;
-  fullDiff += `+ "${key}": "${current[moduleId][key]}"\n`;
-  fullDiff += '```\n';
+
+  if (Object.keys(val.added).length) {
+    fullDiff += `# Added in module ${moduleId}\n\`\`\`diff\n`;
+    for (const [key, value] of Object.entries(val.added)) {
+      fullDiff += `+ "${key}": "${value}"\n`;
+    }
+    fullDiff += '```\n';
+  }
+
+  if (Object.keys(val.removed).length) {
+    fullDiff += `# Removed from module ${moduleId}\n\`\`\`diff\n`;
+    for (const [key, value] of Object.entries(val.removed)) {
+      fullDiff += `- "${key}": "${value}"\n`;
+    }
+    fullDiff += '```\n';
+  }
+
+  if (Object.keys(val.renamed).length) {
+    fullDiff += `# Renamed in module ${moduleId}\n\`\`\`diff\n`;
+    for (const [key, { old, new: newVal }] of Object.entries(val.renamed)) {
+      fullDiff += `- "${key}": "${old}"\n+ "${key}": "${newVal}"\n`;
+    }
+    fullDiff += '```\n';
+  }
 }
 
 fs.writeFileSync('full_diff.txt', fullDiff);
