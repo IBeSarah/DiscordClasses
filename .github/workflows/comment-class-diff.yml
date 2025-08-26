@@ -20,11 +20,8 @@ jobs:
 
       - name: Set up JSON files safely
         run: |
-          # current.json: always exists
           git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
-          # previous.json: if no previous commit, fallback to empty object
           git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
-          # validate JSON format
           node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
           node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
@@ -40,12 +37,8 @@ jobs:
             let prev = {};
             let curr = {};
 
-            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) {
-              console.warn("Failed to parse previous.json, using empty object");
-            }
-            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) {
-              console.warn("Failed to parse current.json, using empty object");
-            }
+            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) {}
+            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) {}
 
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
@@ -135,34 +128,25 @@ jobs:
 
                   summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}`);
 
-                  // Build collapsible section
+                  // Collapsible diff-style block
                   let section = `<details>\n<summary>Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}</summary>\n\n`;
+                  section += '```diff\n';
 
-                  if (removed.length) {
-                    section += '#### Removed\n';
-                    removed.forEach(it => section += `-"${it}"\n`);
-                  }
-                  if (added.length) {
-                    section += '#### Added\n';
-                    added.forEach(it => section += `+"${it}"\n`);
-                  }
+                  if (removed.length) removed.forEach(it => section += `-"${it}"\n`);
+                  if (added.length) added.forEach(it => section += `+"${it}"\n`);
 
+                  // Renamed with arrow
                   const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
-                  if (pureRenames.length) {
-                    section += '#### Renamed\n';
-                    pureRenames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
-                  }
+                  pureRenames.forEach(r => section += `-"${r.from}"\n-> +"${r.to}"\n`);
 
-                  if (movedFromThis.length) {
-                    section += '#### Moved & Renamed\n';
-                    movedFromThis.forEach(m => {
-                      const rename = renames.find(r => r.from===m.item);
-                      const display = rename ? `"${m.item}" to module ${m.to} (renamed to "${rename.to}")` : `"${m.item}" to module ${m.to}`;
-                      section += display + '\n';
-                    });
-                  }
+                  // Moved & Renamed with arrow
+                  movedFromThis.forEach(m => {
+                    const rename = renames.find(r => r.from===m.item);
+                    const display = rename ? `-> +"${m.item}" to module ${m.to} (renamed to "${rename.to}")` : `-> +"${m.item}" to module ${m.to}`;
+                    section += display + '\n';
+                  });
 
-                  section += '\n</details>\n';
+                  section += '```\n</details>\n';
                   sections.push(section);
                 }
               });
