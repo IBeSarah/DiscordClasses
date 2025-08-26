@@ -1,15 +1,24 @@
+// diff_and_post.js
 const fs = require('fs');
+const axios = require('axios');
 const _ = require('lodash');
 const levenshtein = require('fast-levenshtein');
-const axios = require('axios');
 
-// Environment
+// Environment variables
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
 const commitSha = process.env.GITHUB_SHA;
 const repo = process.env.GITHUB_REPOSITORY;
 const serverUrl = process.env.GITHUB_SERVER_URL;
 
-// Load JSON files
+// File paths
+const prevFile = 'previous.json';
+const currFile = 'current.json';
+
+// Discord & GitHub limits
+const MAX_DISCORD_LENGTH = 2000;
+const MAX_GITHUB_LENGTH = 65536;
+
+// Load JSON safely
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -18,108 +27,102 @@ function loadJson(file) {
   }
 }
 
-const prev = loadJson('previous.json');
-const curr = loadJson('current.json');
-
-// Helpers
-function diffModules(prevObj, currObj) {
-  const removed = [];
+// Generate diff arrays
+function generateDiff(prev, curr) {
   const added = [];
+  const removed = [];
   const renamed = [];
   const moved = [];
 
-  for (const moduleId of Object.keys(prevObj)) {
-    if (!currObj[moduleId]) {
-      removed.push(`Module \`${moduleId}\``);
-      continue;
+  // Flatten modules
+  function flatten(obj) {
+    const res = {};
+    for (const key in obj) {
+      for (const subKey in obj[key]) {
+        res[`${key}.${subKey}`] = obj[key][subKey];
+      }
     }
-
-    const prevKeys = Object.keys(prevObj[moduleId]);
-    const currKeys = Object.keys(currObj[moduleId]);
-
-    // Removed keys
-    prevKeys.forEach(k => {
-      if (!currKeys.includes(k)) removed.push(`${k} removed from Module \`${moduleId}\``);
-    });
-
-    // Added keys
-    currKeys.forEach(k => {
-      if (!prevKeys.includes(k)) added.push(`${k} added to Module \`${moduleId}\``);
-    });
-
-    // Renamed detection (simple heuristic)
-    prevKeys.forEach(pk => {
-      currKeys.forEach(ck => {
-        const dist = levenshtein.get(pk, ck);
-        if (dist > 0 && dist <= 3 && prevObj[moduleId][pk] === currObj[moduleId][ck]) {
-          renamed.push(`${pk} → ${ck} in Module \`${moduleId}\``);
-        }
-      });
-    });
+    return res;
   }
 
-  // Moved detection (if keys exist in both but modules changed)
-  const prevKeyMap = _.flatMap(Object.entries(prevObj), ([mod, keys]) =>
-    Object.keys(keys).map(k => ({ key: k, module: mod }))
-  );
-  const currKeyMap = _.flatMap(Object.entries(currObj), ([mod, keys]) =>
-    Object.keys(keys).map(k => ({ key: k, module: mod }))
-  );
+  const prevFlat = flatten(prev);
+  const currFlat = flatten(curr);
 
-  prevKeyMap.forEach(p => {
-    const c = currKeyMap.find(x => x.key === p.key && x.module !== p.module);
-    if (c) moved.push(`${p.key} moved from Module \`${p.module}\` to Module \`${c.module}\``);
-  });
+  // Added & Removed
+  for (const key in currFlat) if (!prevFlat[key]) added.push(`${key}`);
+  for (const key in prevFlat) if (!currFlat[key]) removed.push(`${key}`);
 
-  return { removed, added, renamed, moved };
-}
-
-// Generate diff text
-function generateDiffText(diffObj) {
-  let text = '';
-  if (diffObj.removed.length) text += '### Removed\n' + diffObj.removed.map(x => `- ${x}`).join('\n') + '\n';
-  if (diffObj.added.length) text += '### Added\n' + diffObj.added.map(x => `+ ${x}`).join('\n') + '\n';
-  if (diffObj.renamed.length) text += '### Renamed\n' + diffObj.renamed.map(x => `* ${x}`).join('\n') + '\n';
-  if (diffObj.moved.length) text += '### Moved\n' + diffObj.moved.map(x => `* ${x}`).join('\n') + '\n';
-  return text;
-}
-
-// Post to Discord
-async function postToDiscord(text) {
-  const MAX_LENGTH = 2000;
-  let truncated = text;
-  if (text.length > MAX_LENGTH - 50) { // reserve for commit link
-    truncated = text.slice(0, MAX_LENGTH - 50) + '\n...';
+  // Moved & Renamed (simplified: if value matches but module changed => moved, if key changed but value similar => renamed)
+  for (const keyCurr in currFlat) {
+    for (const keyPrev in prevFlat) {
+      if (currFlat[keyCurr] === prevFlat[keyPrev] && keyCurr !== keyPrev) moved.push(`${keyPrev} -> ${keyCurr}`);
+      else if (levenshtein.get(currFlat[keyCurr], prevFlat[keyPrev]) <= 2 && keyCurr !== keyPrev) renamed.push(`${keyPrev} -> ${keyCurr}`);
+    }
   }
-  truncated += `\nFull details here: ${serverUrl}/${repo}/commit/${commitSha}`;
-  await axios.post(webhookUrl, { content: `\`\`\`diff\n${truncated}\`\`\`` });
+
+  return { added, removed, renamed, moved };
 }
 
-// Prepare GitHub comment
-function generateGitHubComments(text) {
-  const MAX_LENGTH = 65000;
-  const comments = [];
+// Format diff for Discord/GitHub
+function formatDiff(diffObj) {
+  let result = '';
+  if (diffObj.removed.length) result += `### Removed\n* ${diffObj.removed.join('\n* ')}\n`;
+  if (diffObj.added.length) result += `### Added\n* ${diffObj.added.join('\n* ')}\n`;
+  if (diffObj.renamed.length) result += `### Renamed\n* ${diffObj.renamed.join('\n* ')}\n`;
+  if (diffObj.moved.length) result += `### Moved\n* ${diffObj.moved.join('\n* ')}\n`;
+  return result || 'No changes';
+}
+
+// Split text into chunks for GitHub
+function splitChunks(text, maxLength) {
+  const chunks = [];
   let start = 0;
   while (start < text.length) {
-    comments.push(text.slice(start, start + MAX_LENGTH));
-    start += MAX_LENGTH;
+    chunks.push(text.slice(start, start + maxLength));
+    start += maxLength;
   }
-  return comments;
+  return chunks;
+}
+
+async function postToDiscord(content) {
+  // Truncate for Discord
+  let discordContent = content;
+  if (discordContent.length > MAX_DISCORD_LENGTH) {
+    discordContent = discordContent.slice(0, MAX_DISCORD_LENGTH - 20) + '\n... (truncated)';
+  }
+
+  try {
+    await axios.post(webhookUrl, { content: "```diff\n" + discordContent + "\n```" });
+    console.log('Posted to Discord');
+  } catch (err) {
+    console.error('Discord post failed:', err.response?.data || err.message);
+  }
 }
 
 // Main
 (async () => {
-  const diffs = diffModules(prev, curr);
-  const diffText = generateDiffText(diffs);
+  const prevJson = loadJson(prevFile);
+  const currJson = loadJson(currFile);
 
-  if (!diffText.trim()) {
-    console.log('No changes detected');
-    return;
-  }
+  const diffObj = generateDiff(prevJson, currJson);
+  const diffText = formatDiff(diffObj) + `\nFull commit here: ${serverUrl}/${repo}/commit/${commitSha}`;
 
   // Discord
-  if (webhookUrl) await postToDiscord(diffText);
+  await postToDiscord(diffText);
 
-  // GitHub (write to file for github-script)
-  fs.writeFileSync('full_diff.txt', diffText);
+  // GitHub comments
+  const chunks = splitChunks(diffText, MAX_GITHUB_LENGTH);
+  const { Octokit } = require('@octokit/rest');
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+  for (let i = 0; i < chunks.length; i++) {
+    const body = chunks.length > 1 ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}` : chunks[i];
+    await octokit.rest.repos.createCommitComment({
+      owner: repo.split('/')[0],
+      repo: repo.split('/')[1],
+      commit_sha: commitSha,
+      body,
+    });
+    console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
+  }
 })();
