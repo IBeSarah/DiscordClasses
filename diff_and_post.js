@@ -3,115 +3,103 @@ const _ = require('lodash');
 const levenshtein = require('fast-levenshtein');
 const axios = require('axios');
 
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const GITHUB_SHA = process.env.GITHUB_SHA;
-const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY;
-const GITHUB_SERVER_URL = process.env.GITHUB_SERVER_URL;
+const [,, mode] = process.argv;
 
-const commitUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}`;
-
-// Load JSON files
 const previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
 const current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
-// Track changes per module
-const summaryModules = {};
-let fullDiff = '';
+let summaryText = '';
+let fullDiffText = '';
 
-for (const moduleId of new Set([...Object.keys(previous), ...Object.keys(current)])) {
-  const oldModule = previous[moduleId] || {};
-  const newModule = current[moduleId] || {};
+// Helper: detect renamed items
+function detectRenames(prev, curr) {
+  const renamed = [];
+  const prevValues = Object.entries(prev);
+  const currValues = Object.entries(curr);
 
-  const oldKeys = Object.keys(oldModule);
-  const newKeys = Object.keys(newModule);
-
-  const added = newKeys.filter(k => !oldKeys.includes(k));
-  const removed = oldKeys.filter(k => !newKeys.includes(k));
-
-  // Renamed detection: key exists in both, value changed
-  const renamed = oldKeys.filter(k => newKeys.includes(k) && oldModule[k] !== newModule[k]);
-
-  // Record moved modules (module exists in both, keys changed)
-  const moved = (added.length || removed.length || renamed.length) ? true : false;
-
-  // Build module summary for Discord
-  summaryModules[moduleId] = {
-    Added: added.length,
-    Removed: removed.length,
-    Renamed: renamed.length,
-    Moved: moved ? 1 : 0
-  };
-
-  // Build full diff for GitHub
-  if (added.length || removed.length || renamed.length) {
-    fullDiff += `### Added in module ${moduleId}\n\`\`\`diff\n`;
-    added.forEach(k => {
-      fullDiff += `+ "${k}": "${newModule[k]}"\n`;
+  prevValues.forEach(([k1, v1]) => {
+    currValues.forEach(([k2, v2]) => {
+      if (k1 !== k2 && v1 === v2) {
+        renamed.push({from: k1, to: k2, value: v1});
+      }
     });
-    fullDiff += '```\n';
+  });
+  return renamed;
+}
 
-    fullDiff += `### Removed from module ${moduleId}\n\`\`\`diff\n`;
-    removed.forEach(k => {
-      fullDiff += `- "${k}": "${oldModule[k]}"\n`;
-    });
-    fullDiff += '```\n';
+// Helper: diff a module
+function diffModule(moduleName, prevModule, currModule) {
+  const addedKeys = Object.keys(currModule || {}).filter(k => !prevModule || !(k in prevModule));
+  const removedKeys = Object.keys(prevModule || {}).filter(k => !currModule || !(k in currModule));
+  const renamedKeys = detectRenames(prevModule || {}, currModule || {});
+  
+  let moduleDiff = '';
 
-    fullDiff += `### Renamed in module ${moduleId}\n\`\`\`diff\n`;
-    renamed.forEach(k => {
-      fullDiff += `- "${k}": "${oldModule[k]}"\n`;
-      fullDiff += `+ "${k}": "${newModule[k]}"\n`;
-    });
-    fullDiff += '```\n';
+  if (addedKeys.length) {
+    summaryText += `Module ${moduleName}: Added: ${addedKeys.length}\n`;
+    moduleDiff += `# Added in module ${moduleName}\n\`\`\`diff\n`;
+    addedKeys.forEach(k => moduleDiff += `+ "${k}": "${currModule[k]}"\n`);
+    moduleDiff += '```\n\n';
+  }
 
-    if (moved) {
-      fullDiff += `### Moved module ${moduleId}\n`;
-    }
+  if (removedKeys.length) {
+    summaryText += `Module ${moduleName}: Removed: ${removedKeys.length}\n`;
+    moduleDiff += `# Removed from module ${moduleName}\n\`\`\`diff\n`;
+    removedKeys.forEach(k => moduleDiff += `- "${k}": "${prevModule[k]}"\n`);
+    moduleDiff += '```\n\n';
+  }
+
+  if (renamedKeys.length) {
+    summaryText += `Module ${moduleName}: Renamed: ${renamedKeys.length}\n`;
+    moduleDiff += `# Renamed in module ${moduleName}\n\`\`\`diff\n`;
+    renamedKeys.forEach(r => moduleDiff += `- "${r.from}": "${r.value}"\n+ "${r.to}": "${r.value}"\n`);
+    moduleDiff += '```\n\n';
+  }
+
+  return moduleDiff;
+}
+
+// Detect module moves
+const prevKeys = Object.keys(previous);
+const currKeys = Object.keys(current);
+const movedModules = [];
+
+prevKeys.forEach(k => {
+  if (!currKeys.includes(k)) {
+    const match = currKeys.find(ck => _.isEqual(previous[k], current[ck]));
+    if (match) movedModules.push({from: k, to: match});
+  }
+});
+
+if (movedModules.length) {
+  summaryText += `Moved modules: ${movedModules.map(m => `${m.from} → ${m.to}`).join(', ')}\n`;
+  fullDiffText += `# Moved Modules\n\`\`\`diff\n`;
+  movedModules.forEach(m => fullDiffText += `Module ${m.from} moved to ${m.to}\n`);
+  fullDiffText += '```\n\n';
+}
+
+// Process all modules
+const allModuleKeys = _.union(prevKeys, currKeys);
+allModuleKeys.forEach(k => {
+  const mdiff = diffModule(k, previous[k], current[k]);
+  fullDiffText += mdiff;
+});
+
+// Write full diff
+fs.writeFileSync('full_diff.txt', fullDiffText, 'utf8');
+
+// Post to Discord if summary mode
+if (mode === 'summary') {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) process.exit(1);
+
+  let discordMessage = summaryText.trim();
+  if (discordMessage) {
+    discordMessage += `\n\nView full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+    axios.post(webhookUrl, {content: discordMessage})
+      .then(() => console.log('Discord summary posted'))
+      .catch(err => console.error('Discord post failed:', err.message));
+  } else {
+    console.log('No changes to post to Discord');
   }
 }
-
-// Write full diff for GitHub comment
-fs.writeFileSync('full_diff.txt', fullDiff);
-
-// Build Discord summary
-let discordSummary = '';
-for (const [mod, counts] of Object.entries(summaryModules)) {
-  const parts = [];
-  if (counts.Added) parts.push(`Added: ${counts.Added}`);
-  if (counts.Removed) parts.push(`Removed: ${counts.Removed}`);
-  if (counts.Renamed) parts.push(`Renamed: ${counts.Renamed}`);
-  if (counts.Moved) parts.push(`Moved: ${counts.Moved}`);
-  if (parts.length) discordSummary += `Module ${mod}: ${parts.join(', ')}\n`;
-}
-
-if (discordSummary) {
-  discordSummary += `\nView full list of changes here: ${commitUrl}`;
-} else {
-  discordSummary = `No changes detected in this commit.\n${commitUrl}`;
-}
-
-// Discord character limit handling
-const MAX_DISCORD_LENGTH = 2000;
-function splitIntoChunks(str, maxLen) {
-  const chunks = [];
-  let start = 0;
-  while (start < str.length) {
-    chunks.push(str.slice(start, start + maxLen));
-    start += maxLen;
-  }
-  return chunks;
-}
-
-async function postToDiscord(content) {
-  const chunks = splitIntoChunks(content, MAX_DISCORD_LENGTH);
-  for (let i = 0; i < chunks.length; i++) {
-    try {
-      await axios.post(DISCORD_WEBHOOK_URL, { content: chunks[i] });
-      console.log(`Sent Discord message ${i + 1}/${chunks.length}`);
-    } catch (err) {
-      console.error('Discord post failed:', err.response?.status, err.response?.data || err.message);
-    }
-  }
-}
-
-// Execute Discord posting
-postToDiscord(discordSummary);
