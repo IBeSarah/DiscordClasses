@@ -1,131 +1,87 @@
 const fs = require("fs");
-const path = require("path");
 
-function loadJSON(file) {
-  return JSON.parse(fs.readFileSync(path.resolve(file), "utf8"));
+function safeRead(path) {
+  try {
+    return JSON.parse(fs.readFileSync(path, "utf8"));
+  } catch {
+    return {};
+  }
 }
 
-function diffJSON(oldData, newData) {
-  let added = [];
-  let removed = [];
-  let renamed = [];
-  let moved = [];
+const oldData = safeRead("previous.json");
+const newData = safeRead("current.json");
 
-  // Track modules in both
-  const oldKeys = Object.keys(oldData);
-  const newKeys = Object.keys(newData);
+if (!oldData || !newData) {
+  console.log("No diff to post");
+  process.exit(0);
+}
 
-  // Detect removed & renamed
-  oldKeys.forEach((key) => {
-    if (!newData[key]) {
-      removed.push({ key, value: oldData[key] });
+let output = [];
+
+function isObject(obj) {
+  return obj && typeof obj === "object" && !Array.isArray(obj);
+}
+
+function diffObjects(oldObj, newObj, path = "") {
+  let diffs = { added: [], removed: [], renamed: [], moved: [] };
+
+  // Removed
+  for (const key of Object.keys(oldObj)) {
+    if (!(key in newObj)) {
+      diffs.removed.push(`${path}"${key}": ${JSON.stringify(oldObj[key])}`);
     }
-  });
+  }
 
-  // Detect added
-  newKeys.forEach((key) => {
-    if (!oldData[key]) {
-      added.push({ key, value: newData[key] });
+  // Added
+  for (const key of Object.keys(newObj)) {
+    if (!(key in oldObj)) {
+      diffs.added.push(`${path}"${key}": ${JSON.stringify(newObj[key])}`);
     }
-  });
+  }
 
-  // Detect renames & moves
-  oldKeys.forEach((key) => {
-    if (newData[key] && typeof oldData[key] === "object") {
-      const oldObj = oldData[key];
-      const newObj = newData[key];
-
-      // Detect renamed keys inside same module
-      Object.keys(oldObj).forEach((k) => {
-        if (!newObj[k]) {
-          // Was renamed or removed
-          const match = Object.keys(newObj).find(
-            (nk) => oldObj[k] === newObj[nk]
-          );
-          if (match) {
-            renamed.push({ module: key, from: k, to: match });
-          }
-        }
-      });
-
-      // Detect moved items (present in another module)
-      Object.keys(oldObj).forEach((k) => {
-        const val = oldObj[k];
-        if (!Object.values(newObj).includes(val)) {
-          const foundModule = Object.entries(newData).find(([mod, obj]) =>
-            Object.values(obj).includes(val)
-          );
-          if (foundModule) {
-            moved.push({
-              key: k,
-              value: val,
-              from: key,
-              to: foundModule[0],
-            });
-          }
-        }
-      });
+  // Changed or Renamed
+  for (const key of Object.keys(oldObj)) {
+    if (key in newObj) {
+      if (isObject(oldObj[key]) && isObject(newObj[key])) {
+        const nested = diffObjects(oldObj[key], newObj[key], path + key + ".");
+        diffs.added.push(...nested.added);
+        diffs.removed.push(...nested.removed);
+        diffs.renamed.push(...nested.renamed);
+        diffs.moved.push(...nested.moved);
+      } else if (oldObj[key] !== newObj[key]) {
+        diffs.renamed.push(
+          `${path}"${key}": ${JSON.stringify(oldObj[key])} -> ${JSON.stringify(newObj[key])}`
+        );
+      }
     }
-  });
+  }
 
-  return { added, removed, renamed, moved };
+  return diffs;
 }
 
-function formatDiff(diff) {
-  let out = "";
+const diffs = diffObjects(oldData, newData);
 
-  if (diff.added.length) {
-    out += "### Added\n```diff\n";
-    diff.added.forEach((a) => {
-      out += `+ ${a.key}: ${JSON.stringify(a.value)}\n`;
-    });
-    out += "```\n\n";
-  }
-
-  if (diff.removed.length) {
-    out += "### Removed\n```diff\n";
-    diff.removed.forEach((r) => {
-      out += `- ${r.key}: ${JSON.stringify(r.value)}\n`;
-    });
-    out += "```\n\n";
-  }
-
-  if (diff.renamed.length) {
-    out += "### Renamed\n";
-    diff.renamed.forEach((rn) => {
-      out += `* In module ${rn.module}: "${rn.from}" → "${rn.to}"\n`;
-    });
-    out += "\n";
-  }
-
-  if (diff.moved.length) {
-    out += "### Moved\n";
-    diff.moved.forEach((m) => {
-      out += `* "${m.key}" moved from module ${m.from} to module ${m.to}\n`;
-    });
-    out += "\n";
-  }
-
-  return out || "No changes detected.";
+if (
+  diffs.added.length === 0 &&
+  diffs.removed.length === 0 &&
+  diffs.renamed.length === 0 &&
+  diffs.moved.length === 0
+) {
+  console.log("No diff to post");
+  process.exit(0);
 }
 
-function main() {
-  const oldFile = "old.json";
-  const newFile = "new.json";
-
-  if (!fs.existsSync(oldFile) || !fs.existsSync(newFile)) {
-    console.error("Missing old.json or new.json for diffing");
-    process.exit(1);
-  }
-
-  const oldData = loadJSON(oldFile);
-  const newData = loadJSON(newFile);
-
-  const diff = diffJSON(oldData, newData);
-  const formatted = formatDiff(diff);
-
-  fs.writeFileSync("full_diff.txt", formatted, "utf8");
-  console.log("Diff written to full_diff.txt");
+if (diffs.added.length) {
+  output.push("### Added", "```diff", ...diffs.added.map((l) => `+ ${l}`), "```");
+}
+if (diffs.removed.length) {
+  output.push("### Removed", "```diff", ...diffs.removed.map((l) => `- ${l}`), "```");
+}
+if (diffs.renamed.length) {
+  output.push("### Renamed", "```diff", ...diffs.renamed.map((l) => `~ ${l}`), "```");
+}
+if (diffs.moved.length) {
+  output.push("### Moved", "```diff", ...diffs.moved.map((l) => `# ${l}`), "```");
 }
 
-main();
+console.log(output.join("\n"));
