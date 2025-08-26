@@ -8,29 +8,55 @@ const commitUrl = process.env.GITHUB_SERVER_URL + '/' + process.env.GITHUB_REPOS
 
 const prevFile = path.join(__dirname, 'previous.json');
 const currFile = path.join(__dirname, 'current.json');
+const mainFile = path.join(__dirname, 'discordclasses.json');
+
+// Normalize JSON by sorting keys recursively
+function normalize(obj) {
+  if (Array.isArray(obj)) return obj.map(normalize);
+  if (obj && typeof obj === 'object') {
+    return Object.keys(obj)
+      .sort()
+      .reduce((res, key) => {
+        res[key] = normalize(obj[key]);
+        return res;
+      }, {});
+  }
+  return obj;
+}
 
 function readJSON(filePath) {
   try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
   } catch {
     return {};
   }
 }
 
+function writeJSON(filePath, data) {
+  fs.writeFileSync(filePath, JSON.stringify(normalize(data), null, 2), 'utf8');
+}
+
+// Diffing function
 function diffObjects(prev, curr, prefix = '') {
   const added = [];
   const removed = [];
   const renamed = [];
   const moved = [];
-  
+
   const prevKeys = Object.keys(prev || {});
   const currKeys = Object.keys(curr || {});
-  
+
   for (const key of currKeys) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
     if (!(key in prev)) {
       added.push(fullKey);
-    } else if (typeof curr[key] === 'object' && curr[key] !== null && typeof prev[key] === 'object' && prev[key] !== null) {
+    } else if (
+      typeof curr[key] === 'object' &&
+      curr[key] !== null &&
+      typeof prev[key] === 'object' &&
+      prev[key] !== null
+    ) {
       const { added: a, removed: r, renamed: rn, moved: m } = diffObjects(prev[key], curr[key], fullKey);
       added.push(...a);
       removed.push(...r);
@@ -40,14 +66,14 @@ function diffObjects(prev, curr, prefix = '') {
       renamed.push(fullKey);
     }
   }
-  
+
   for (const key of prevKeys) {
     const fullKey = prefix ? `${prefix}.${key}` : key;
     if (!(key in curr)) {
       removed.push(fullKey);
     }
   }
-  
+
   return { added, removed, renamed, moved };
 }
 
@@ -57,9 +83,14 @@ function formatDiffSection(title, keys, symbol = '+') {
 }
 
 (async () => {
+  // Normalize the main JSON file
+  const mainJSON = readJSON(mainFile);
+  writeJSON(mainFile, mainJSON);
+
+  // Read normalized previous/current
   const prevJSON = readJSON(prevFile);
   const currJSON = readJSON(currFile);
-  
+
   const { added, removed, renamed, moved } = diffObjects(prevJSON, currJSON);
 
   if (!added.length && !removed.length && !renamed.length && !moved.length) {
