@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json  # Trigger only on this file
 
 jobs:
   post-diff:
@@ -17,36 +17,76 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
-
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Generate and post diff
+      - name: Diff and post to Discord/GitHub
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
         run: |
-          node -e "
           const fs = require('fs');
           const _ = require('lodash');
           const axios = require('axios');
+          const levenshtein = require('fast-levenshtein');
 
-          const mode = process.argv[1]; // 'discord' or 'github'
-          const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-          const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+          // Load previous and current JSON
+          const prev = JSON.parse(fs.readFileSync('discordclasses.json', 'utf8'));
+          const curr = JSON.parse(require('child_process').execSync(`git show HEAD:discordclasses.json`).toString());
 
           const addedModules = {};
           const removedModules = {};
           const renamedModules = {};
           const movedModules = {};
 
-          // Detect changes
+          const usedCurr = new Set();
+
+          // Detect module moves
+          for (const oldId of Object.keys(prev)) {
+            if (curr[oldId]) continue; // still exists, no move
+
+            let bestMatch = null;
+            let bestScore = Infinity;
+
+            for (const newId of Object.keys(curr)) {
+              if (usedCurr.has(newId)) continue;
+
+              const oldKeys = Object.keys(prev[oldId]);
+              const newKeys = Object.keys(curr[newId]);
+
+              const keyStrOld = oldKeys.join(',');
+              const keyStrNew = newKeys.join(',');
+
+              const score = levenshtein.get(keyStrOld, keyStrNew);
+              if (score < bestScore) {
+                bestScore = score;
+                bestMatch = newId;
+              }
+            }
+
+            // Use key similarity threshold
+            if (bestMatch) {
+              const oldKeysSet = new Set(Object.keys(prev[oldId]));
+              const newKeysSet = new Set(Object.keys(curr[bestMatch]));
+              const intersection = [...oldKeysSet].filter(k => newKeysSet.has(k));
+              const similarity = intersection.length / Math.max(oldKeysSet.size, newKeysSet.size);
+
+              if (similarity >= 0.5) { // 50% or more keys overlap
+                movedModules[oldId] = { to: bestMatch, keys: [...intersection.filter(k => prev[oldId][k] !== curr[bestMatch][k])] };
+                usedCurr.add(bestMatch);
+              }
+            }
+          }
+
+          // Detect additions, removals, renames
           for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
             const oldMod = prev[key] || {};
             const newMod = curr[key] || {};
 
-            // Added
+            // Added keys
             for (const k of Object.keys(newMod)) {
               if (!oldMod.hasOwnProperty(k)) {
                 addedModules[key] = addedModules[key] || [];
@@ -54,7 +94,7 @@ jobs:
               }
             }
 
-            // Removed
+            // Removed keys
             for (const k of Object.keys(oldMod)) {
               if (!newMod.hasOwnProperty(k)) {
                 removedModules[key] = removedModules[key] || [];
@@ -62,69 +102,84 @@ jobs:
               }
             }
 
-            // Renamed (key exists in both, value changed)
+            // Renamed keys (value changed)
             for (const k of Object.keys(newMod)) {
               if (oldMod[k] && oldMod[k] !== newMod[k]) {
                 renamedModules[key] = renamedModules[key] || [];
                 renamedModules[key].push(k);
               }
             }
-
-            // Moved (treat same as renamed for individual keys)
-            const changedKeys = Object.keys(newMod).filter(k => oldMod[k] && oldMod[k] !== newMod[k]);
-            if (changedKeys.length) {
-              movedModules[key] = changedKeys;
-            }
           }
 
           function formatDiffBlock(title, moduleId, keys, type) {
             if (!keys || keys.length === 0) return '';
             const lines = keys.map(k => {
-              switch(type) {
-                case 'added': return '+ \"'+k+'\": \"'+curr[moduleId][k]+'\"';
-                case 'removed': return '- \"'+k+'\": \"'+prev[moduleId][k]+'\"';
+              switch (type) {
+                case 'added': return `+ "${k}": "${curr[moduleId][k]}"`;
+                case 'removed': return `- "${k}": "${prev[moduleId][k]}"`;
                 case 'renamed':
                 case 'moved':
-                  return '- \"'+k+'\": \"'+prev[moduleId][k]+'\"\n+ \"'+k+'\": \"'+curr[moduleId][k]+'\"';
+                  return `- "${k}": "${prev[moduleId][k]}"\n+ "${k}": "${curr[moduleId][k]}"`;
               }
-            }).join('\\n');
+            }).join('\n');
             return `### ${title} in module ${moduleId}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
           }
 
-          let output = '';
-          for (const [mod, keys] of Object.entries(addedModules)) output += formatDiffBlock('Added', mod, keys, 'added');
-          for (const [mod, keys] of Object.entries(removedModules)) output += formatDiffBlock('Removed', mod, keys, 'removed');
-          for (const [mod, keys] of Object.entries(renamedModules)) output += formatDiffBlock('Renamed', mod, keys, 'renamed');
-          for (const [mod, keys] of Object.entries(movedModules)) output += formatDiffBlock('Moved', mod, keys, 'moved');
+          // Build full output for GitHub
+          let githubOutput = '';
+          for (const [mod, keys] of Object.entries(addedModules)) githubOutput += formatDiffBlock('Added', mod, keys, 'added');
+          for (const [mod, keys] of Object.entries(removedModules)) githubOutput += formatDiffBlock('Removed', mod, keys, 'removed');
+          for (const [mod, keys] of Object.entries(renamedModules)) githubOutput += formatDiffBlock('Renamed', mod, keys, 'renamed');
+          for (const [mod, info] of Object.entries(movedModules)) githubOutput += formatDiffBlock('Moved', mod, info.keys, 'moved');
 
-          if (!output) output = 'No changes detected.';
+          if (!githubOutput) githubOutput = 'No changes detected.';
+
+          // Post GitHub comments
+          const MAX_COMMENT_LENGTH = 65000;
+          function splitText(text, maxLength) {
+            const chunks = [];
+            let start = 0;
+            while (start < text.length) {
+              chunks.push(text.slice(start, start + maxLength));
+              start += maxLength;
+            }
+            return chunks;
+          }
+          const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
+          const { Octokit } = require("@octokit/rest");
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+          for (let i = 0; i < githubChunks.length; i++) {
+            const body = githubChunks.length > 1
+              ? `**Part ${i + 1} of ${githubChunks.length}**\n\n${githubChunks[i]}`
+              : githubChunks[i];
+
+            octokit.rest.repos.createCommitComment({
+              owner: process.env.GITHUB_REPOSITORY.split('/')[0],
+              repo: process.env.GITHUB_REPOSITORY.split('/')[1],
+              commit_sha: process.env.GITHUB_SHA,
+              body,
+            });
+          }
+
+          // Build Discord summary (short overview)
+          function summarize(mods) {
+            return Object.entries(mods).map(([mod, keys]) => {
+              if (typeof keys === 'object' && keys.to) { // moved
+                return `Module ${mod}: Moved: ${keys.keys.length}`;
+              }
+              return `Module ${mod}: ${keys.length}`;
+            }).join(', ');
+          }
+          const summaryLines = [];
+          if (Object.keys(addedModules).length) summaryLines.push(`Added: ${summarize(addedModules)}`);
+          if (Object.keys(removedModules).length) summaryLines.push(`Removed: ${summarize(removedModules)}`);
+          if (Object.keys(renamedModules).length) summaryLines.push(`Renamed: ${summarize(renamedModules)}`);
+          if (Object.keys(movedModules).length) summaryLines.push(`Moved: ${summarize(movedModules)}`);
 
           const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+          const discordMessage = `**Module changes summary**\n${summaryLines.join('\n')}\n\nView full list of changes here: ${commitUrl}`;
 
-          // Post to Discord
-          const summary = '**Module changes summary**\\n';
-          const shortSummary = Object.keys(addedModules).map(m => `Module ${m}: Added: ${addedModules[m]?.length || 0}`).join(', ')
-            + '\\n' + Object.keys(removedModules).map(m => `Module ${m}: Removed: ${removedModules[m]?.length || 0}`).join(', ')
-            + '\\n' + Object.keys(renamedModules).map(m => `Module ${m}: Renamed: ${renamedModules[m]?.length || 0}`).join(', ')
-            + '\\n' + Object.keys(movedModules).map(m => `Module ${m}: Moved: ${movedModules[m]?.length || 0}`).join(', ')
-            + '\\n\\nView full list of changes here: '+commitUrl;
-
-          axios.post(process.env.DISCORD_WEBHOOK_URL, { content: shortSummary })
-            .then(()=>console.log('Discord post successful'))
-            .catch(err=>console.error('Discord post failed:', err.message));
-
-          // Post full diff for GitHub
-          const MAX_LEN = 65000;
-          const chunks = [];
-          for (let i=0; i<output.length; i+=MAX_LEN) chunks.push(output.slice(i,i+MAX_LEN));
-          const { execSync } = require('child_process');
-          for (let i=0; i<chunks.length; i++) {
-            const body = chunks.length>1 ? `**Part ${i+1} of ${chunks.length}**\\n\\n${chunks[i]}` : chunks[i];
-            execSync(`gh api repos/${process.env.GITHUB_REPOSITORY}/commits/${process.env.GITHUB_SHA}/comments -f body='${body.replace(/'/g,\"'\\\\''\")}'`);
-          }
-          "
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+          axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
+            .then(() => console.log('Discord post successful'))
+            .catch(err => console.error('Discord post failed:', err.message));
