@@ -19,7 +19,7 @@ const removed = {};
 const renamed = [];
 const moved = [];
 
-// Detect added and removed
+// Step 1: Detect added and removed
 for (const [module, keys] of Object.entries(oldData)) {
   if (!newData[module]) {
     removed[module] = keys;
@@ -46,14 +46,14 @@ for (const [module, keys] of Object.entries(newData)) {
   }
 }
 
-// Detect renames and moves across modules
+// Step 2: Detect renames
 for (const [remModule, remKeys] of Object.entries(removed)) {
   for (const [k, v] of Object.entries(remKeys)) {
     let found = false;
     for (const [addModule, addKeys] of Object.entries(added)) {
       for (const [ak, av] of Object.entries(addKeys)) {
         const dist = levenshtein.get(String(v), String(av));
-        if (dist <= 3) { // similarity threshold
+        if (dist <= 3 && k !== ak) { // key name changed
           renamed.push({
             fromModule: remModule,
             toModule: addModule,
@@ -72,9 +72,26 @@ for (const [remModule, remKeys] of Object.entries(removed)) {
   }
 }
 
-// Build GitHub diff
-let githubDiff = "";
+// Step 3: Detect moved keys (same key/value, different module)
+for (const [remModule, remKeys] of Object.entries(removed)) {
+  for (const [k, v] of Object.entries(remKeys)) {
+    for (const [addModule, addKeys] of Object.entries(added)) {
+      if (addKeys[k] && addKeys[k] === v) {
+        moved.push({
+          key: k,
+          value: v,
+          fromModule: remModule,
+          toModule: addModule
+        });
+        delete added[addModule][k];
+        delete removed[remModule][k];
+      }
+    }
+  }
+}
 
+// Step 4: Build GitHub diff
+let githubDiff = "";
 function diffSection(title, data, sign) {
   for (const [mod, keys] of Object.entries(data)) {
     githubDiff += `# ${title} in module ${mod}\n\`\`\`diff\n`;
@@ -97,15 +114,24 @@ if (renamed.length) {
   }
 }
 
+if (moved.length) {
+  for (const m of moved) {
+    githubDiff += `# Moved key "${m.key}" from module ${m.fromModule} → ${m.toModule}\n\`\`\`diff\n`;
+    githubDiff += `- "${m.key}": "${m.value}"\n`;
+    githubDiff += `+ "${m.key}": "${m.value}"\n`;
+    githubDiff += "```\n";
+  }
+}
+
 // Write full diff for GitHub
 fs.writeFileSync("full_diff.txt", githubDiff);
 
-// Post to Discord summary
+// Step 5: Post Discord summary
 const discordSummary = `
 ### Added: ${Object.values(added).flatMap(Object.keys).length} items in modules ${Object.keys(added).join(", ")}
 ### Removed: ${Object.values(removed).flatMap(Object.keys).length} items in modules ${Object.keys(removed).join(", ")}
 ### Renamed: ${renamed.length} items
-### Moved: 0 items
+### Moved: ${moved.length} items
 View full list of changes here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}
 `;
 
