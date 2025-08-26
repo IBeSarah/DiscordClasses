@@ -25,10 +25,13 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Run diff and post
+      - name: Post diff to Discord
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
 
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
@@ -36,6 +39,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+
             const MAX_COMMENT_LENGTH = 65000;
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
 
