@@ -1,167 +1,96 @@
-name: Post JSON module diff
+- name: Post structured module diff with per-item detection
+  uses: actions/github-script@v6
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    script: |
+      const fs = require('fs');
+      const _ = require('lodash');
 
-on:
-  push:
-    branches:
-      - main
+      const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+      const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
-jobs:
-  post-diff:
-    runs-on: ubuntu-latest
+      const MAX_COMMENT_LENGTH = 65536;
+      const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
+      function parseItems(arr) {
+        if (!arr) return [];
+        // Remove surrounding quotes and split "key": "value" strings
+        return arr.map(s => s.replace(/^"?\s*/, '').replace(/\s*"?$/, ''));
+      }
 
-      - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein
+      function compareModules(prevObj, currObj) {
+        const sections = [];
+        const moduleStats = {};
 
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+        const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
-      - name: Post structured module diff with per-item detection and summary
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const _ = require('lodash');
+        allModules.forEach(mod => {
+          const prevItems = parseItems(prevObj[mod]);
+          const currItems = parseItems(currObj[mod]);
 
-            const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-            const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+          const removed = _.difference(prevItems, currItems);
+          const added = _.difference(currItems, prevItems);
+          const common = _.intersection(prevItems, currItems);
 
-            const MAX_COMMENT_LENGTH = 65536;
-            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+          // track stats for summary
+          moduleStats[mod] = {
+            added: added.length,
+            removed: removed.length,
+            renamed: 0,
+            moved: 0
+          };
 
-            function compareModules(prevObj, currObj) {
-              const sections = [];
-              const moduleStats = {};
-
-              const prevMap = new Map();
-              const currMap = new Map();
-
-              Object.entries(prevObj).forEach(([mod, items]) => {
-                Object.entries(items || {}).forEach(([key, val]) => {
-                  prevMap.set(key, { module: mod, value: val });
-                });
-              });
-
-              Object.entries(currObj).forEach(([mod, items]) => {
-                Object.entries(items || {}).forEach(([key, val]) => {
-                  currMap.set(key, { module: mod, value: val });
-                });
-              });
-
-              const allKeys = _.union(Array.from(prevMap.keys()), Array.from(currMap.keys()));
-
-              const added = [];
-              const removed = [];
-              const renamed = [];
-              const moved = [];
-
-              allKeys.forEach(key => {
-                const prevItem = prevMap.get(key);
-                const currItem = currMap.get(key);
-
-                if (!prevItem && currItem) {
-                  added.push({ module: currItem.module, key, value: currItem.value });
-                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
-                  moduleStats[currItem.module].added++;
-                } else if (prevItem && !currItem) {
-                  removed.push({ module: prevItem.module, key, value: prevItem.value });
-                  moduleStats[prevItem.module] = moduleStats[prevItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
-                  moduleStats[prevItem.module].removed++;
-                } else if (prevItem.value !== currItem.value) {
-                  renamed.push({ module: currItem.module, key, from: prevItem.value, to: currItem.value });
-                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
-                  moduleStats[currItem.module].renamed++;
-                } else if (prevItem.module !== currItem.module) {
-                  moved.push({ key, from: prevItem.module, to: currItem.module, value: currItem.value });
-                  moduleStats[prevItem.module] = moduleStats[prevItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
-                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
-                  moduleStats[prevItem.module].moved++;
-                  moduleStats[currItem.module].moved++;
-                }
-              });
-
-              // Format summary
-              const summaryLines = [];
-              Object.entries(moduleStats).forEach(([mod, stats]) => {
-                summaryLines.push(`Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`);
-              });
-              if (summaryLines.length) {
-                sections.push(`**Summary:**\n${summaryLines.join('\n')}`);
-              }
-
-              // Format detailed sections
-              if (added.length) {
-                const mods = _.groupBy(added, 'module');
-                for (const [mod, items] of Object.entries(mods)) {
-                  sections.push(`### Added in module ${mod}`);
-                  items.forEach(it => sections.push(`"${it.key}": "${it.value}"`));
-                }
-              }
-
-              if (removed.length) {
-                const mods = _.groupBy(removed, 'module');
-                for (const [mod, items] of Object.entries(mods)) {
-                  sections.push(`### Removed from module ${mod}`);
-                  items.forEach(it => sections.push(`"${it.key}": "${it.value}"`));
-                }
-              }
-
-              if (renamed.length) {
-                const mods = _.groupBy(renamed, 'module');
-                for (const [mod, items] of Object.entries(mods)) {
-                  sections.push(`### Renamed in module ${mod}`);
-                  items.forEach(it => sections.push(`"${it.key}": "${it.from}" to "${it.to}"`));
-                }
-              }
-
-              if (moved.length) {
-                moved.forEach(it => {
-                  sections.push(`### Moved from module ${it.from} to ${it.to}`);
-                  sections.push(`"${it.key}": "${it.value}"`);
-                });
-              }
-
-              return sections.join('\n\n');
+          if (removed.length || added.length) {
+            let section = `### Module: ${mod}\n`;
+            if (removed.length) {
+              section += '#### Removed\n';
+              removed.forEach(it => section += `-"${it}"\n`);
             }
-
-            const diffText = compareModules(prev, curr);
-
-            if (!diffText.trim()) {
-              console.log("No changes to post");
-              return;
+            if (added.length) {
+              section += '#### Added\n';
+              added.forEach(it => section += `+"${it}"\n`);
             }
+            sections.push(section);
+          }
+        });
 
-            function splitText(text, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < text.length) {
-                chunks.push(text.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
+        // summary
+        const summaryText = Object.entries(moduleStats)
+          .map(([mod, stats]) => `Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`)
+          .join('\n');
+        return `**Summary:**\n${summaryText}\n\n` + sections.join('\n');
+      }
 
-            const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
+      const diffText = compareModules(prev, curr);
 
-            for (let i = 0; i < chunks.length; i++) {
-              const comment = chunks.length > 1
-                ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
-                : `${header}${chunks[i]}`;
+      if (!diffText.trim()) {
+        console.log("No changes to post");
+        return;
+      }
 
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: comment,
-              });
+      function splitText(text, maxLength) {
+        const chunks = [];
+        let start = 0;
+        while (start < text.length) {
+          chunks.push(text.slice(start, start + maxLength));
+          start += maxLength;
+        }
+        return chunks;
+      }
 
-              console.log(`Posted comment part ${i + 1}/${chunks.length}`);
-            }
+      const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
+
+      for (let i = 0; i < chunks.length; i++) {
+        const comment = chunks.length > 1
+          ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+          : `${header}${chunks[i]}`;
+
+        await github.rest.repos.createCommitComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          commit_sha: context.sha,
+          body: comment,
+        });
+
+        console.log(`Posted comment part ${i + 1}/${chunks.length}`);
+      }
