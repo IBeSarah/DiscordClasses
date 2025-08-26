@@ -29,102 +29,162 @@ jobs:
             const current = JSON.parse(fs.readFileSync('current.json', 'utf-8'));
             const previous = JSON.parse(fs.readFileSync('previous.json', 'utf-8'));
 
-            // Containers for diff lines
-            const added = [];
-            const removed = [];
-            const renamed = [];
-
-            // Helper to compare nested objects for renames
-            function detectNestedRenames(key, prevObj, currObj) {
+            // Detect module-level changes: renames, added, removed
+            function detectModuleChanges(prev, curr) {
               const renames = [];
-              const keys = new Set([...Object.keys(prevObj), ...Object.keys(currObj)]);
-              for (const nestedKey of keys) {
-                const oldVal = prevObj[nestedKey];
-                const newVal = currObj[nestedKey];
-                if (oldVal !== undefined && newVal !== undefined && oldVal !== newVal) {
-                  renames.push({
-                    key: nestedKey,
-                    original: oldVal,
-                    renamed: newVal,
-                    parentKey: key
-                  });
-                }
-              }
-              return renames;
-            }
+              const addedModules = [];
+              const removedModules = [];
 
-            // Check for added and renamed keys
-            for (const key of Object.keys(current)) {
-              if (!(key in previous)) {
-                added.push(`${key} : ${JSON.stringify(current[key])}`);
-              } else {
-                if (JSON.stringify(previous[key]) !== JSON.stringify(current[key])) {
-                  if (
-                    typeof previous[key] === 'object' && previous[key] !== null &&
-                    typeof current[key] === 'object' && current[key] !== null
-                  ) {
-                    // Nested renames inside objects
-                    const nestedRenames = detectNestedRenames(key, previous[key], current[key]);
-                    if (nestedRenames.length > 0) {
-                      renamed.push(...nestedRenames);
-                    } else {
-                      // If no nested rename detected, just treat as rename whole key
-                      renamed.push({
-                        key: key,
-                        original: previous[key],
-                        renamed: current[key]
-                      });
+              const prevKeys = Object.keys(prev);
+              const currKeys = Object.keys(curr);
+
+              const matchedCurr = new Set();
+              const matchedPrev = new Set();
+
+              // Detect renames
+              for (const oldKey of prevKeys) {
+                for (const newKey of currKeys) {
+                  if (oldKey !== newKey && !matchedCurr.has(newKey)) {
+                    const prevObj = prev[oldKey];
+                    const currObj = curr[newKey];
+                    if (
+                      typeof prevObj === 'object' &&
+                      typeof currObj === 'object' &&
+                      JSON.stringify(Object.keys(prevObj).sort()) === JSON.stringify(Object.keys(currObj).sort())
+                    ) {
+                      renames.push({ from: oldKey, to: newKey, prevObj, currObj });
+                      matchedCurr.add(newKey);
+                      matchedPrev.add(oldKey);
                     }
-                  } else {
-                    // Simple rename (value changed)
-                    renamed.push({
-                      key: key,
-                      original: previous[key],
-                      renamed: current[key]
-                    });
                   }
                 }
               }
-            }
 
-            // Check for removed keys
-            for (const key of Object.keys(previous)) {
-              if (!(key in current)) {
-                removed.push(`${key} : ${JSON.stringify(previous[key])}`);
-              }
-            }
-
-            // Format diff sections
-            function formatDiffSection(title, lines) {
-              if (lines.length === 0) return '';
-              let output = `### ${title}\n\`\`\`diff\n`;
-              for (const line of lines) {
-                if (typeof line === 'string') {
-                  output += `+ ${line}\n`;
-                } else if (line.parentKey) {
-                  // For nested rename inside an object
-                  output += `- original: "${line.parentKey}.${line.key}":"${line.original}"\n`;
-                  output += `+ renamed: "${line.parentKey}.${line.key}":"${line.renamed}"\n`;
-                } else {
-                  output += `- original: "${line.key}":${JSON.stringify(line.original)}\n`;
-                  output += `+ renamed: "${line.key}":${JSON.stringify(line.renamed)}\n`;
+              // Added modules
+              for (const newKey of currKeys) {
+                if (!matchedCurr.has(newKey) && !prevKeys.includes(newKey)) {
+                  addedModules.push({ id: newKey, obj: curr[newKey] });
                 }
               }
-              output += '```\n';
+
+              // Removed modules
+              for (const oldKey of prevKeys) {
+                if (!matchedPrev.has(oldKey) && !currKeys.includes(oldKey)) {
+                  removedModules.push({ id: oldKey, obj: prev[oldKey] });
+                }
+              }
+
+              return { renames, addedModules, removedModules };
+            }
+
+            // Compare module contents
+            function diffModule(prevObj, currObj) {
+              const added = [];
+              const removed = [];
+              const renamed = [];
+
+              const keys = new Set([...Object.keys(prevObj), ...Object.keys(currObj)]);
+              for (const k of keys) {
+                const oldVal = prevObj[k];
+                const newVal = currObj[k];
+                if (oldVal === undefined) {
+                  added.push({ key: k, val: newVal });
+                } else if (newVal === undefined) {
+                  removed.push({ key: k, val: oldVal });
+                } else if (oldVal !== newVal) {
+                  renamed.push({ key: k, oldVal, newVal });
+                }
+              }
+
+              return { added, removed, renamed };
+            }
+
+            // Format diffs into collapsible markdown with counts
+            function formatModuleDiff(title, moduleId, changes, autoExpand = true) {
+              const addedCount = changes.added?.length || 0;
+              const removedCount = changes.removed?.length || 0;
+              const renamedCount = changes.renamed?.length || 0;
+              const totalCount = addedCount + removedCount + renamedCount;
+
+              const shouldExpand = autoExpand && totalCount <= 20;
+
+              const parts = [];
+              if (addedCount) parts.push(`${addedCount} added`);
+              if (removedCount) parts.push(`${removedCount} removed`);
+              if (renamedCount) parts.push(`${renamedCount} renamed`);
+              const summaryCounts = parts.length ? ` (${parts.join(", ")})` : "";
+
+              let output = `<details${shouldExpand ? " open" : ""}>\n`;
+              output += `<summary>${title} module ${moduleId}${summaryCounts}</summary>\n\n`;
+
+              if (addedCount) {
+                output += `#### Added in ${moduleId}\n\`\`\`diff\n`;
+                for (const a of changes.added) {
+                  output += `+ "${a.key}": ${JSON.stringify(a.val)}\n`;
+                }
+                output += "```\n\n";
+              }
+
+              if (removedCount) {
+                output += `#### Removed from ${moduleId}\n\`\`\`diff\n`;
+                for (const r of changes.removed) {
+                  output += `- "${r.key}": ${JSON.stringify(r.val)}\n`;
+                }
+                output += "```\n\n";
+              }
+
+              if (renamedCount) {
+                output += `#### Renamed in ${moduleId}\n\`\`\`diff\n`;
+                for (const rn of changes.renamed) {
+                  output += `- "${rn.key}": ${JSON.stringify(rn.oldVal)}\n`;
+                  output += `+ "${rn.key}": ${JSON.stringify(rn.newVal)}\n`;
+                }
+                output += "```\n\n";
+              }
+
+              output += `</details>\n\n`;
               return output;
             }
 
-            const commentBody =
-              formatDiffSection('Added', added) +
-              formatDiffSection('Removed', removed) +
-              formatDiffSection('Renamed', renamed);
+            function formatPureRename(from, to) {
+              return `<details open>\n<summary>Renamed module ${from} to ${to} (no internal changes)</summary>\n\n</details>\n\n`;
+            }
+
+            // Build comment
+            const { renames, addedModules, removedModules } = detectModuleChanges(previous, current);
+
+            let commentBody = "";
+
+            // Handle module renames
+            for (const { from, to, prevObj, currObj } of renames) {
+              const changes = diffModule(prevObj, currObj);
+              if (changes.added.length === 0 && changes.removed.length === 0 && changes.renamed.length === 0) {
+                commentBody += formatPureRename(from, to);
+              } else {
+                commentBody += `<details>\n<summary>Renamed module ${from} to ${to} (${changes.added.length + changes.removed.length + changes.renamed.length} changes)</summary>\n\n`;
+                commentBody += formatModuleDiff("Changes in", to, changes);
+                commentBody += `</details>\n\n`;
+              }
+            }
+
+            // Handle added modules
+            for (const { id, obj } of addedModules) {
+              const added = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
+              commentBody += formatModuleDiff("Added", id, { added });
+            }
+
+            // Handle removed modules
+            for (const { id, obj } of removedModules) {
+              const removed = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
+              commentBody += formatModuleDiff("Removed", id, { removed });
+            }
 
             if (!commentBody) {
-              console.log('No changes detected.');
+              console.log("No changes detected.");
               return;
             }
 
-            // Post comment on commit (you can adjust this to issue comment or elsewhere)
+            // Post the comment
             const commitSha = process.env.GITHUB_SHA;
             await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
