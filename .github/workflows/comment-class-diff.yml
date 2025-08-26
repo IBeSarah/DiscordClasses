@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json
 
 jobs:
   comment-diff:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare with previous commit
+          fetch-depth: 2
 
       - name: Set up JSON files
         run: |
@@ -33,52 +33,89 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Create full JSON diff
-        run: |
-          node -e "
-          const fs = require('fs');
-          const prev = JSON.parse(fs.readFileSync('previous.json'));
-          const curr = JSON.parse(fs.readFileSync('current.json'));
-          const diff = require('util').inspect({ previous: prev, current: curr }, { depth: null, colors: false });
-          fs.writeFileSync('full_diff.txt', diff);
-          "
-
       - name: Post full diff as GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+            const _ = require('lodash');
             const MAX_COMMENT_LENGTH = 65536;
 
-            const diff = fs.readFileSync('full_diff.txt', 'utf8');
-            if (!diff.trim()) {
-              console.log("No diff to post");
+            const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+            const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+
+            const added = [];
+            const removed = [];
+            const renamed = [];
+            const moved = [];
+
+            function diffObjects(oldObj, newObj, path = []) {
+              const oldKeys = Object.keys(oldObj);
+              const newKeys = Object.keys(newObj);
+
+              // Added keys
+              newKeys.forEach(k => {
+                if (!oldKeys.includes(k)) {
+                  added.push([...path, k].join('.'));
+                }
+              });
+
+              // Removed keys
+              oldKeys.forEach(k => {
+                if (!newKeys.includes(k)) {
+                  removed.push([...path, k].join('.'));
+                }
+              });
+
+              // Existing keys
+              oldKeys.forEach(k => {
+                if (newKeys.includes(k)) {
+                  if (_.isObject(oldObj[k]) && _.isObject(newObj[k])) {
+                    diffObjects(oldObj[k], newObj[k], [...path, k]);
+                  } else if (oldObj[k] !== newObj[k]) {
+                    renamed.push([...path, k].join('.'));
+                  }
+                }
+              });
+            }
+
+            diffObjects(prev, curr);
+
+            let commentText = '';
+            if (removed.length) commentText += '### Removed\n' + removed.map(r => r).join('\n') + '\n';
+            if (added.length) commentText += '### Added\n' + added.map(a => a).join('\n') + '\n';
+            if (renamed.length) commentText += '### Renamed\n' + renamed.map(r => r).join('\n') + '\n';
+            if (moved.length) commentText += '### Moved\n' + moved.map(m => m).join('\n') + '\n';
+
+            if (!commentText) {
+              console.log('No changes detected.');
               return;
             }
 
-            function splitDiff(fullText, maxLength) {
+            // Split into multiple comments if too large
+            function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
-              while (start < fullText.length) {
-                chunks.push(fullText.slice(start, start + maxLength));
+              while (start < text.length) {
+                chunks.push(text.slice(start, start + maxLength));
                 start += maxLength;
               }
               return chunks;
             }
 
-            const chunks = splitDiff(diff, MAX_COMMENT_LENGTH);
+            const chunks = splitText('```diff\n' + commentText + '\n```', MAX_COMMENT_LENGTH);
 
             for (let i = 0; i < chunks.length; i++) {
-              const commentBody = chunks.length > 1
-                ? `**Part ${i+1} of ${chunks.length}**\n\n` + '```diff\n' + chunks[i] + '\n```'
-                : '```diff\n' + chunks[i] + '\n```';
+              const body = chunks.length > 1
+                ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+                : chunks[i];
 
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: commentBody,
+                body,
               });
 
               console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
