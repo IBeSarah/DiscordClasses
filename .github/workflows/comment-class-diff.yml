@@ -8,12 +8,11 @@ on:
 jobs:
   post-diff:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get current and previous version of the file
+      - name: Get current and previous version of discordclasses.json
         run: |
           git show HEAD:discordclasses.json > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
@@ -22,49 +21,48 @@ jobs:
         run: |
           diff --unified=3 previous.json current.json || true > diff.txt
 
-      - name: Debug diff.txt content
-        run: |
-          echo "------ diff.txt ------"
-          cat diff.txt
-          echo "---------------------"
-
       - name: Install GitHub CLI
         run: |
           LATEST_TAG=$(curl --silent "https://api.github.com/repos/cli/cli/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-          echo "Latest GH CLI version: $LATEST_TAG"
           wget "https://github.com/cli/cli/releases/download/${LATEST_TAG}/gh_${LATEST_TAG#v}_linux_amd64.deb" -O gh_latest_linux_amd64.deb
           sudo dpkg -i gh_latest_linux_amd64.deb
 
       - name: Authenticate GitHub CLI
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "${GITHUB_TOKEN}" | env -u GITHUB_TOKEN gh auth login --with-token
+        run: echo "${GITHUB_TOKEN}" | env -u GITHUB_TOKEN gh auth login --with-token
 
-      - name: Split and post comments
+      - name: Split diff and post multiple comments
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
         run: |
-          MAX_SIZE=60000
+          MAX_CHUNK_SIZE=60000
 
-          awk -v max=$MAX_SIZE '
-          BEGIN {buf=""}
-          {
-            if (length(buf) + length($0) + 1 > max) {
-              print buf
-              print "---split---"
-              buf=""
-            }
-            buf = buf $0 "\n"
-          }
-          END {if(buf) print buf}
-          ' diff.txt | csplit -f part - '/---split---/' '{*}'
-
-          for file in part*; do
-            echo "Posting comment from $file"
+          # Split diff.txt into chunks by character count (~60k chars each)
+          split_file() {
+            local file="$1"
+            local max=$2
+            local content
             content=$(cat "$file")
-            echo "Comment content preview:"
-            echo "${content:0:100}"
-            gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments -f body="🧩 **Changes in \`discordclasses.json\`:**\n\n\`\`\`diff\n$content\n\`\`\`"
+            local length=${#content}
+            local start=0
+            local part=1
+            while [ $start -lt $length ]; do
+              chunk=${content:$start:$max}
+              echo "$chunk" > "diff_part_$part.txt"
+              start=$((start + max))
+              part=$((part + 1))
+            done
+            echo $((part - 1))
+          }
+
+          parts=$(split_file diff.txt $MAX_CHUNK_SIZE)
+
+          echo "Diff split into $parts parts."
+
+          for i in $(seq 1 $parts); do
+            body="🧩 **Changes in \`discordclasses.json\` (part $i/$parts):**\n\n\`\`\`diff\n$(cat diff_part_$i.txt)\n\`\`\`"
+            echo "Posting comment part $i..."
+            gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments -f body="$body"
           done
