@@ -130,7 +130,6 @@ jobs:
 
                   summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}`);
 
-                  // Collapsible diff-style block with headers
                   let section = `<details>\n<summary>Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}</summary>\n\n`;
                   section += '```diff\n';
 
@@ -138,13 +137,21 @@ jobs:
                   if (added.length) { section += '### Added\n'; added.forEach(it => section += `+"${it}"\n`); }
 
                   const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
-                  if (pureRenames.length) { section += '### Renamed\n'; pureRenames.forEach(r => section += `-"${r.from}"\n +"${r.to}"\n`); }
+                  if (pureRenames.length) { 
+                    section += '### Renamed\n'; 
+                    pureRenames.forEach(r => section += `-"${r.from}"\n+"${r.to}"\n`); 
+                  }
 
-                  if (movedFromThis.length) { section += '### Moved & Renamed\n'; movedFromThis.forEach(m => {
-                    const rename = renames.find(r => r.from===m.item);
-                    const display = rename ? `+"${m.item}" to module ${m.to} (renamed to "${rename.to}")` : `+"${m.item}" to module ${m.to}`;
-                    section += display + '\n';
-                  }); }
+                  if (movedFromThis.length) { 
+                    section += '### Moved & Renamed\n'; 
+                    movedFromThis.forEach(m => {
+                      const rename = renames.find(r => r.from===m.item);
+                      const line = rename
+                        ? `+"${m.item}" → module ${m.to} (renamed to "${rename.to}")`
+                        : `+"${m.item}" → module ${m.to}`;
+                      section += line + '\n';
+                    });
+                  }
 
                   section += '```\n</details>\n';
                   sections.push(section);
