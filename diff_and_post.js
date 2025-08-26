@@ -1,94 +1,44 @@
 const fs = require('fs');
-const _ = require('lodash');
 const axios = require('axios');
-const levenshtein = require('fast-levenshtein');
 
-const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+const discordWebhook = process.env.DISCORD_WEBHOOK_URL;
+const commitSha = process.env.GITHUB_SHA;
+const repo = process.env.GITHUB_REPOSITORY;
+const serverUrl = process.env.GITHUB_SERVER_URL;
 
-const githubDiffs = [];
-const discordSummary = [];
+const fullDiff = fs.readFileSync('full_diff.txt', 'utf8');
 
-function diffModules(prev, curr) {
-    const addedModules = [];
-    const removedModules = [];
-    const movedModules = [];
-    const renamedModules = [];
+// Parse diff to count changes per module
+const moduleChanges = {};
+const lines = fullDiff.split('\n');
+lines.forEach(line => {
+  const match = line.match(/^### (\w+) in module (\d+)/);
+  if (match) {
+    const type = match[1]; // Added, Removed, Renamed, Moved
+    const moduleId = match[2];
+    if (!moduleChanges[moduleId]) moduleChanges[moduleId] = { Added: 0, Removed: 0, Renamed: 0, Moved: 0 };
+    moduleChanges[moduleId][type]++;
+  }
+});
 
-    for (const key in prev) {
-        if (!curr[key]) removedModules.push(key);
-    }
-    for (const key in curr) {
-        if (!prev[key]) addedModules.push(key);
-    }
-
-    for (const key in curr) {
-        if (prev[key]) {
-            const prevKeys = Object.keys(prev[key]);
-            const currKeys = Object.keys(curr[key]);
-
-            const added = _.difference(currKeys, prevKeys);
-            const removed = _.difference(prevKeys, currKeys);
-            const renamed = [];
-
-            // Detect renames (simple heuristic)
-            for (const k of removed) {
-                for (const k2 of added) {
-                    if (levenshtein.get(prev[key][k], curr[key][k2]) <= 3) {
-                        renamed.push([k, k2]);
-                    }
-                }
-            }
-
-            if (added.length || removed.length || renamed.length) {
-                let text = '';
-
-                if (added.length) {
-                    text += `### Added in module ${key}\n\`\`\`diff\n`;
-                    added.forEach(k => text += `+ "${k}": "${curr[key][k]}"\n`);
-                    text += '```\n';
-                }
-
-                if (removed.length) {
-                    text += `### Removed from module ${key}\n\`\`\`diff\n`;
-                    removed.forEach(k => text += `- "${k}": "${prev[key][k]}"\n`);
-                    text += '```\n';
-                }
-
-                if (renamed.length) {
-                    text += `### Renamed in module ${key}\n\`\`\`diff\n`;
-                    renamed.forEach(([oldK, newK]) => text += `- "${oldK}": "${prev[key][oldK]}"\n+ "${newK}": "${curr[key][newK]}"\n`);
-                    text += '```\n';
-                }
-
-                githubDiffs.push(text);
-
-                // Discord summary
-                const summary = [];
-                if (added.length) summary.push(`Added: ${added.length}`);
-                if (removed.length) summary.push(`Removed: ${removed.length}`);
-                if (renamed.length) summary.push(`Renamed: ${renamed.length}`);
-                if (summary.length) discordSummary.push(`Module ${key}: ${summary.join(', ')}`);
-            }
-        }
-    }
-
-    return { addedModules, removedModules, movedModules, renamedModules };
+// Create summary message
+let summary = '';
+for (const moduleId in moduleChanges) {
+  const counts = moduleChanges[moduleId];
+  const parts = [];
+  if (counts.Added) parts.push(`Added: ${counts.Added}`);
+  if (counts.Removed) parts.push(`Removed: ${counts.Removed}`);
+  if (counts.Renamed) parts.push(`Renamed: ${counts.Renamed}`);
+  if (counts.Moved) parts.push(`Moved: ${counts.Moved}`);
+  summary += `Module ${moduleId}: ${parts.join(', ')}\n`;
 }
 
-diffModules(prev, curr);
+const commitUrl = `${serverUrl}/${repo}/commit/${commitSha}`;
+summary += `\nView full list of changes here: ${commitUrl}`;
 
-// Write full diff for GitHub comments
-fs.writeFileSync('full_diff.txt', githubDiffs.join('\n'));
-
-// Post to Discord
-if (discordSummary.length) {
-    const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-    const content = discordSummary.map(x => `### ${x}`).join('\n') + `\n\nView full list of changes here: ${commitUrl}`;
-
-    axios.post(process.env.DISCORD_WEBHOOK_URL, { content })
-        .then(() => console.log('Posted summary to Discord'))
-        .catch(console.error);
-} else {
-    console.log('No changes detected for Discord');
-}
+// Send to Discord
+axios.post(discordWebhook, {
+  content: summary
+})
+.then(() => console.log('Discord summary posted'))
+.catch(err => console.error('Error posting to Discord:', err));
