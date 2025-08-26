@@ -1,105 +1,133 @@
 const fs = require('fs');
 const _ = require('lodash');
+const levenshtein = require('fast-levenshtein');
 const axios = require('axios');
 
-const oldFile = 'previous.json';
-const newFile = 'current.json';
-const githubDiffFile = 'full_diff.txt';
+const previousPath = 'previous.json';
+const currentPath = 'current.json';
 
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+// Parse JSON with duplicate key detection
+function parseJsonWithDuplicateCheck(path) {
+  const content = fs.readFileSync(path, 'utf8');
+  const keyStack = [];
+  const duplicates = [];
 
-// Load JSON safely
-function loadJSON(path) {
-  try {
-    return JSON.parse(fs.readFileSync(path, 'utf8'));
-  } catch {
-    return {};
-  }
-}
-
-const oldData = loadJSON(oldFile);
-const newData = loadJSON(newFile);
-
-const added = {};
-const removed = {};
-const moved = {};
-const renamed = {};
-
-// Compare modules
-for (const module in _.union(Object.keys(oldData), Object.keys(newData))) {
-  const oldModule = oldData[module] || {};
-  const newModule = newData[module] || {};
-
-  // Added keys
-  const addedKeys = _.difference(Object.keys(newModule), Object.keys(oldModule));
-  if (addedKeys.length) added[module] = addedKeys;
-
-  // Removed keys
-  const removedKeys = _.difference(Object.keys(oldModule), Object.keys(newModule));
-  if (removedKeys.length) removed[module] = removedKeys;
-
-  // Renamed / changed keys (same value different name or vice versa)
-  const commonKeys = _.intersection(Object.keys(oldModule), Object.keys(newModule));
-  commonKeys.forEach(key => {
-    if (oldModule[key] !== newModule[key]) {
-      if (!renamed[module]) renamed[module] = [];
-      renamed[module].push(key);
+  JSON.parse(content, (key, value) => {
+    if (key && keyStack.includes(key)) {
+      duplicates.push(key);
     }
+    if (key) keyStack.push(key);
+    return value;
   });
 
-  // Detect moved modules (if module structure changed entirely)
-  if (!_.isEqual(oldModule, newModule) && Object.keys(oldModule).length && Object.keys(newModule).length) {
-    if (!moved[module]) moved[module] = { from: oldModule, to: newModule };
+  if (duplicates.length > 0) {
+    console.warn(`⚠ Duplicate keys detected in ${path}:`, [...new Set(duplicates)]);
   }
+
+  return JSON.parse(content);
 }
 
-// ---- Generate GitHub full diff ----
+const previous = parseJsonWithDuplicateCheck(previousPath);
+const current = parseJsonWithDuplicateCheck(currentPath);
+
+// Helper to detect added, removed, renamed, moved
+function diffModules(prev, curr) {
+  const added = {};
+  const removed = {};
+  const renamed = {};
+  const moved = {};
+
+  for (const mod in curr) {
+    if (!prev[mod]) {
+      added[mod] = curr[mod];
+      continue;
+    }
+
+    // Compare keys inside module
+    const prevKeys = prev[mod];
+    const currKeys = curr[mod];
+
+    // Added keys
+    for (const key in currKeys) {
+      if (!(key in prevKeys)) {
+        added[key] = added[key] || [];
+        added[key].push(mod);
+      } else if (prevKeys[key] !== currKeys[key]) {
+        renamed[key] = renamed[key] || [];
+        renamed[key].push(mod);
+      }
+    }
+
+    // Removed keys
+    for (const key in prevKeys) {
+      if (!(key in currKeys)) {
+        removed[key] = removed[key] || [];
+        removed[key].push(mod);
+      }
+    }
+
+    // Detect module moved (if module contents changed)
+    if (!_.isEqual(prevKeys, currKeys)) {
+      moved[mod] = { from: prevKeys, to: currKeys };
+    }
+  }
+
+  // Modules entirely removed
+  for (const mod in prev) {
+    if (!curr[mod]) {
+      removed[mod] = prev[mod];
+    }
+  }
+
+  return { added, removed, renamed, moved };
+}
+
+const diff = diffModules(previous, current);
+
+// ---------- Discord Post ----------
+let discordMsg = '';
+const addSummary = (title, obj) => {
+  const modules = Object.values(obj)
+    .flatMap(x => (typeof x === 'object' ? Object.keys(x) : x))
+    .join(', ');
+  if (modules) discordMsg += `### ${title} ${modules.length} items in modules: ${modules}\n`;
+};
+
+addSummary('Added', diff.added);
+addSummary('Removed', diff.removed);
+addSummary('Renamed', diff.renamed);
+addSummary('Moved', diff.moved);
+
+if (discordMsg.trim()) {
+  axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMsg })
+    .catch(err => console.error('Discord post failed', err));
+}
+
+// ---------- GitHub Post ----------
 let githubDiff = '';
+for (const [mod, keys] of Object.entries(diff.moved)) {
+  githubDiff += `# Moved in module ${mod}\n\`\`\`diff\n`;
+  for (const [key, value] of Object.entries(keys.from)) {
+    githubDiff += `- "${key}": "${value}"\n`;
+  }
+  for (const [key, value] of Object.entries(keys.to)) {
+    githubDiff += `+ "${key}": "${value}"\n`;
+  }
+  githubDiff += '```\n';
+}
 
-function appendDiff(title, items, symbol = '+') {
-  if (!items) return;
-  Object.keys(items).forEach(module => {
-    githubDiff += `# ${title} in module ${module}\n`;
-    githubDiff += '```diff\n';
-    if (Array.isArray(items[module])) {
-      items[module].forEach(key => {
-        githubDiff += `${symbol} "${key}": "${(symbol === '+' ? newData[module] : oldData[module])[key]}"\n`;
-      });
-    } else if (items[module].from && items[module].to) {
-      githubDiff += '+ ' + JSON.stringify(items[module].to, null, 2) + '\n';
-      githubDiff += '- ' + JSON.stringify(items[module].from, null, 2) + '\n';
-    }
-    githubDiff += '```\n\n';
+const postGitHubComment = async () => {
+  const { Octokit } = require("@octokit/rest");
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+  if (!githubDiff.trim()) return;
+
+  await octokit.rest.repos.createCommitComment({
+    owner: process.env.GITHUB_REPOSITORY.split('/')[0],
+    repo: process.env.GITHUB_REPOSITORY.split('/')[1],
+    commit_sha: process.env.GITHUB_SHA,
+    body: githubDiff
   });
-}
+};
 
-appendDiff('Added', added, '+');
-appendDiff('Removed', removed, '-');
-appendDiff('Renamed', renamed, '~');
-appendDiff('Moved', moved, '+');
-
-fs.writeFileSync(githubDiffFile, githubDiff);
-
-// ---- Generate Discord summary ----
-let discordSummary = '';
-function summaryLine(title, items) {
-  if (!items || Object.keys(items).length === 0) return '';
-  const modules = Object.keys(items).join(', ');
-  const count = Object.values(items).reduce((sum, arr) => sum + arr.length, 0);
-  return `### ${title}: ${count} item(s) in modules ${modules}\n`;
-}
-
-discordSummary += summaryLine('Added', added);
-discordSummary += summaryLine('Removed', removed);
-discordSummary += summaryLine('Renamed', renamed);
-discordSummary += summaryLine('Moved', moved);
-
-if (DISCORD_WEBHOOK_URL && discordSummary) {
-  axios.post(DISCORD_WEBHOOK_URL, { content: discordSummary })
-    .then(() => console.log('Discord summary posted'))
-    .catch(e => console.error('Discord post failed:', e.message));
-} else {
-  console.log('No Discord summary to post or webhook missing');
-}
-
-console.log('GitHub diff written to', githubDiffFile);
+postGitHubComment().catch(err => console.error('GitHub comment failed', err));
