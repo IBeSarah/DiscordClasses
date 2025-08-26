@@ -25,11 +25,17 @@ jobs:
           script: |
             const fs = require('fs');
 
-            // Load JSON files
             const current = JSON.parse(fs.readFileSync('current.json', 'utf-8'));
             const previous = JSON.parse(fs.readFileSync('previous.json', 'utf-8'));
 
-            // Detect module-level changes: renames, added, removed
+            // Escape string values to avoid breaking JSON/Markdown
+            function escapeValue(val) {
+              if (typeof val === 'string') {
+                return val.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+              }
+              return val;
+            }
+
             function detectModuleChanges(prev, curr) {
               const renames = [];
               const addedModules = [];
@@ -77,7 +83,6 @@ jobs:
               return { renames, addedModules, removedModules };
             }
 
-            // Compare module contents
             function diffModule(prevObj, currObj) {
               const added = [];
               const removed = [];
@@ -87,6 +92,7 @@ jobs:
               for (const k of keys) {
                 const oldVal = prevObj[k];
                 const newVal = currObj[k];
+
                 if (oldVal === undefined) {
                   added.push({ key: k, val: newVal });
                 } else if (newVal === undefined) {
@@ -99,7 +105,6 @@ jobs:
               return { added, removed, renamed };
             }
 
-            // Format diffs into collapsible markdown with counts
             function formatModuleDiff(title, moduleId, changes, autoExpand = true) {
               const addedCount = changes.added?.length || 0;
               const removedCount = changes.removed?.length || 0;
@@ -120,7 +125,7 @@ jobs:
               if (addedCount) {
                 output += `#### Added in ${moduleId}\n\`\`\`diff\n`;
                 for (const a of changes.added) {
-                  output += `+ "${a.key}": ${JSON.stringify(a.val)}\n`;
+                  output += `+ "${a.key}": "${escapeValue(a.val)}"\n`;
                 }
                 output += "```\n\n";
               }
@@ -128,7 +133,7 @@ jobs:
               if (removedCount) {
                 output += `#### Removed from ${moduleId}\n\`\`\`diff\n`;
                 for (const r of changes.removed) {
-                  output += `- "${r.key}": ${JSON.stringify(r.val)}\n`;
+                  output += `- "${r.key}": "${escapeValue(r.val)}"\n`;
                 }
                 output += "```\n\n";
               }
@@ -136,8 +141,8 @@ jobs:
               if (renamedCount) {
                 output += `#### Renamed in ${moduleId}\n\`\`\`diff\n`;
                 for (const rn of changes.renamed) {
-                  output += `- "${rn.key}": ${JSON.stringify(rn.oldVal)}\n`;
-                  output += `+ "${rn.key}": ${JSON.stringify(rn.newVal)}\n`;
+                  output += `- "${rn.key}": "${escapeValue(rn.oldVal)}"\n`;
+                  output += `+ "${rn.key}": "${escapeValue(rn.newVal)}"\n`;
                 }
                 output += "```\n\n";
               }
@@ -150,30 +155,24 @@ jobs:
               return `<details open>\n<summary>Renamed module ${from} to ${to} (no internal changes)</summary>\n\n</details>\n\n`;
             }
 
-            // Build comment
             const { renames, addedModules, removedModules } = detectModuleChanges(previous, current);
 
             let commentBody = "";
 
-            // Handle module renames
             for (const { from, to, prevObj, currObj } of renames) {
               const changes = diffModule(prevObj, currObj);
               if (changes.added.length === 0 && changes.removed.length === 0 && changes.renamed.length === 0) {
                 commentBody += formatPureRename(from, to);
               } else {
-                commentBody += `<details>\n<summary>Renamed module ${from} to ${to} (${changes.added.length + changes.removed.length + changes.renamed.length} changes)</summary>\n\n`;
-                commentBody += formatModuleDiff("Changes in", to, changes);
-                commentBody += `</details>\n\n`;
+                commentBody += formatModuleDiff("Renamed", to, changes);
               }
             }
 
-            // Handle added modules
             for (const { id, obj } of addedModules) {
               const added = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
               commentBody += formatModuleDiff("Added", id, { added });
             }
 
-            // Handle removed modules
             for (const { id, obj } of removedModules) {
               const removed = Object.entries(obj).map(([k, v]) => ({ key: k, val: v }));
               commentBody += formatModuleDiff("Removed", id, { removed });
@@ -184,13 +183,11 @@ jobs:
               return;
             }
 
-            // Post the comment
-            const commitSha = process.env.GITHUB_SHA;
             await github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              commit_sha: commitSha,
+              commit_sha: process.env.GITHUB_SHA,
               body: commentBody
             });
 
-            console.log('Diff comment posted successfully.');
+            console.log("Diff comment posted successfully.");
