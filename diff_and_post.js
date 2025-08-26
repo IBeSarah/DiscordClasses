@@ -1,159 +1,83 @@
-const fs = require("fs");
+const fs = require('fs');
+const _ = require('lodash');
+const axios = require('axios');
 
-function safeRead(path) {
+// Environment
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+const commitSha = process.env.GITHUB_SHA;
+const repo = process.env.GITHUB_REPOSITORY;
+
+// Load JSON
+function loadJson(file) {
   try {
-    return JSON.parse(fs.readFileSync(path, "utf8"));
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
   } catch {
     return {};
   }
 }
 
-const oldData = safeRead("previous.json");
-const newData = safeRead("current.json");
+const prev = loadJson('previous.json');
+const curr = loadJson('current.json');
 
-if (!oldData || !newData) {
-  console.log("No diff to post");
-  process.exit(0);
-}
+// Output arrays
+let discordOutput = [];
+let githubOutput = [];
 
-function isObject(obj) {
-  return obj && typeof obj === "object" && !Array.isArray(obj);
-}
+// Compare keys
+const allModules = _.union(Object.keys(prev), Object.keys(curr));
 
-function diffObjects(oldObj, newObj, path = "") {
-  let diffs = { added: [], removed: [], renamed: [], movedKeys: [], movedModules: [] };
-
-  // Removed
-  for (const key of Object.keys(oldObj)) {
-    if (!(key in newObj)) {
-      diffs.removed.push({ key, value: oldObj[key], path });
-    }
-  }
+allModules.forEach(mod => {
+  const prevKeys = prev[mod] || {};
+  const currKeys = curr[mod] || {};
 
   // Added
-  for (const key of Object.keys(newObj)) {
-    if (!(key in oldObj)) {
-      diffs.added.push({ key, value: newObj[key], path });
-    }
+  const addedKeys = _.difference(Object.keys(currKeys), Object.keys(prevKeys));
+  if (addedKeys.length) {
+    const line = `### Added\n${addedKeys.map(k => `+ ${k}`).join('\n')}`;
+    discordOutput.push(line);
+    githubOutput.push(line);
   }
 
-  // Changed or Renamed
-  for (const key of Object.keys(oldObj)) {
-    if (key in newObj) {
-      if (isObject(oldObj[key]) && isObject(newObj[key])) {
-        const nested = diffObjects(oldObj[key], newObj[key], path + key + ".");
-        for (const type in nested) diffs[type].push(...nested[type]);
-      } else if (oldObj[key] !== newObj[key]) {
-        diffs.renamed.push(
-          `${path}"${key}": ${JSON.stringify(oldObj[key])} -> ${JSON.stringify(newObj[key])}`
-        );
-      }
-    }
+  // Removed
+  const removedKeys = _.difference(Object.keys(prevKeys), Object.keys(currKeys));
+  if (removedKeys.length) {
+    const line = `### Removed\n${removedKeys.map(k => `- ${k}`).join('\n')}`;
+    discordOutput.push(line);
+    githubOutput.push(line);
   }
 
-  return diffs;
+  // Renamed (simple heuristic: key exists but value changed)
+  const renamedKeys = Object.keys(prevKeys).filter(k => currKeys[k] && currKeys[k] !== prevKeys[k]);
+  if (renamedKeys.length) {
+    const line = `### Renamed\n${renamedKeys.map(k => `* ${k}: ${prevKeys[k]} → ${currKeys[k]}`).join('\n')}`;
+    discordOutput.push(line);
+    githubOutput.push(line);
+  }
+
+  // Moved module
+  if (prev[mod] && curr[mod] && !_.isEqual(prev[mod], curr[mod])) {
+    const line = `### Moved\nModule ${mod} changed`;
+    discordOutput.push(line);
+    githubOutput.push(`Module ${mod} moved from previous state to current state`);
+  }
+});
+
+// Final text
+const discordText = '```diff\n' + discordOutput.join('\n') + '\n```';
+const githubText = githubOutput.join('\n');
+
+// Write full_diff.txt for GitHub action
+fs.writeFileSync('full_diff.txt', githubText);
+
+// Post to Discord
+async function postToDiscord() {
+  if (!webhookUrl || !discordText.trim()) return;
+  try {
+    await axios.post(webhookUrl, { content: discordText });
+    console.log("Discord posted successfully");
+  } catch (e) {
+    console.error("Discord post failed:", e.message);
+  }
 }
 
-let diffs = diffObjects(oldData, newData);
-
-// --- Detect moves ---
-function detectMoves(diffs, oldObj, newObj) {
-  let movedKeys = [];
-  let movedModules = [];
-
-  // Sub-key moves
-  let removedMap = new Map();
-  for (const r of diffs.removed) removedMap.set(JSON.stringify(r.value), r);
-
-  let newRemoved = [];
-  let newAdded = [];
-
-  for (const a of diffs.added) {
-    const match = removedMap.get(JSON.stringify(a.value));
-    if (match) {
-      movedKeys.push(
-        `"${a.key}" moved from ${match.path || "(root)"} to ${a.path || "(root)"}`
-      );
-      removedMap.delete(JSON.stringify(a.value));
-    } else {
-      newAdded.push(a);
-    }
-  }
-  newRemoved = [...removedMap.values()];
-
-  // Whole-module moves
-  let oldModules = Object.keys(oldObj);
-  let newModules = Object.keys(newObj);
-
-  for (const o of oldModules) {
-    for (const n of newModules) {
-      if (
-        JSON.stringify(oldObj[o]) === JSON.stringify(newObj[n]) &&
-        o !== n
-      ) {
-        movedModules.push(`module "${o}" moved to "${n}"`);
-      }
-    }
-  }
-
-  return {
-    added: newAdded,
-    removed: newRemoved,
-    renamed: diffs.renamed,
-    movedKeys,
-    movedModules
-  };
-}
-
-diffs = detectMoves(diffs, oldData, newData);
-
-// --- Format output ---
-function formatDiffs(diffs) {
-  let output = [];
-
-  if (diffs.added.length) {
-    output.push("### Added", "```diff",
-      ...diffs.added.map(l => `+ ${l.path}"${l.key}": ${JSON.stringify(l.value)}`),
-      "```"
-    );
-  }
-
-  if (diffs.removed.length) {
-    output.push("### Removed", "```diff",
-      ...diffs.removed.map(l => `- ${l.path}"${l.key}": ${JSON.stringify(l.value)}`),
-      "```"
-    );
-  }
-
-  if (diffs.renamed.length) {
-    output.push("### Renamed", "```diff",
-      ...diffs.renamed.map(l => `~ ${l}`),
-      "```"
-    );
-  }
-
-  if (diffs.movedKeys.length) {
-    output.push("### Moved Keys", "```diff",
-      ...diffs.movedKeys.map(l => `# ${l}`),
-      "```"
-    );
-  }
-
-  if (diffs.movedModules.length) {
-    output.push("### Moved Modules", "```diff",
-      ...diffs.movedModules.map(l => `# ${l}`),
-      "```"
-    );
-  }
-
-  return output;
-}
-
-const finalOutput = formatDiffs(diffs);
-
-if (finalOutput.length === 0) {
-  console.log("No diff to post");
-  process.exit(0);
-}
-
-console.log(finalOutput.join("\n"));
+postToDiscord();
