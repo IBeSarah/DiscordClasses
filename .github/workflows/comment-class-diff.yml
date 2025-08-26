@@ -31,34 +31,3 @@ jobs:
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-
-      - name: Post GitHub commit comments (chunked)
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const MAX_COMMENT_LENGTH = 65536;
-
-            const diffText = fs.readFileSync('current_diff.txt', 'utf8');
-            if (!diffText.trim()) return;
-
-            const chunks = [];
-            let start = 0;
-            while (start < diffText.length) {
-              chunks.push(diffText.slice(start, start + MAX_COMMENT_LENGTH));
-              start += MAX_COMMENT_LENGTH;
-            }
-
-            for (let i = 0; i < chunks.length; i++) {
-              const partHeader = chunks.length > 1 ? `**Part ${i+1} of ${chunks.length}**\n\n` : '';
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: partHeader + chunks[i]
-              });
-            }
