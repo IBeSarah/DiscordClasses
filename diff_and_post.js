@@ -1,14 +1,14 @@
 const fs = require("fs");
 const axios = require("axios");
 
-// Simple heuristic for renames: prefix before "_" unchanged
+// Simple heuristic for renames
 function looksLikeRename(oldVal, newVal) {
   const prefixOld = oldVal.split("_")[0];
   const prefixNew = newVal.split("_")[0];
   return prefixOld === prefixNew;
 }
 
-// Generate detailed diff
+// Generate full diff for GitHub
 function generateDiff(prev, curr) {
   let output = [];
 
@@ -17,13 +17,11 @@ function generateDiff(prev, curr) {
     const newObj = curr[id];
 
     if (!oldObj) {
-      // Entire module added
       output.push(`### Added module ${id}`);
       output.push("```diff");
       for (const [k, v] of Object.entries(newObj)) output.push(`+ "${k}": "${v}"`);
       output.push("```");
     } else if (!newObj) {
-      // Entire module removed
       output.push(`### Removed module ${id}`);
       output.push("```diff");
       for (const [k, v] of Object.entries(oldObj)) output.push(`- "${k}": "${v}"`);
@@ -59,7 +57,7 @@ function generateDiff(prev, curr) {
   return output.join("\n");
 }
 
-// Discord summary (short overview, max 2000 chars including commit URL)
+// Generate Discord summary (short, single message, max 2000 chars)
 function discordSummary(prev, curr, commitUrl) {
   let lines = [];
 
@@ -79,13 +77,12 @@ function discordSummary(prev, curr, commitUrl) {
     }
 
     if (added || removed || renamed || moved) {
-      lines.push(
-        `Module ${id}:` +
-          (added ? ` Added: ${added},` : "") +
-          (removed ? ` Removed: ${removed},` : "") +
-          (renamed ? ` Renamed: ${renamed},` : "") +
-          (moved ? ` Moved: ${moved},` : "")
-      );
+      const parts = [];
+      if (added) parts.push(`Added: ${added}`);
+      if (removed) parts.push(`Removed: ${removed}`);
+      if (renamed) parts.push(`Renamed: ${renamed}`);
+      if (moved) parts.push(`Moved: ${moved}`);
+      lines.push(`Module ${id}: ${parts.join(", ")}`);
     }
   }
 
@@ -96,10 +93,7 @@ function discordSummary(prev, curr, commitUrl) {
 
 // Post to Discord
 async function postDiscord(summary) {
-  const webhook = process.env.DISCORD_WEBHOOK_URL;
-  if (!webhook) throw new Error("Missing DISCORD_WEBHOOK_URL");
-
-  await axios.post(webhook, { content: summary });
+  await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: summary });
   console.log("✅ Discord post successful");
 }
 
@@ -108,8 +102,6 @@ async function postGitHub(diffText) {
   const token = process.env.GITHUB_TOKEN;
   const repo = process.env.GITHUB_REPOSITORY;
   const sha = process.env.GITHUB_SHA;
-
-  if (!token || !repo || !sha) throw new Error("Missing GitHub env vars");
 
   const MAX_COMMENT = 65000;
   const chunks = [];
