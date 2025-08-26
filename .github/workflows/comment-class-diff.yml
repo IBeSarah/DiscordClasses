@@ -12,11 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - run: npm install lodash fast-levenshtein axios
+      - name: Install Node dependencies
+        run: npm install lodash fast-levenshtein axios
 
       - name: Set up JSON files safely
         run: |
@@ -25,44 +27,33 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
           node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      - name: Compute diff and post to Discord + GitHub
+      - name: Compute diff and post to Discord
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Post full diff to GitHub commit comment
+      - name: Create GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const diffText = fs.readFileSync('current_diff.txt', 'utf8');
-            if(!diffText.trim()) return;
+            if (!diffText.trim()) return;
 
-            const MAX = 65536;
-            function splitText(text, maxLength){
-              const chunks = [];
-              let start=0;
-              while(start<text.length){
-                chunks.push(text.slice(start,start+maxLength));
-                start += maxLength;
-              }
-              return chunks;
-            }
+            const MAX_COMMENT = 65536;
+            let start = 0;
 
-            const chunks = splitText(diffText, MAX);
-            for(let i=0;i<chunks.length;i++){
-              const comment = chunks.length>1
-                ? `**Part ${i+1} of ${chunks.length}**\n\n${chunks[i]}`
-                : chunks[i];
+            while (start < diffText.length) {
+              const chunk = diffText.slice(start, start + MAX_COMMENT);
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: comment
+                body: chunk
               });
+              start += MAX_COMMENT;
             }
