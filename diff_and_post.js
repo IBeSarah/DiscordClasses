@@ -1,4 +1,5 @@
 const fs = require('fs');
+const _ = require('lodash');
 const axios = require('axios');
 
 // Environment variables
@@ -7,12 +8,12 @@ const commitSha = process.env.GITHUB_SHA;
 const repo = process.env.GITHUB_REPOSITORY;
 const serverUrl = process.env.GITHUB_SERVER_URL;
 
-// Files
+// File paths
 const prevFile = 'previous.json';
 const currFile = 'current.json';
-const outputFile = 'full_diff.txt';
+const fullDiffFile = 'full_diff.txt';
 
-// Helper to load JSON
+// Load JSON safely
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -21,102 +22,67 @@ function loadJson(file) {
   }
 }
 
-// Helper to format objects nicely
-function formatValue(val) {
-  if (typeof val === 'object' && val !== null) {
-    return JSON.stringify(val, null, 2);
-  }
-  return val;
+const prev = loadJson(prevFile);
+const curr = loadJson(currFile);
+
+let added = [];
+let removed = [];
+let moved = [];
+
+// Compare modules
+for (const moduleId of _.union(Object.keys(prev), Object.keys(curr))) {
+  const prevKeys = prev[moduleId] ? Object.keys(prev[moduleId]) : [];
+  const currKeys = curr[moduleId] ? Object.keys(curr[moduleId]) : [];
+
+  // Added keys
+  const newKeys = _.difference(currKeys, prevKeys);
+  newKeys.forEach(k => added.push(`${k} in module ${moduleId}`));
+
+  // Removed keys
+  const removedKeys = _.difference(prevKeys, currKeys);
+  removedKeys.forEach(k => removed.push(`${k} in module ${moduleId}`));
+
+  // Moved keys
+  const commonKeys = _.intersection(prevKeys, currKeys);
+  commonKeys.forEach(k => {
+    if (!_.isEqual(prev[moduleId][k], curr[moduleId][k])) {
+      moved.push(`${k} in module ${moduleId}`);
+    }
+  });
 }
 
-// Compare two JSON objects
-function diffModules(prev, curr) {
-  const added = {};
-  const removed = {};
-  const moved = {};
-
-  // Check for removed or moved
-  for (const key in prev) {
-    if (!(key in curr)) {
-      removed[key] = prev[key];
-    } else {
-      // Only mark as moved if the value itself changed (module ID changed)
-      if (prev[key] !== curr[key]) {
-        moved[key] = { from: prev[key], to: curr[key] };
-      }
-    }
-  }
-
-  // Check for added
-  for (const key in curr) {
-    if (!(key in prev)) {
-      added[key] = curr[key];
-    }
-  }
-
-  return { added, removed, moved };
+// Generate diff sections
+function makeSection(title, items) {
+  if (items.length === 0) return '';
+  return `### ${title}\n\`\`\`diff\n${items.map(i => {
+    const sign = title === 'Added' ? '+' : title === 'Removed' ? '-' : '*';
+    return `${sign} ${i}`;
+  }).join('\n')}\n\`\`\`\n`;
 }
 
-// Build diff string
-function buildDiffString(diffObj) {
-  let str = '```diff\n';
+const diffText = makeSection('Added', added) +
+                 makeSection('Removed', removed) +
+                 makeSection('Moved', moved);
 
-  if (Object.keys(diffObj.added).length > 0) {
-    str += '### Added\n';
-    for (const key in diffObj.added) {
-      str += `+ ${key}: ${formatValue(diffObj.added[key])}\n`;
-    }
-  }
-
-  if (Object.keys(diffObj.removed).length > 0) {
-    str += '### Removed\n';
-    for (const key in diffObj.removed) {
-      str += `- ${key}: ${formatValue(diffObj.removed[key])}\n`;
-    }
-  }
-
-  if (Object.keys(diffObj.moved).length > 0) {
-    str += '### Moved\n';
-    for (const key in diffObj.moved) {
-      str += `* ${key} moved from ${formatValue(diffObj.moved[key].from)} to ${formatValue(diffObj.moved[key].to)}\n`;
-    }
-  }
-
-  str += '```';
-  return str;
-}
-
-// Load JSON
-const prevData = loadJson(prevFile);
-const currData = loadJson(currFile);
-
-// Generate diff
-const diffObj = diffModules(prevData, currData);
-const diffString = buildDiffString(diffObj);
-
-// Save full diff for GitHub
-fs.writeFileSync(outputFile, diffString, 'utf8');
-
-// Truncate for Discord
-function truncateForDiscord(text) {
-  if (text.length > 1990) {
-    return text.slice(0, 1990) + '\n...';
-  }
-  return text;
-}
+fs.writeFileSync(fullDiffFile, diffText);
 
 // Post to Discord
-async function postToDiscord(content) {
+async function postToDiscord(text) {
   if (!webhookUrl) return;
-  try {
-    await axios.post(webhookUrl, { content });
-    console.log('Discord webhook sent.');
-  } catch (err) {
-    console.error('Error posting to Discord:', err.response?.data || err.message);
+
+  const MAX = 2000;
+  for (let i = 0; i < text.length; i += MAX) {
+    const chunk = text.slice(i, i + MAX);
+    await axios.post(webhookUrl, { content: chunk });
   }
 }
 
-// Run
 (async () => {
-  await postToDiscord(truncateForDiscord(diffString));
+  if (!diffText.trim()) {
+    console.log('No diff to post');
+    return;
+  }
+
+  console.log(diffText);
+  await postToDiscord(diffText);
 })();
