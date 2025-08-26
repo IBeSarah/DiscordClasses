@@ -12,9 +12,8 @@ const serverUrl = process.env.GITHUB_SERVER_URL;
 // File paths
 const prevFile = 'previous.json';
 const currFile = 'current.json';
-const fullDiffFile = 'full_diff.txt';
 
-// Helpers
+// Helper to load JSON safely
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -23,61 +22,97 @@ function loadJson(file) {
   }
 }
 
-// Simple diff generator
-function generateDiff(prev, curr) {
+// Compute diff between two objects
+function computeDiff(prev, curr) {
   const added = [];
   const removed = [];
   const renamed = [];
   const moved = [];
 
-  for (const key in curr) {
-    if (!(key in prev)) added.push(`${key} added to Module \`${curr[key]}\``);
-  }
+  const prevKeys = Object.keys(prev);
+  const currKeys = Object.keys(curr);
 
-  for (const key in prev) {
-    if (!(key in curr)) removed.push(`${key} removed from Module \`${prev[key]}\``);
-  }
+  // Added
+  currKeys.forEach(k => {
+    if (!prevKeys.includes(k)) added.push(k);
+  });
 
-  // Example placeholders for renamed/moved
-  // Extend this with real logic if needed
-  // For moved/renamed, you could compare values and use Levenshtein distance
+  // Removed
+  prevKeys.forEach(k => {
+    if (!currKeys.includes(k)) removed.push(k);
+  });
 
-  let diffText = '';
-  if (added.length) diffText += `### Added\n${added.map(a => '+ ' + a).join('\n')}\n`;
-  if (removed.length) diffText += `### Removed\n${removed.map(r => '- ' + r).join('\n')}\n`;
-  if (renamed.length) diffText += `### Renamed\n${renamed.map(r => '* ' + r).join('\n')}\n`;
-  if (moved.length) diffText += `### Moved\n${moved.map(m => '* ' + m).join('\n')}\n`;
+  // Renamed / moved (simple heuristic)
+  prevKeys.forEach(prevKey => {
+    const prevVal = prev[prevKey];
+    currKeys.forEach(currKey => {
+      const currVal = curr[currKey];
+      if (prevKey !== currKey && prevVal === currVal) {
+        renamed.push({from: prevKey, to: currKey});
+      }
+    });
+  });
 
-  return diffText;
+  return { added, removed, renamed, moved };
 }
 
-// Load files
+// Format diff as Markdown H3 with code block
+function formatDiff(diff) {
+  let text = '```diff\n';
+  if (diff.added.length) {
+    text += '### Added\n';
+    diff.added.forEach(k => {
+      text += `+ ${k}\n`;
+    });
+  }
+  if (diff.removed.length) {
+    text += '### Removed\n';
+    diff.removed.forEach(k => {
+      text += `- ${k}\n`;
+    });
+  }
+  if (diff.renamed.length) {
+    text += '### Renamed\n';
+    diff.renamed.forEach(r => {
+      text += `* ${r.from} -> ${r.to}\n`;
+    });
+  }
+  if (diff.moved.length) {
+    text += '### Moved\n';
+    diff.moved.forEach(m => {
+      text += `* ${m}\n`;
+    });
+  }
+  text += '```';
+  return text;
+}
+
+// Load JSON files
 const prevJson = loadJson(prevFile);
 const currJson = loadJson(currFile);
 
-// Generate diff
-const fullDiff = generateDiff(prevJson, currJson);
+// Compute diff
+const diff = computeDiff(prevJson, currJson);
+const fullDiffText = formatDiff(diff);
 
-// Write full diff for GitHub
-fs.writeFileSync(fullDiffFile, fullDiff, 'utf8');
+// Write full diff for GitHub workflow
+fs.writeFileSync('full_diff.txt', fullDiffText, 'utf8');
+console.log('Saved full diff to full_diff.txt');
 
-// Post to Discord (truncate to 2000 chars)
-async function postToDiscord(text) {
-  if (!webhookUrl || !text.trim()) return;
-  const DISCORD_MAX = 2000;
-  const chunks = [];
-  for (let i = 0; i < text.length; i += DISCORD_MAX) {
-    chunks.push(text.slice(i, i + DISCORD_MAX));
-  }
+// Post to Discord truncated at 2000 characters
+async function postToDiscord(content) {
+  if (!webhookUrl) return console.log('No DISCORD_WEBHOOK_URL set');
 
-  for (const chunk of chunks) {
-    try {
-      await axios.post(webhookUrl, { content: chunk });
-    } catch (err) {
-      console.error('Discord webhook error:', err.response?.data || err.message);
-    }
+  try {
+    await axios.post(webhookUrl, { content });
+    console.log('Posted diff to Discord');
+  } catch (err) {
+    console.error('Failed to post to Discord', err);
   }
 }
 
+// Discord truncation
+const discordMessage = fullDiffText.length > 2000 ? fullDiffText.slice(0, 2000) + '\n[Truncated]' : fullDiffText;
+
 // Run
-postToDiscord(fullDiff);
+postToDiscord(discordMessage);
