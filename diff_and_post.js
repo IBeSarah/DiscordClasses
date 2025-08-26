@@ -1,6 +1,4 @@
 const fs = require('fs');
-const _ = require('lodash');
-const levenshtein = require('fast-levenshtein');
 const axios = require('axios');
 
 // Environment variables
@@ -9,12 +7,12 @@ const commitSha = process.env.GITHUB_SHA;
 const repo = process.env.GITHUB_REPOSITORY;
 const serverUrl = process.env.GITHUB_SERVER_URL;
 
-// File paths
+// Files
 const prevFile = 'previous.json';
 const currFile = 'current.json';
-const fullDiffFile = 'full_diff.txt';
+const outputFile = 'full_diff.txt';
 
-// Helper functions
+// Helper to load JSON
 function loadJson(file) {
   try {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -23,108 +21,102 @@ function loadJson(file) {
   }
 }
 
-function formatValue(value) {
-  if (_.isObject(value)) return JSON.stringify(value, null, 2);
-  return value;
+// Helper to format objects nicely
+function formatValue(val) {
+  if (typeof val === 'object' && val !== null) {
+    return JSON.stringify(val, null, 2);
+  }
+  return val;
 }
 
-// Compute diff between two JSON objects
-function computeDiff(prev, curr) {
-  const added = [];
-  const removed = [];
-  const renamed = [];
-  const moved = [];
+// Compare two JSON objects
+function diffModules(prev, curr) {
+  const added = {};
+  const removed = {};
+  const moved = {};
 
-  for (const key in curr) {
-    if (!prev[key]) {
-      added.push({ key, value: curr[key] });
-    } else if (!_.isEqual(prev[key], curr[key])) {
-      // You could add custom logic here for "moved" or "renamed"
-      moved.push({ key, from: prev[key], to: curr[key] });
-    }
-  }
-
+  // Check for removed or moved
   for (const key in prev) {
-    if (!curr[key]) {
-      removed.push({ key, value: prev[key] });
+    if (!(key in curr)) {
+      removed[key] = prev[key];
+    } else {
+      // Only mark as moved if the value itself changed (module ID changed)
+      if (prev[key] !== curr[key]) {
+        moved[key] = { from: prev[key], to: curr[key] };
+      }
     }
   }
 
-  return { added, removed, renamed, moved };
+  // Check for added
+  for (const key in curr) {
+    if (!(key in prev)) {
+      added[key] = curr[key];
+    }
+  }
+
+  return { added, removed, moved };
 }
 
-function generateDiffText(diff) {
-  let text = '';
+// Build diff string
+function buildDiffString(diffObj) {
+  let str = '```diff\n';
 
-  if (diff.added.length) {
-    text += '### Added\n';
-    diff.added.forEach(item => {
-      text += `+ ${item.key}: ${formatValue(item.value)}\n`;
-    });
+  if (Object.keys(diffObj.added).length > 0) {
+    str += '### Added\n';
+    for (const key in diffObj.added) {
+      str += `+ ${key}: ${formatValue(diffObj.added[key])}\n`;
+    }
   }
 
-  if (diff.removed.length) {
-    text += '\n### Removed\n';
-    diff.removed.forEach(item => {
-      text += `- ${item.key}: ${formatValue(item.value)}\n`;
-    });
+  if (Object.keys(diffObj.removed).length > 0) {
+    str += '### Removed\n';
+    for (const key in diffObj.removed) {
+      str += `- ${key}: ${formatValue(diffObj.removed[key])}\n`;
+    }
   }
 
-  if (diff.renamed.length) {
-    text += '\n### Renamed\n';
-    diff.renamed.forEach(item => {
-      text += `* ${item.key} renamed from ${formatValue(item.from)} to ${formatValue(item.to)}\n`;
-    });
+  if (Object.keys(diffObj.moved).length > 0) {
+    str += '### Moved\n';
+    for (const key in diffObj.moved) {
+      str += `* ${key} moved from ${formatValue(diffObj.moved[key].from)} to ${formatValue(diffObj.moved[key].to)}\n`;
+    }
   }
 
-  if (diff.moved.length) {
-    text += '\n### Moved\n';
-    diff.moved.forEach(item => {
-      text += `* ${item.key} moved from ${formatValue(item.from)} to ${formatValue(item.to)}\n`;
-    });
-  }
-
-  return text.trim();
+  str += '```';
+  return str;
 }
 
-function truncateForDiscord(text, max = 2000) {
-  if (text.length <= max) return [text];
-  const chunks = [];
-  let start = 0;
-  while (start < text.length) {
-    chunks.push(text.slice(start, start + max));
-    start += max;
+// Load JSON
+const prevData = loadJson(prevFile);
+const currData = loadJson(currFile);
+
+// Generate diff
+const diffObj = diffModules(prevData, currData);
+const diffString = buildDiffString(diffObj);
+
+// Save full diff for GitHub
+fs.writeFileSync(outputFile, diffString, 'utf8');
+
+// Truncate for Discord
+function truncateForDiscord(text) {
+  if (text.length > 1990) {
+    return text.slice(0, 1990) + '\n...';
   }
-  return chunks;
+  return text;
 }
 
-async function postToDiscord(text) {
-  const chunks = truncateForDiscord(text);
-  for (const chunk of chunks) {
-    await axios.post(webhookUrl, { content: '```diff\n' + chunk + '\n```' });
-  }
-}
-
-async function main() {
-  const prev = loadJson(prevFile);
-  const curr = loadJson(currFile);
-
-  const diff = computeDiff(prev, curr);
-  const diffText = generateDiffText(diff);
-
-  // Write full diff for GitHub
-  fs.writeFileSync(fullDiffFile, diffText, 'utf8');
-
-  if (diffText) {
-    console.log('Posting diff to Discord...');
-    await postToDiscord(diffText);
-    console.log('Done!');
-  } else {
-    console.log('No diff detected.');
+// Post to Discord
+async function postToDiscord(content) {
+  if (!webhookUrl) return;
+  try {
+    await axios.post(webhookUrl, { content });
+    console.log('Discord webhook sent.');
+  } catch (err) {
+    console.error('Error posting to Discord:', err.response?.data || err.message);
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+// Run
+(async () => {
+  await postToDiscord(truncateForDiscord(diffString));
+})();
