@@ -3,10 +3,7 @@ name: Comment Class Diff
 on:
   push:
     paths:
-      - 'DiscordClasses/discordclasses.json'  # Change this to your file path
-  pull_request:
-    paths:
-      - 'DiscordClasses/discordclasses.json'
+      - 'discordclasses.json'
 
 jobs:
   post-diff:
@@ -18,26 +15,50 @@ jobs:
 
       - name: Get current and previous version of the file
         run: |
-          git show HEAD:DiscordClasses/discordclasses.json > current.json
-          git show HEAD^:DiscordClasses/discordclasses.json > previous.json || echo '{}' > previous.json
+          git show HEAD:discordclasses.json > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Generate JSON diff
-        id: diff
         run: |
           npm install -g json-diff
-          DIFF=$(json-diff previous.json current.json --color=never || true)
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          echo "$DIFF" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          json-diff previous.json current.json --color=never > diff.txt || true
 
-      - name: Post comment to commit
-        uses: peter-evans/commit-comment@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            🧩 **Changes in `discordclasses.json`**:
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0 || true
+          sudo apt-add-repository https://cli.github.com/packages || true
+          sudo apt update
+          sudo apt install -y gh
 
-            ```diff
-            ${{ steps.diff.outputs.diff }}
-            ```
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $GITHUB_TOKEN | gh auth login --with-token
 
+      - name: Split and post comments
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          MAX_SIZE=60000
+
+          # Split diff.txt into chunks smaller than MAX_SIZE, using awk and csplit
+          awk -v max=$MAX_SIZE '
+          BEGIN {buf=""}
+          {
+            if (length(buf) + length($0) + 1 > max) {
+              print buf
+              print "---split---"
+              buf=""
+            }
+            buf = buf $0 "\n"
+          }
+          END {if(buf) print buf}
+          ' diff.txt | csplit -f part - '/---split---/' '{*}'
+
+          # Post each chunk as a separate commit comment
+          for file in part*; do
+            content=$(cat "$file")
+            gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments -f body="🧩 **Changes in \`discordclasses.json\`:**\n\n\`\`\`diff\n$content\n\`\`\`"
+          done
