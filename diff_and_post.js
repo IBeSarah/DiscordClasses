@@ -1,98 +1,69 @@
 const fs = require('fs');
 const axios = require('axios');
-const _ = require('lodash');
-const levenshtein = require('fast-levenshtein');
+const { Octokit } = require('@octokit/rest');
 
-// Load JSON
-const prev = JSON.parse(fs.readFileSync('previous.json'));
-const curr = JSON.parse(fs.readFileSync('current.json'));
+const MAX_DISCORD_CHARS = 2000;
+const MAX_GITHUB_COMMENT = 65536;
 
-// Flatten module structure into {module, item, value}
-function flatten(json) {
-  const result = [];
-  for (const mod in json) {
-    for (const key in json[mod]) {
-      result.push({module: mod, item: key, value: json[mod][key]});
-    }
-  }
-  return result;
+// --- Read diff ---
+const diff = fs.readFileSync('diff.txt', 'utf8').trim();
+if (!diff) {
+  console.log("No diff to post.");
+  process.exit(0);
 }
 
-const prevFlat = flatten(prev);
-const currFlat = flatten(curr);
+// --- DISCORD POST ---
+const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+const commitUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+let discordContent = `**Changes in discordclasses.json:**\n\`\`\`diff\n${diff}\n\`\`\`\nFull commit here: ${commitUrl}`;
 
-// Detect added/removed
-const added = _.differenceWith(currFlat, prevFlat, _.isEqual);
-const removed = _.differenceWith(prevFlat, currFlat, _.isEqual);
+// Truncate to 2000 chars including link
+if (discordContent.length > MAX_DISCORD_CHARS) {
+  const allowedDiffLength = MAX_DISCORD_CHARS - (`**Changes in discordclasses.json:**\n\`\`\`diff\n\`\`\`\nFull commit here: ${commitUrl}`).length;
+  discordContent = `**Changes in discordclasses.json:**\n\`\`\`diff\n${diff.slice(0, allowedDiffLength)}\n\`\`\`\nFull commit here: ${commitUrl}`;
+}
 
-// Detect moved and/or renamed
-const moved = [];
-const renamed = [];
+// Send Discord webhook
+axios.post(webhookUrl, { content: discordContent })
+  .then(() => console.log("Discord webhook sent."))
+  .catch(err => {
+    console.error("Failed to send Discord webhook:", err.message);
+    process.exit(1);
+  });
 
-for (const c of currFlat) {
-  const p = prevFlat.find(pf => pf.item === c.item);
-  if (p && p.module !== c.module) {
-    const renameMatch = prevFlat.find(pf => pf.value === c.value && pf.item !== c.item);
-    moved.push({
-      item: c.item,
-      fromModule: p.module,
-      toModule: c.module,
-      renamed: renameMatch ? c.item : null
+// --- GitHub COMMENT ---
+const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+const chunkPrefix = '```diff\n';
+const chunkSuffix = '\n```';
+
+function splitDiff(fullText, maxLength) {
+  const chunks = [];
+  let start = 0;
+  while (start < fullText.length) {
+    chunks.push(fullText.slice(start, start + maxLength));
+    start += maxLength;
+  }
+  return chunks;
+}
+
+const rawChunks = splitDiff(diff, MAX_GITHUB_COMMENT - header.length - chunkPrefix.length - chunkSuffix.length);
+
+(async () => {
+  for (let i = 0; i < rawChunks.length; i++) {
+    const partHeader = rawChunks.length > 1
+      ? `${header}**Part ${i + 1} of ${rawChunks.length}**\n\n`
+      : header;
+
+    const commentBody = `${partHeader}${chunkPrefix}${rawChunks[i]}${chunkSuffix}`;
+
+    await octokit.rest.repos.createCommitComment({
+      owner: process.env.GITHUB_REPOSITORY.split('/')[0],
+      repo: process.env.GITHUB_REPOSITORY.split('/')[1],
+      commit_sha: process.env.GITHUB_SHA,
+      body: commentBody,
     });
+
+    console.log(`Posted GitHub comment part ${i + 1}/${rawChunks.length}`);
   }
-  if (!p) {
-    const nameMatch = prevFlat.find(pf => pf.value === c.value && pf.item !== c.item);
-    if (nameMatch) renamed.push({item: nameMatch.item, to: c.item, newModule: c.module});
-  }
-}
-
-// Build GitHub comment with collapsible large modules
-const githubSummary = [];
-const COLLAPSE_THRESHOLD = 30; // lines
-
-const moduleChanges = {};
-
-added.forEach(a => (moduleChanges[a.module] = moduleChanges[a.module] || []).push(`+ ${a.item}`));
-removed.forEach(r => (moduleChanges[r.module] = moduleChanges[r.module] || []).push(`- ${r.item}`));
-moved.forEach(m => {
-  const line = m.renamed
-    ? `* ${m.item} moved from module ${m.fromModule} to module ${m.toModule} (renamed)`
-    : `* ${m.item} moved from module ${m.fromModule} to module ${m.toModule}`;
-  moduleChanges[m.toModule] = moduleChanges[m.toModule] || [];
-  moduleChanges[m.toModule].push(line);
-});
-renamed.forEach(r => {
-  moduleChanges[r.newModule] = moduleChanges[r.newModule] || [];
-  moduleChanges[r.newModule].push(`* ${r.item} renamed to "${r.to}"`);
-});
-
-for (const mod in moduleChanges) {
-  const lines = moduleChanges[mod];
-  if (lines.length > COLLAPSE_THRESHOLD) {
-    githubSummary.push(`### Module ${mod} (${lines.length} changes, collapsed)`);
-  } else {
-    githubSummary.push(`### Module ${mod}\n${lines.join('\n')}`);
-  }
-}
-
-fs.writeFileSync('current_diff.txt', githubSummary.join('\n\n'));
-
-// Prepare Discord message (first 2000 chars)
-const discordMessage = `**Changes in discordclasses.json:**\n` +
-  '```diff\n' +
-  githubSummary.join('\n') +
-  '\n```\n' +
-  `Full commit here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-
-const snippet = discordMessage.slice(0, 2000);
-
-async function postDiscord() {
-  try {
-    await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: snippet });
-    console.log('Discord webhook posted successfully!');
-  } catch (e) {
-    console.error('Failed to send Discord webhook:', e);
-  }
-}
-
-postDiscord();
+})();
