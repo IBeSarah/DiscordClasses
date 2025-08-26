@@ -1,100 +1,113 @@
+// diff_and_post.js
 const fs = require('fs');
 const { Octokit } = require('@octokit/rest');
-const path = require('path');
-const axios = require('axios'); // for Discord webhook
+const axios = require('axios');
 
-// GitHub Actions environment
-const githubToken = process.env.GITHUB_TOKEN;
-const commitSha = process.env.GITHUB_SHA;
-const repo = process.env.GITHUB_REPOSITORY; // owner/repo
-const commitUrl = `https://github.com/${repo}/commit/${commitSha}`;
-const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL; // optional
+const MAX_GITHUB_COMMENT = 65536; // max characters per GitHub comment
+const MAX_DISCORD_COMMENT = 2000; // max characters for Discord
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const COMMIT_SHA = process.env.GITHUB_SHA;
+const REPO = process.env.GITHUB_REPOSITORY; // e.g., owner/repo
 
-const prevPath = path.join(__dirname, 'previous.json');
-const currPath = path.join(__dirname, 'current.json');
-
-function readJsonSafe(filePath) {
-  if (!fs.existsSync(filePath)) return {};
-  try { return JSON.parse(fs.readFileSync(filePath, 'utf8')); }
-  catch { return {}; }
+// Helper: read files
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-function diffObjects(prev, curr) {
-  const added = [], removed = [], renamed = [], moved = [];
-  const allModules = new Set([...Object.keys(prev), ...Object.keys(curr)]);
-  allModules.forEach(moduleKey => {
-    const prevModule = prev[moduleKey] || {};
-    const currModule = curr[moduleKey] || {};
-    const allKeys = new Set([...Object.keys(prevModule), ...Object.keys(currModule)]);
-    allKeys.forEach(k => {
-      if (!(k in prevModule)) added.push({ module: moduleKey, key: k });
-      else if (!(k in currModule)) removed.push({ module: moduleKey, key: k });
-      else if (prevModule[k] !== currModule[k]) renamed.push({ module: moduleKey, key: k });
-    });
-  });
-  return { added, removed, renamed, moved };
+// Helper: generate diff in added/removed/renamed/moved format for Discord
+function generateDiffForDiscord(prev, curr) {
+  const added = [];
+  const removed = [];
+  const renamed = [];
+  const moved = [];
+
+  const prevModules = Object.keys(prev);
+  const currModules = Object.keys(curr);
+
+  // Added / Removed modules
+  for (const key of currModules) if (!prevModules.includes(key)) added.push(key);
+  for (const key of prevModules) if (!currModules.includes(key)) removed.push(key);
+
+  // Changes inside modules
+  for (const mod of currModules) {
+    if (!prev[mod]) continue;
+    const prevKeys = Object.keys(prev[mod]);
+    const currKeys = Object.keys(curr[mod]);
+
+    // Added / Removed keys
+    for (const k of currKeys) if (!prevKeys.includes(k)) added.push(`${k} to Module ${mod}`);
+    for (const k of prevKeys) if (!currKeys.includes(k)) removed.push(`${k} from Module ${mod}`);
+
+    // Renames: simple check (if value changed)
+    for (const k of currKeys) {
+      if (prevKeys.includes(k) && prev[mod][k] !== curr[mod][k]) {
+        renamed.push(`${k} in Module ${mod}`);
+      }
+    }
+  }
+
+  let discordText = '';
+  if (removed.length) discordText += `### Removed\n${removed.map(r => `- ${r}`).join('\n')}\n`;
+  if (added.length) discordText += `### Added\n${added.map(a => `+ ${a}`).join('\n')}\n`;
+  if (renamed.length) discordText += `### Renamed\n${renamed.map(r => `~ ${r}`).join('\n')}\n`;
+  if (moved.length) discordText += `### Moved\n${moved.map(m => `> ${m}`).join('\n')}\n`;
+
+  return discordText;
 }
 
-function formatDiff(diffObj) {
-  const lines = [];
-  if (diffObj.removed.length) {
-    lines.push('### Removed');
-    diffObj.removed.forEach(r => lines.push(`- ${r.key} removed from Module ${r.module}`));
-  }
-  if (diffObj.added.length) {
-    lines.push('### Added');
-    diffObj.added.forEach(a => lines.push(`+ ${a.key} added to Module ${a.module}`));
-  }
-  if (diffObj.renamed.length) {
-    lines.push('### Renamed');
-    diffObj.renamed.forEach(rn => lines.push(`~ ${rn.key} renamed in Module ${rn.module}`));
-  }
-  if (diffObj.moved.length) {
-    lines.push('### Moved');
-    diffObj.moved.forEach(mv => lines.push(`> ${mv.key} moved in Module ${mv.module}`));
-  }
-  return lines.join('\n');
-}
-
-async function postGitHubComment(octokit, body) {
-  const MAX_LENGTH = 65000; // GitHub max per comment
+// Helper: split text into chunks
+function splitText(text, maxLen) {
   const chunks = [];
-  for (let i = 0; i < body.length; i += MAX_LENGTH) {
-    chunks.push(body.slice(i, i + MAX_LENGTH));
+  let start = 0;
+  while (start < text.length) {
+    chunks.push(text.slice(start, start + maxLen));
+    start += maxLen;
   }
-  for (const chunk of chunks) {
-    await octokit.rest.repos.createCommitComment({
-      owner: repo.split('/')[0],
-      repo: repo.split('/')[1],
-      commit_sha: commitSha,
-      body: chunk
-    });
+  return chunks;
+}
+
+(async () => {
+  const prev = readJson('previous.json');
+  const curr = readJson('current.json');
+
+  // --- Discord ---
+  if (DISCORD_WEBHOOK_URL) {
+    const discordDiff = generateDiffForDiscord(prev, curr);
+    const discordText = discordDiff + `\nFull commit here: https://github.com/${REPO}/commit/${COMMIT_SHA}`;
+    const discordChunks = splitText(discordText, MAX_DISCORD_COMMENT);
+
+    for (const chunk of discordChunks) {
+      try {
+        await axios.post(DISCORD_WEBHOOK_URL, { content: chunk });
+      } catch (e) {
+        console.error('Failed to send Discord webhook:', e.message);
+      }
+    }
+    console.log('Discord diff posted.');
   }
-}
 
-async function postDiscordComment(body) {
-  if (!discordWebhookUrl) return;
-  const MAX_LENGTH = 2000 - 100;
-  const msg = body.length > MAX_LENGTH ? body.slice(0, MAX_LENGTH) + '\n...' : body;
-  await axios.post(discordWebhookUrl, { content: '```diff\n' + msg + '\n```\nFull commit here: ' + commitUrl });
-}
+  // --- GitHub ---
+  if (GITHUB_TOKEN && COMMIT_SHA) {
+    const octokit = new Octokit({ auth: GITHUB_TOKEN });
+    const fullDiff = JSON.stringify(curr, null, 2); // full JSON diff
 
-async function main() {
-  const prevJson = readJsonSafe(prevPath);
-  const currJson = readJsonSafe(currPath);
-  const diffObj = diffObjects(prevJson, currJson);
-  const formattedDiff = formatDiff(diffObj);
+    const githubChunks = splitText(fullDiff, MAX_GITHUB_COMMENT);
 
-  if (!formattedDiff) return console.log('No changes detected');
-
-  const githubOctokit = new Octokit({ auth: githubToken });
-  const fullGitHubComment = formattedDiff + '\nFull commit here: ' + commitUrl;
-
-  await postGitHubComment(githubOctokit, fullGitHubComment);
-  console.log('GitHub comment posted.');
-
-  await postDiscordComment(formattedDiff);
-  console.log('Discord comment posted.');
-}
-
-main().catch(err => console.error(err));
+    for (let i = 0; i < githubChunks.length; i++) {
+      const partHeader = githubChunks.length > 1 ? `Part ${i + 1} of ${githubChunks.length}\n\n` : '';
+      const body = '```json\n' + partHeader + githubChunks[i] + '\n```';
+      try {
+        await octokit.repos.createCommitComment({
+          owner: REPO.split('/')[0],
+          repo: REPO.split('/')[1],
+          commit_sha: COMMIT_SHA,
+          body,
+        });
+        console.log(`GitHub comment part ${i + 1}/${githubChunks.length} posted.`);
+      } catch (e) {
+        console.error('Failed to post GitHub comment:', e.message);
+      }
+    }
+  }
+})();
