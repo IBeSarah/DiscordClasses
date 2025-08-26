@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json  # Only trigger when this file changes
+      - discordclasses.json   # Only trigger when this file changes
 
 jobs:
   comment-diff:
@@ -26,7 +26,7 @@ jobs:
         run: npm install lodash fast-levenshtein axios
 
       - name: Post diff to Discord
-        run: node diff_and_post_discord.js
+        run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
