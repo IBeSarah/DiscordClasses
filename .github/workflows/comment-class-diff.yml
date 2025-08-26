@@ -12,32 +12,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2  # Needed to compare with previous commit
 
-      # Save current and previous JSON files
       - name: Set up JSON files
         run: |
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      # Install Node dependencies
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      # Run diff_and_post.js
-      - name: Run diff script
-        run: node diff_and_post.js > full_diff.txt
+      - name: Run diff and post
+        run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      # Post full diff as GitHub commit comments
       - name: Post full diff as GitHub commit comments
         uses: actions/github-script@v6
         with:
