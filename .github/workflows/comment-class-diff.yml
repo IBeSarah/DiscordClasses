@@ -1,96 +1,119 @@
-- name: Post structured module diff with per-item detection
-  uses: actions/github-script@v6
-  with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    script: |
-      const fs = require('fs');
-      const _ = require('lodash');
+name: Post JSON module diff
 
-      const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-      const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
+on:
+  push:
+    branches:
+      - main
 
-      const MAX_COMMENT_LENGTH = 65536;
-      const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+jobs:
+  post-diff:
+    runs-on: ubuntu-latest
 
-      function parseItems(arr) {
-        if (!arr) return [];
-        // Remove surrounding quotes and split "key": "value" strings
-        return arr.map(s => s.replace(/^"?\s*/, '').replace(/\s*"?$/, ''));
-      }
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      function compareModules(prevObj, currObj) {
-        const sections = [];
-        const moduleStats = {};
+      - name: Install Node dependencies
+        run: npm install lodash
 
-        const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
+      - name: Set up JSON files
+        run: |
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-        allModules.forEach(mod => {
-          const prevItems = parseItems(prevObj[mod]);
-          const currItems = parseItems(currObj[mod]);
+      - name: Post structured module diff
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const _ = require('lodash');
 
-          const removed = _.difference(prevItems, currItems);
-          const added = _.difference(currItems, prevItems);
-          const common = _.intersection(prevItems, currItems);
+            const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+            const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
-          // track stats for summary
-          moduleStats[mod] = {
-            added: added.length,
-            removed: removed.length,
-            renamed: 0,
-            moved: 0
-          };
+            const MAX_COMMENT_LENGTH = 65536;
+            const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
-          if (removed.length || added.length) {
-            let section = `### Module: ${mod}\n`;
-            if (removed.length) {
-              section += '#### Removed\n';
-              removed.forEach(it => section += `-"${it}"\n`);
+            function parseItems(arr) {
+              if (!arr) return [];
+              return arr.map(s => s.trim().replace(/^"?|"?$/g, '')); // remove surrounding quotes
             }
-            if (added.length) {
-              section += '#### Added\n';
-              added.forEach(it => section += `+"${it}"\n`);
+
+            function compareModules(prevObj, currObj) {
+              const sections = [];
+              const moduleStats = {};
+
+              const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
+
+              allModules.forEach(mod => {
+                const prevItems = parseItems(prevObj[mod]);
+                const currItems = parseItems(currObj[mod]);
+
+                const removed = _.difference(prevItems, currItems);
+                const added = _.difference(currItems, prevItems);
+
+                moduleStats[mod] = {
+                  added: added.length,
+                  removed: removed.length,
+                  renamed: 0,
+                  moved: 0
+                };
+
+                if (removed.length || added.length) {
+                  let section = `### Module: ${mod}\n`;
+                  if (removed.length) {
+                    section += '#### Removed\n';
+                    removed.forEach(it => section += `-"${it}"\n`);
+                  }
+                  if (added.length) {
+                    section += '#### Added\n';
+                    added.forEach(it => section += `+"${it}"\n`);
+                  }
+                  sections.push(section);
+                }
+              });
+
+              const summaryText = Object.entries(moduleStats)
+                .map(([mod, stats]) => `Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`)
+                .join('\n');
+
+              return `**Summary:**\n${summaryText}\n\n` + sections.join('\n');
             }
-            sections.push(section);
-          }
-        });
 
-        // summary
-        const summaryText = Object.entries(moduleStats)
-          .map(([mod, stats]) => `Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`)
-          .join('\n');
-        return `**Summary:**\n${summaryText}\n\n` + sections.join('\n');
-      }
+            const diffText = compareModules(prev, curr);
 
-      const diffText = compareModules(prev, curr);
+            if (!diffText.trim()) {
+              console.log("No changes to post");
+              return;
+            }
 
-      if (!diffText.trim()) {
-        console.log("No changes to post");
-        return;
-      }
+            function splitText(text, maxLength) {
+              const chunks = [];
+              let start = 0;
+              while (start < text.length) {
+                chunks.push(text.slice(start, start + maxLength));
+                start += maxLength;
+              }
+              return chunks;
+            }
 
-      function splitText(text, maxLength) {
-        const chunks = [];
-        let start = 0;
-        while (start < text.length) {
-          chunks.push(text.slice(start, start + maxLength));
-          start += maxLength;
-        }
-        return chunks;
-      }
+            const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
 
-      const chunks = splitText(diffText, MAX_COMMENT_LENGTH - header.length);
+            for (let i = 0; i < chunks.length; i++) {
+              const comment = chunks.length > 1
+                ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+                : `${header}${chunks[i]}`;
 
-      for (let i = 0; i < chunks.length; i++) {
-        const comment = chunks.length > 1
-          ? `${header}**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
-          : `${header}${chunks[i]}`;
+              console.log("Posting comment part:", i + 1);
+              console.log(comment); // debug
 
-        await github.rest.repos.createCommitComment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          commit_sha: context.sha,
-          body: comment,
-        });
-
-        console.log(`Posted comment part ${i + 1}/${chunks.length}`);
-      }
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: comment,
+              });
+            }
