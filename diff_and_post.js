@@ -1,77 +1,97 @@
 const fs = require("fs");
-const axios = require("axios");
-const { Octokit } = require("@octokit/rest");
 
-const mode = process.argv[2] || "discord";
-
-// Load diff text
-const diffText = fs.existsSync("full_diff.txt")
-  ? fs.readFileSync("full_diff.txt", "utf8")
-  : "";
-
-async function postToDiscord() {
-  if (!diffText.trim()) {
-    console.log("No diff to post to Discord.");
-    return;
-  }
-
-  const webhook = process.env.DISCORD_WEBHOOK_URL;
-  if (!webhook) {
-    console.error("Missing DISCORD_WEBHOOK_URL env variable");
-    process.exit(1);
-  }
-
-  const sha = process.env.GITHUB_SHA;
-  const repo = process.env.GITHUB_REPOSITORY;
-  const serverUrl = process.env.GITHUB_SERVER_URL;
-
-  const shortSummary = diffText
-    .split("\n")
-    .filter((line) => line.startsWith("Module"))
-    .join("\n");
-
-  const body = {
-    content: `\`\`\`\n${shortSummary}\n\`\`\`\n\nView full list of changes here: ${serverUrl}/${repo}/commit/${sha}`,
-  };
-
-  await axios.post(webhook, body);
-  console.log("✅ Posted summary to Discord");
+function looksLikeRename(oldVal, newVal) {
+  // Simple heuristic: same prefix, only suffix/hash changes
+  const prefixOld = oldVal.split("_")[0];
+  const prefixNew = newVal.split("_")[0];
+  return prefixOld === prefixNew;
 }
 
-async function postToGitHub() {
-  if (!diffText.trim()) {
-    console.log("No diff to post to GitHub.");
-    return;
+function generateDiff(prev, curr) {
+  let output = [];
+
+  for (const id of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
+    const oldObj = prev[id];
+    const newObj = curr[id];
+
+    if (!oldObj) {
+      // Entire module added
+      output.push(`### Added module ${id}`);
+      output.push("```diff");
+      for (const [k, v] of Object.entries(newObj)) {
+        output.push(`+ "${k}": "${v}"`);
+      }
+      output.push("```");
+    } else if (!newObj) {
+      // Entire module removed
+      output.push(`### Removed module ${id}`);
+      output.push("```diff");
+      for (const [k, v] of Object.entries(oldObj)) {
+        output.push(`- "${k}": "${v}"`);
+      }
+      output.push("```");
+    } else {
+      // Compare keys inside module
+      let added = [];
+      let removed = [];
+      let renamed = [];
+      let changed = [];
+
+      for (const key of new Set([...Object.keys(oldObj), ...Object.keys(newObj)])) {
+        if (!(key in oldObj)) {
+          added.push([key, newObj[key]]);
+        } else if (!(key in newObj)) {
+          removed.push([key, oldObj[key]]);
+        } else if (oldObj[key] !== newObj[key]) {
+          if (looksLikeRename(oldObj[key], newObj[key])) {
+            renamed.push([key, oldObj[key], newObj[key]]);
+          } else {
+            changed.push([key, oldObj[key], newObj[key]]);
+          }
+        }
+      }
+
+      if (added.length || removed.length || renamed.length || changed.length) {
+        // Entire module replaced
+        if (
+          Object.keys(oldObj).length === removed.length &&
+          Object.keys(newObj).length === added.length
+        ) {
+          output.push(`### Replaced module ${id}`);
+          output.push("```diff");
+          for (const [k, v] of Object.entries(oldObj)) {
+            output.push(`- "${k}": "${v}"`);
+          }
+          for (const [k, v] of Object.entries(newObj)) {
+            output.push(`+ "${k}": "${v}"`);
+          }
+          output.push("```");
+        } else {
+          output.push(`### Changes in module ${id}`);
+          output.push("```diff");
+          for (const [k, v] of added) output.push(`+ "${k}": "${v}"`);
+          for (const [k, v] of removed) output.push(`- "${k}": "${v}"`);
+          for (const [k, oldVal, newVal] of renamed)
+            output.push(`~ "${k}": renamed from "${oldVal}" to "${newVal}"`);
+          for (const [k, oldVal, newVal] of changed) {
+            output.push(`- "${k}": "${oldVal}"`);
+            output.push(`+ "${k}": "${newVal}"`);
+          }
+          output.push("```");
+        }
+      }
+    }
   }
 
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
-    console.error("Missing GITHUB_TOKEN env variable");
-    process.exit(1);
-  }
-
-  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-  const sha = process.env.GITHUB_SHA;
-
-  const octokit = new Octokit({ auth: token });
-
-  await octokit.repos.createCommitComment({
-    owner,
-    repo,
-    commit_sha: sha,
-    body: diffText,
-  });
-
-  console.log("✅ Posted full diff as GitHub commit comment");
+  return output.join("\n");
 }
 
-(async () => {
-  if (mode === "discord") {
-    await postToDiscord();
-  } else if (mode === "github") {
-    await postToGitHub();
-  } else {
-    console.error(`Unknown mode: ${mode}`);
-    process.exit(1);
-  }
-})();
+// Run entrypoint
+if (["summary", "github", "discord"].includes(process.argv[2])) {
+  const prev = JSON.parse(fs.readFileSync("previous.json", "utf8"));
+  const curr = JSON.parse(fs.readFileSync("current.json", "utf8"));
+
+  const diffText = generateDiff(prev, curr);
+  fs.writeFileSync("full_diff.txt", diffText);
+  console.log("GitHub diff ready in full_diff.txt");
+}
