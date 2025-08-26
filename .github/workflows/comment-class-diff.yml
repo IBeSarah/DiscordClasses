@@ -1,4 +1,4 @@
-name: Post JSON module diff
+name: Post JSON Module Diff
 
 on:
   push:
@@ -43,13 +43,13 @@ jobs:
             const fs = require('fs');
             const diffText = fs.readFileSync('current_diff.txt', 'utf8');
             if(!diffText.trim()) return;
-            // Split into multiple comments if > 65k chars
-            const MAX = 65000;
-            for (let i = 0; i < diffText.length; i += MAX) {
+            const MAX_LENGTH = 65536;
+            // Split into multiple comments if necessary
+            for(let i=0; i<diffText.length; i+=MAX_LENGTH){
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
-                body: diffText.slice(i, i + MAX)
+                body: diffText.slice(i, i+MAX_LENGTH)
               });
             }
