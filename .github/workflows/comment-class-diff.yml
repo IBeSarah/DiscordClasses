@@ -27,18 +27,15 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
           node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
-      - name: Compute structured module diff
-        run: node compute_diff.js
-
-      - name: Post first 2000 chars to Discord webhook
-        run: node post_discord.js
+      - name: Compute diff and post to Discord
+        run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Optionally, create GitHub commit comment
+      - name: Create GitHub commit comment
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
