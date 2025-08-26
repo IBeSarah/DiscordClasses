@@ -23,7 +23,7 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash axios
 
       - name: Post diff to Discord
         run: node diff_and_post.js
@@ -39,15 +39,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-
             const MAX_COMMENT_LENGTH = 65000;
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
-
             if (!diffText.trim()) {
               console.log("No diff to post");
               return;
             }
-
             function splitText(text, maxLength) {
               const chunks = [];
               let start = 0;
@@ -57,20 +54,16 @@ jobs:
               }
               return chunks;
             }
-
             const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
-
             for (let i = 0; i < chunks.length; i++) {
               const body = chunks.length > 1
                 ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
                 : chunks[i];
-
               await github.rest.repos.createCommitComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 commit_sha: context.sha,
                 body,
               });
-
               console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
             }
