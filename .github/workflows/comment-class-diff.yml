@@ -25,7 +25,7 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Run diff and post
+      - name: Run diff script
         run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -39,14 +39,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-
-            const MAX_COMMENT_LENGTH = 65000;
-            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
+            const diffText = fs.existsSync('full_diff.txt') ? fs.readFileSync('full_diff.txt', 'utf8') : '';
 
             if (!diffText.trim()) {
               console.log("No diff to post");
               return;
             }
+
+            const MAX_COMMENT_LENGTH = 65000;
 
             function splitText(text, maxLength) {
               const chunks = [];
