@@ -23,7 +23,7 @@ jobs:
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Post structured module diff with rename detection
+      - name: Post structured module diff with summary and rename detection
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,6 +37,23 @@ jobs:
 
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
+
+            function itemToString(item) {
+              if (item == null) return '';
+              if (typeof item === 'string') return item;
+              if (typeof item === 'object') {
+                if ('name' in item) return item.name;
+                return JSON.stringify(item);
+              }
+              return String(item);
+            }
+
+            function extractNames(moduleData) {
+              if (!moduleData) return [];
+              if (Array.isArray(moduleData)) return moduleData.map(itemToString);
+              if (typeof moduleData === 'object') return [itemToString(moduleData)];
+              return [String(moduleData)];
+            }
 
             function detectRenames(removed, added) {
               const renames = [];
@@ -64,15 +81,9 @@ jobs:
               return { renames, newRemoved, newAdded };
             }
 
-            function extractNames(moduleData) {
-              if (!moduleData) return [];
-              if (Array.isArray(moduleData)) return moduleData.map(x => (x && x.name) || x);
-              if (typeof moduleData === 'object') return [moduleData.name || moduleData];
-              return [moduleData];
-            }
-
             function compareModules(prevObj, currObj) {
               const sections = [];
+              const summary = [];
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
               allModules.forEach(moduleName => {
@@ -87,6 +98,7 @@ jobs:
                 added = newAdded;
 
                 if (removed.length || added.length || renames.length) {
+                  summary.push(`- ${moduleName}: +${added.length} / -${removed.length} / ~${renames.length}`);
                   let section = `### Module: ${moduleName}\n`;
                   if (removed.length) {
                     section += '#### Removed\n';
@@ -104,7 +116,11 @@ jobs:
                 }
               });
 
-              return sections.join('\n');
+              const summaryText = summary.length
+                ? `**Summary:**\n${summary.join('\n')}\n\n`
+                : '';
+
+              return summaryText + sections.join('\n');
             }
 
             const diffText = compareModules(prev, curr);
