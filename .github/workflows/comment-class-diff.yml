@@ -101,9 +101,41 @@ jobs:
               const summary = [];
               const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
 
+              // --- Module rename detection ---
+              const prevHashes = {};
+              const currHashes = {};
+              const moduleRenames = [];
+
+              Object.entries(prevObj).forEach(([mod, obj]) => {
+                prevHashes[mod] = JSON.stringify(obj);
+              });
+              Object.entries(currObj).forEach(([mod, obj]) => {
+                currHashes[mod] = JSON.stringify(obj);
+              });
+
+              Object.entries(prevHashes).forEach(([prevMod, hash]) => {
+                Object.entries(currHashes).forEach(([currMod, currHash]) => {
+                  if (hash === currHash && prevMod !== currMod) {
+                    moduleRenames.push({from: prevMod, to: currMod});
+                    delete prevObj[prevMod];
+                    delete currObj[currMod];
+                  }
+                });
+              });
+
+              let renameSummaryText = '';
+              if (moduleRenames.length) {
+                renameSummaryText += '### Module Renamed\n';
+                moduleRenames.forEach(r => {
+                  renameSummaryText += `Module ${r.from} → ${r.to}\n`;
+                });
+                renameSummaryText += '\n';
+              }
+
               const moves = detectMoves(prevObj, currObj);
 
               allModules.forEach(mod => {
+                if (!prevObj[mod] && !currObj[mod]) return; // Skip renamed modules
                 let prevItems = moduleItems(prevObj[mod]);
                 let currItems = moduleItems(currObj[mod]);
 
@@ -120,28 +152,25 @@ jobs:
                 removed = newRemoved;
                 added = newAdded;
 
-                const totalRenamed = renames.length + movedFromThis.filter(m => renames.some(r => r.from === m.item)).length;
+                const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
+                const totalRenamed = pureRenames.length + movedFromThis.filter(m => renames.some(r => r.from === m.item)).length;
 
                 if (removed.length || added.length || totalRenamed || movedFromThis.length) {
                   const movedSummary = movedFromThis.map(m => {
                     const rename = renames.find(r => r.from === m.item);
-                    if(rename) return `"${m.item}"→${m.to} (renamed to "${rename.to}")`;
-                    return `"${m.item}"→${m.to}`;
+                    if(rename) return `"${m.item}" → from module ${m.from} to module ${m.to} (renamed to "${rename.to}")`;
+                    return `"${m.item}" → from module ${m.from} to module ${m.to}`;
                   }).join(', ');
 
-                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}`);
+                  summary.push(`- ${mod}: +${added.length} / -${removed.length} / ~${pureRenames.length} / moved: ${movedSummary || 'none'}`);
 
-                  // Build diff content first
                   let diffContent = '';
                   if (removed.length) { diffContent += '### Removed\n'; removed.forEach(it => diffContent += `-"${it}"\n`); }
                   if (added.length) { diffContent += '### Added\n'; added.forEach(it => diffContent += `+"${it}"\n`); }
-
-                  const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
                   if (pureRenames.length) { 
                     diffContent += '### Renamed\n'; 
                     pureRenames.forEach(r => diffContent += `-"${r.from}"\n+"${r.to}"\n`); 
                   }
-
                   if (movedFromThis.length) { 
                     diffContent += '### Moved & Renamed\n'; 
                     movedFromThis.forEach(m => {
@@ -153,13 +182,12 @@ jobs:
                     });
                   }
 
-                  // Conditional collapse
                   const lines = diffContent.split('\n').length;
                   let section = '';
                   if (lines > COLLAPSE_THRESHOLD) {
-                    section = `<details>\n<summary>Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}</summary>\n\n\`\`\`diff\n${diffContent}\`\`\`\n</details>\n`;
+                    section = `<details>\n<summary>Module ${mod}: +${added.length} / -${removed.length} / ~${pureRenames.length} / moved: ${movedSummary || 'none'}</summary>\n\n\`\`\`diff\n${diffContent}\`\`\`\n</details>\n`;
                   } else {
-                    section = `Module ${mod}: +${added.length} / -${removed.length} / ~${totalRenamed} / moved: ${movedSummary || 'none'}\n\`\`\`diff\n${diffContent}\`\`\`\n`;
+                    section = `Module ${mod}: +${added.length} / -${removed.length} / ~${pureRenames.length} / moved: ${movedSummary || 'none'}\n\`\`\`diff\n${diffContent}\`\`\`\n`;
                   }
 
                   sections.push(section);
@@ -167,7 +195,7 @@ jobs:
               });
 
               const summaryText = summary.length ? `**Summary of changes:**\n${summary.join('\n')}\n\n` : '';
-              return summaryText + sections.join('\n');
+              return renameSummaryText + summaryText + sections.join('\n');
             }
 
             const diffText = compareModules(prev, curr);
