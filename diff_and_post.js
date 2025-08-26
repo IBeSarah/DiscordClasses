@@ -26,6 +26,16 @@ const discordSummary = { Added: {}, Removed: {}, Moved: {}, Renamed: {} };
 function diffModules(prev, curr) {
   const allModules = _.union(Object.keys(prev), Object.keys(curr));
 
+  // Track removed keys for detecting moves
+  const removedMap = {}; // key → module it was removed from
+  for (const mod of Object.keys(prev)) {
+    for (const k of Object.keys(prev[mod])) {
+      if (!(curr[mod] && curr[mod][k])) {
+        removedMap[k] = mod;
+      }
+    }
+  }
+
   for (const mod of allModules) {
     const prevKeys = prev[mod] || {};
     const currKeys = curr[mod] || {};
@@ -35,21 +45,33 @@ function diffModules(prev, curr) {
     const commonKeys = _.intersection(Object.keys(prevKeys), Object.keys(currKeys));
 
     // --- Added ---
-    if (addedKeys.length) {
-      githubDiff.push(`### Added\n` + addedKeys.map(k => `+ "${k}": "${currKeys[k]}" added in module ${mod}`).join('\n'));
-      discordSummary.Added[mod] = addedKeys;
+    const actuallyAdded = [];
+    for (const k of addedKeys) {
+      if (removedMap[k]) {
+        // It's a moved key
+        const fromModule = removedMap[k];
+        githubDiff.push(`### Moved\n"${k}" moved from module ${fromModule} → module ${mod}`);
+        discordSummary.Moved[`${fromModule} → ${mod}`] = (discordSummary.Moved[`${fromModule} → ${mod}`] || 0) + 1;
+      } else {
+        actuallyAdded.push(k);
+      }
+    }
+
+    if (actuallyAdded.length) {
+      githubDiff.push(`### Added\n` + actuallyAdded.map(k => `+ "${k}": "${currKeys[k]}" added in module ${mod}`).join('\n'));
+      discordSummary.Added[mod] = actuallyAdded;
     }
 
     // --- Removed ---
-    if (removedKeys.length) {
-      githubDiff.push(`### Removed\n` + removedKeys.map(k => `- "${k}": "${prevKeys[k]}" removed from module ${mod}`).join('\n'));
-      discordSummary.Removed[mod] = removedKeys;
+    const actuallyRemoved = removedKeys.filter(k => !addedKeys.includes(k)); // already counted as moved
+    if (actuallyRemoved.length) {
+      githubDiff.push(`### Removed\n` + actuallyRemoved.map(k => `- "${k}": "${prevKeys[k]}" removed from module ${mod}`).join('\n'));
+      discordSummary.Removed[mod] = actuallyRemoved;
     }
 
-    // --- Moved & Renamed ---
+    // --- Renamed ---
     for (const key of commonKeys) {
       if (!_.isEqual(prevKeys[key], currKeys[key])) {
-        // Check if value changed slightly → Renamed
         if (levenshtein.get(prevKeys[key], currKeys[key]) > 0) {
           githubDiff.push(`### Renamed\n"${key}" in module ${mod}: "${prevKeys[key]}" → "${currKeys[key]}"`);
           discordSummary.Renamed[mod] = discordSummary.Renamed[mod] || [];
@@ -73,18 +95,20 @@ async function postDiscord() {
 
   const sections = [];
 
-  // Added / Removed / Renamed (summary by module)
   for (const type of ['Added', 'Removed', 'Renamed']) {
     const mods = Object.entries(discordSummary[type]);
     if (!mods.length) continue;
 
-    const modsText = mods.map(([mod, items]) => `${mod}: ${items.length} item(s)`).join(', ');
+    const modsText = mods.map(([mod, items]) => `${mod}: ${Array.isArray(items) ? items.length : items} item(s)`).join(', ');
     sections.push(`### ${type}\n${modsText}`);
   }
 
-  // Moved: module → module (if you detect moves)
-  // Example: if you track moves in a separate structure
-  // sections.push(`### Moved\n315 → 567: 3 items`);
+  // Moved summary
+  const movedEntries = Object.entries(discordSummary.Moved);
+  if (movedEntries.length) {
+    const movedText = movedEntries.map(([mods, count]) => `${mods}: ${count} item(s)`).join(', ');
+    sections.push(`### Moved\n${movedText}`);
+  }
 
   if (!sections.length) return;
 
