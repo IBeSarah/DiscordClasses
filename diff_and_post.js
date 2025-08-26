@@ -1,6 +1,5 @@
 // diff_and_post_discord.js
 const fs = require('fs');
-const _ = require('lodash');
 const axios = require('axios');
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
@@ -26,7 +25,7 @@ function diffModules(prev, curr) {
   const added = [];
   const removed = [];
   const renamed = [];
-  const moved = [];
+  const moved = []; // kept for future use if needed
 
   const allModules = new Set([...Object.keys(prev), ...Object.keys(curr)]);
 
@@ -34,15 +33,26 @@ function diffModules(prev, curr) {
     const prevKeys = prev[module] ? Object.keys(prev[module]) : [];
     const currKeys = curr[module] ? Object.keys(curr[module]) : [];
 
+    // Detect removed
     prevKeys.forEach(k => {
       if (!currKeys.includes(k)) removed.push(`${k} in Module ${module}`);
     });
 
+    // Detect added
     currKeys.forEach(k => {
       if (!prevKeys.includes(k)) added.push(`${k} in Module ${module}`);
     });
 
-    // Optional: add rename detection logic if needed
+    // Detect renamed: simple heuristic by matching values
+    prevKeys.forEach(pk => {
+      if (!currKeys.includes(pk) && currKeys.some(ck => prev[module][pk] === curr[module][ck])) {
+        const ck = currKeys.find(ck => prev[module][pk] === curr[module][ck]);
+        renamed.push(`${pk} → ${ck} in Module ${module}`);
+        // Remove from added/removed since counted as rename
+        added.splice(added.indexOf(`${ck} in Module ${module}`), 1);
+        removed.splice(removed.indexOf(`${pk} in Module ${module}`), 1);
+      }
+    });
   }
 
   return { added, removed, renamed, moved };
@@ -51,7 +61,6 @@ function diffModules(prev, curr) {
 const { added, removed, renamed, moved } = diffModules(prev, curr);
 
 let message = '```diff\n';
-
 if (removed.length) message += '### Removed\n' + removed.map(r => `- ${r}`).join('\n') + '\n';
 if (added.length) message += '### Added\n' + added.map(a => `+ ${a}`).join('\n') + '\n';
 if (renamed.length) message += '### Renamed\n' + renamed.map(r => `~ ${r}`).join('\n') + '\n';
