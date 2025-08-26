@@ -1,7 +1,8 @@
 const fs = require("fs");
+const axios = require("axios");
 
 function looksLikeRename(oldVal, newVal) {
-  // Simple heuristic: same prefix, only suffix/hash changes
+  // Heuristic: same prefix before underscore = rename
   const prefixOld = oldVal.split("_")[0];
   const prefixNew = newVal.split("_")[0];
   return prefixOld === prefixNew;
@@ -52,7 +53,7 @@ function generateDiff(prev, curr) {
       }
 
       if (added.length || removed.length || renamed.length || changed.length) {
-        // Entire module replaced
+        // If all keys replaced, show as full replacement
         if (
           Object.keys(oldObj).length === removed.length &&
           Object.keys(newObj).length === added.length
@@ -72,7 +73,7 @@ function generateDiff(prev, curr) {
           for (const [k, v] of added) output.push(`+ "${k}": "${v}"`);
           for (const [k, v] of removed) output.push(`- "${k}": "${v}"`);
           for (const [k, oldVal, newVal] of renamed)
-            output.push(`~ "${k}": renamed from "${oldVal}" to "${newVal}"`);
+            output.push(`R "${k}": "${oldVal}" -> "${newVal}"`);
           for (const [k, oldVal, newVal] of changed) {
             output.push(`- "${k}": "${oldVal}"`);
             output.push(`+ "${k}": "${newVal}"`);
@@ -86,12 +87,46 @@ function generateDiff(prev, curr) {
   return output.join("\n");
 }
 
-// Run entrypoint
-if (["summary", "github", "discord"].includes(process.argv[2])) {
+async function postToGitHub(diffText) {
+  const token = process.env.GITHUB_TOKEN;
+  const repo = process.env.GITHUB_REPOSITORY;
+  const sha = process.env.GITHUB_SHA;
+
+  if (!token || !repo || !sha) {
+    console.error("Missing GitHub environment variables");
+    return;
+  }
+
+  const url = `https://api.github.com/repos/${repo}/commits/${sha}/comments`;
+
+  await axios.post(
+    url,
+    { body: diffText },
+    { headers: { Authorization: `token ${token}` } }
+  );
+  console.log("✅ Posted diff to GitHub commit comments");
+}
+
+async function main() {
+  const mode = process.argv[2];
+
   const prev = JSON.parse(fs.readFileSync("previous.json", "utf8"));
   const curr = JSON.parse(fs.readFileSync("current.json", "utf8"));
 
   const diffText = generateDiff(prev, curr);
   fs.writeFileSync("full_diff.txt", diffText);
-  console.log("GitHub diff ready in full_diff.txt");
+
+  if (mode === "summary") {
+    console.log(diffText);
+  } else if (mode === "github") {
+    await postToGitHub(diffText);
+  } else if (mode === "discord") {
+    // You can add Discord webhook posting here if needed
+    console.log("Discord mode not implemented yet");
+  }
 }
+
+main().catch(err => {
+  console.error("❌ Error:", err);
+  process.exit(1);
+});
