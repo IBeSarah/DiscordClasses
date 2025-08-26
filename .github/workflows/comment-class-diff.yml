@@ -18,10 +18,15 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein
 
-      - name: Set up JSON files
+      - name: Set up JSON files safely
         run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+          # current.json: always exists
+          git show HEAD:discordclasses.json > current.json 2>/dev/null || echo '{}' > current.json
+          # previous.json: if no previous commit, fallback to empty object
+          git show HEAD^:discordclasses.json > previous.json 2>/dev/null || echo '{}' > previous.json
+          # validate JSON format
+          node -e "JSON.parse(require('fs').readFileSync('current.json'))" || echo '{}' > current.json
+          node -e "JSON.parse(require('fs').readFileSync('previous.json'))" || echo '{}' > previous.json
 
       - name: Post structured module diff
         uses: actions/github-script@v6
@@ -35,8 +40,12 @@ jobs:
             let prev = {};
             let curr = {};
 
-            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) { console.warn("Failed to parse previous.json"); }
-            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) { console.warn("Failed to parse current.json"); }
+            try { prev = JSON.parse(fs.readFileSync('previous.json', 'utf8')); } catch(e) {
+              console.warn("Failed to parse previous.json, using empty object");
+            }
+            try { curr = JSON.parse(fs.readFileSync('current.json', 'utf8')); } catch(e) {
+              console.warn("Failed to parse current.json, using empty object");
+            }
 
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
@@ -115,12 +124,9 @@ jobs:
                 removed = newRemoved;
                 added = newAdded;
 
-                // Count renames including moved & renamed items
                 const totalRenamed = renames.length + movedFromThis.filter(m => renames.some(r => r.from === m.item)).length;
 
                 if (removed.length || added.length || totalRenamed || movedFromThis.length) {
-
-                  // Prepare moved & renamed summary
                   const movedSummary = movedFromThis.map(m => {
                     const rename = renames.find(r => r.from === m.item);
                     if(rename) return `"${m.item}"→${m.to} (renamed to "${rename.to}")`;
@@ -140,7 +146,6 @@ jobs:
                     added.forEach(it => section += `+"${it}"\n`);
                   }
 
-                  // Only include renamed items that are not also moved
                   const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
                   if (pureRenames.length) {
                     section += '#### Renamed\n';
