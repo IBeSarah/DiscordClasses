@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare with previous commit
+          fetch-depth: 2
 
       - name: Set up JSON files
         run: |
@@ -25,8 +25,8 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios
 
-      - name: Post diff to Discord
-        run: node diff_and_post.js
+      - name: Post summary to Discord
+        run: node diff_and_post.js summary
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_SHA: ${{ github.sha }}
@@ -39,7 +39,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-
             const MAX_COMMENT_LENGTH = 65000;
             const diffText = fs.readFileSync('full_diff.txt', 'utf8');
 
