@@ -138,7 +138,7 @@ jobs:
                   if (added.length) { section += '### Added\n'; added.forEach(it => section += `+"${it}"\n`); }
 
                   const pureRenames = renames.filter(r => !movedFromThis.some(m=>m.item===r.from));
-                  if (pureRenames.length) { section += '### Renamed\n'; pureRenames.forEach(r => section += `-"${r.from}"\n-> +"${r.to}"\n`); }
+                  if (pureRenames.length) { section += '### Renamed\n'; pureRenames.forEach(r => section += `-"${r.from}"\n +"${r.to}"\n`); }
 
                   if (movedFromThis.length) { section += '### Moved & Renamed\n'; movedFromThis.forEach(m => {
                     const rename = renames.find(r => r.from===m.item);
