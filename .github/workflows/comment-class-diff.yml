@@ -23,14 +23,13 @@ jobs:
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
-      - name: Post structured module diff with summary and rename detection
+      - name: Post structured module diff with per-item detection and summary
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
             const _ = require('lodash');
-            const levenshtein = require('fast-levenshtein');
 
             const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
             const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
@@ -38,92 +37,103 @@ jobs:
             const MAX_COMMENT_LENGTH = 65536;
             const header = `🧩 **Changes in \`discordclasses.json\`:**\n\n`;
 
-            function itemToString(item) {
-              if (item == null) return '';
-              if (typeof item === 'string') return item;
-              if (typeof item === 'object') {
-                if ('name' in item) return item.name;
-                return JSON.stringify(item);
-              }
-              return String(item);
-            }
-
-            function extractNames(moduleData) {
-              if (!moduleData) return [];
-              if (Array.isArray(moduleData)) return moduleData.map(itemToString);
-              if (typeof moduleData === 'object') return [itemToString(moduleData)];
-              return [String(moduleData)];
-            }
-
-            function detectRenames(removed, added) {
-              const renames = [];
-              const unmatchedAdded = new Set(added);
-
-              removed.forEach(rem => {
-                let bestMatch = null;
-                let bestDist = Infinity;
-                unmatchedAdded.forEach(add => {
-                  const dist = levenshtein.get(rem, add);
-                  if (dist < bestDist && dist <= Math.max(rem.length, add.length) * 0.4) {
-                    bestDist = dist;
-                    bestMatch = add;
-                  }
-                });
-                if (bestMatch) {
-                  renames.push({ from: rem, to: bestMatch });
-                  unmatchedAdded.delete(bestMatch);
-                }
-              });
-
-              const newRemoved = removed.filter(r => !renames.some(x => x.from === r));
-              const newAdded = Array.from(unmatchedAdded);
-
-              return { renames, newRemoved, newAdded };
-            }
-
             function compareModules(prevObj, currObj) {
               const sections = [];
-              const summary = [];
-              const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
+              const moduleStats = {};
 
-              allModules.forEach(moduleName => {
-                const prevItems = extractNames(prevObj[moduleName]);
-                const currItems = extractNames(currObj[moduleName]);
+              const prevMap = new Map();
+              const currMap = new Map();
 
-                let removed = _.difference(prevItems, currItems);
-                let added = _.difference(currItems, prevItems);
+              Object.entries(prevObj).forEach(([mod, items]) => {
+                Object.entries(items || {}).forEach(([key, val]) => {
+                  prevMap.set(key, { module: mod, value: val });
+                });
+              });
 
-                const { renames, newRemoved, newAdded } = detectRenames(removed, added);
-                removed = newRemoved;
-                added = newAdded;
+              Object.entries(currObj).forEach(([mod, items]) => {
+                Object.entries(items || {}).forEach(([key, val]) => {
+                  currMap.set(key, { module: mod, value: val });
+                });
+              });
 
-                if (removed.length || added.length || renames.length) {
-                  summary.push(`- ${moduleName}: +${added.length} / -${removed.length} / ~${renames.length}`);
-                  let section = `### Module: ${moduleName}\n`;
-                  if (removed.length) {
-                    section += '#### Removed\n';
-                    removed.forEach(item => section += `-"${item}"\n`);
-                  }
-                  if (added.length) {
-                    section += '#### Added\n';
-                    added.forEach(item => section += `+"${item}"\n`);
-                  }
-                  if (renames.length) {
-                    section += '#### Renamed\n';
-                    renames.forEach(r => section += `"${r.from}" to "${r.to}"\n`);
-                  }
-                  sections.push(section);
+              const allKeys = _.union(Array.from(prevMap.keys()), Array.from(currMap.keys()));
+
+              const added = [];
+              const removed = [];
+              const renamed = [];
+              const moved = [];
+
+              allKeys.forEach(key => {
+                const prevItem = prevMap.get(key);
+                const currItem = currMap.get(key);
+
+                if (!prevItem && currItem) {
+                  added.push({ module: currItem.module, key, value: currItem.value });
+                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
+                  moduleStats[currItem.module].added++;
+                } else if (prevItem && !currItem) {
+                  removed.push({ module: prevItem.module, key, value: prevItem.value });
+                  moduleStats[prevItem.module] = moduleStats[prevItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
+                  moduleStats[prevItem.module].removed++;
+                } else if (prevItem.value !== currItem.value) {
+                  renamed.push({ module: currItem.module, key, from: prevItem.value, to: currItem.value });
+                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
+                  moduleStats[currItem.module].renamed++;
+                } else if (prevItem.module !== currItem.module) {
+                  moved.push({ key, from: prevItem.module, to: currItem.module, value: currItem.value });
+                  moduleStats[prevItem.module] = moduleStats[prevItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
+                  moduleStats[currItem.module] = moduleStats[currItem.module] || { added: 0, removed: 0, renamed: 0, moved: 0 };
+                  moduleStats[prevItem.module].moved++;
+                  moduleStats[currItem.module].moved++;
                 }
               });
 
-              const summaryText = summary.length
-                ? `**Summary:**\n${summary.join('\n')}\n\n`
-                : '';
+              // Format summary
+              const summaryLines = [];
+              Object.entries(moduleStats).forEach(([mod, stats]) => {
+                summaryLines.push(`Module ${mod}: +${stats.added} / -${stats.removed} / ~${stats.renamed} / moved:${stats.moved}`);
+              });
+              if (summaryLines.length) {
+                sections.push(`**Summary:**\n${summaryLines.join('\n')}`);
+              }
 
-              return summaryText + sections.join('\n');
+              // Format detailed sections
+              if (added.length) {
+                const mods = _.groupBy(added, 'module');
+                for (const [mod, items] of Object.entries(mods)) {
+                  sections.push(`### Added in module ${mod}`);
+                  items.forEach(it => sections.push(`"${it.key}": "${it.value}"`));
+                }
+              }
+
+              if (removed.length) {
+                const mods = _.groupBy(removed, 'module');
+                for (const [mod, items] of Object.entries(mods)) {
+                  sections.push(`### Removed from module ${mod}`);
+                  items.forEach(it => sections.push(`"${it.key}": "${it.value}"`));
+                }
+              }
+
+              if (renamed.length) {
+                const mods = _.groupBy(renamed, 'module');
+                for (const [mod, items] of Object.entries(mods)) {
+                  sections.push(`### Renamed in module ${mod}`);
+                  items.forEach(it => sections.push(`"${it.key}": "${it.from}" to "${it.to}"`));
+                }
+              }
+
+              if (moved.length) {
+                moved.forEach(it => {
+                  sections.push(`### Moved from module ${it.from} to ${it.to}`);
+                  sections.push(`"${it.key}": "${it.value}"`);
+                });
+              }
+
+              return sections.join('\n\n');
             }
 
             const diffText = compareModules(prev, curr);
+
             if (!diffText.trim()) {
               console.log("No changes to post");
               return;
