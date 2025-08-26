@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json
 
 jobs:
   post-diff:
@@ -23,17 +23,12 @@ jobs:
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash axios fast-levenshtein
 
-      - name: Post diff to Discord
-        run: node diff_and_post.js summary
+      - name: Post diff to Discord and GitHub
+        run: node diff_and_post.js
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
-
-      - name: Post full diff as GitHub commit comments
-        run: node diff_and_post.js github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
