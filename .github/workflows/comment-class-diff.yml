@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Only trigger when this file changes
+      - discordclasses.json
 
 jobs:
   post-diff:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to compare with previous commit
+          fetch-depth: 2
 
       - name: Set up JSON files
         run: |
@@ -39,44 +39,42 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-
             const MAX_COMMENT_LENGTH = 65000;
-            let diffText = '';
-            try {
-              diffText = fs.readFileSync('full_diff.txt', 'utf8');
-            } catch (err) {
-              console.log('full_diff.txt not found, nothing to post.');
-              return;
+
+            if (!fs.existsSync('full_diff.txt')) {
+                console.log("full_diff.txt not found, nothing to post.");
+                return;
             }
 
+            const diffText = fs.readFileSync('full_diff.txt', 'utf8');
             if (!diffText.trim()) {
-              console.log("No diff to post");
-              return;
+                console.log("No diff to post");
+                return;
             }
 
             function splitText(text, maxLength) {
-              const chunks = [];
-              let start = 0;
-              while (start < text.length) {
-                chunks.push(text.slice(start, start + maxLength));
-                start += maxLength;
-              }
-              return chunks;
+                const chunks = [];
+                let start = 0;
+                while (start < text.length) {
+                    chunks.push(text.slice(start, start + maxLength));
+                    start += maxLength;
+                }
+                return chunks;
             }
 
             const chunks = splitText(diffText, MAX_COMMENT_LENGTH);
 
             for (let i = 0; i < chunks.length; i++) {
-              const body = chunks.length > 1
-                ? `# Part ${i + 1} of ${chunks.length}\n\n${chunks[i]}`
-                : chunks[i];
+                const body = chunks.length > 1
+                    ? `**Part ${i + 1} of ${chunks.length}**\n\n${chunks[i]}`
+                    : chunks[i];
 
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body,
-              });
+                await github.rest.repos.createCommitComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    commit_sha: context.sha,
+                    body,
+                });
 
-              console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
+                console.log(`Posted GitHub comment part ${i + 1}/${chunks.length}`);
             }
