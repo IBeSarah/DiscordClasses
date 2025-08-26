@@ -8,9 +8,9 @@ on:
 jobs:
   post-diff:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Get current and previous version of discordclasses.json
         run: |
@@ -21,48 +21,57 @@ jobs:
         run: |
           diff --unified=3 previous.json current.json || true > diff.txt
 
-      - name: Install GitHub CLI
-        run: |
-          LATEST_TAG=$(curl --silent "https://api.github.com/repos/cli/cli/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
-          wget "https://github.com/cli/cli/releases/download/${LATEST_TAG}/gh_${LATEST_TAG#v}_linux_amd64.deb" -O gh_latest_linux_amd64.deb
-          sudo dpkg -i gh_latest_linux_amd64.deb
-
-      - name: Authenticate GitHub CLI
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${GITHUB_TOKEN}" | env -u GITHUB_TOKEN gh auth login --with-token
-
-      - name: Split diff and post multiple comments
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
+      - name: Read diff and split into chunks
+        id: prepare
         run: |
           MAX_CHUNK_SIZE=60000
+          DIFF_CONTENT=$(cat diff.txt)
+          echo "diff_length=${#DIFF_CONTENT}" >> $GITHUB_OUTPUT
 
-          # Split diff.txt into chunks by character count (~60k chars each)
-          split_file() {
-            local file="$1"
-            local max=$2
-            local content
-            content=$(cat "$file")
-            local length=${#content}
-            local start=0
-            local part=1
-            while [ $start -lt $length ]; do
-              chunk=${content:$start:$max}
-              echo "$chunk" > "diff_part_$part.txt"
-              start=$((start + max))
-              part=$((part + 1))
-            done
-            echo $((part - 1))
-          }
-
-          parts=$(split_file diff.txt $MAX_CHUNK_SIZE)
-
-          echo "Diff split into $parts parts."
-
-          for i in $(seq 1 $parts); do
-            body="🧩 **Changes in \`discordclasses.json\` (part $i/$parts):**\n\n\`\`\`diff\n$(cat diff_part_$i.txt)\n\`\`\`"
-            echo "Posting comment part $i..."
-            gh api repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments -f body="$body"
+          # Split diff content into chunks of MAX_CHUNK_SIZE chars
+          i=0
+          start=0
+          chunk_count=0
+          while [ $start -lt ${#DIFF_CONTENT} ]; do
+            chunk="${DIFF_CONTENT:start:MAX_CHUNK_SIZE}"
+            echo "chunk_$i<<EOF" >> $GITHUB_OUTPUT
+            echo "$chunk" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            start=$((start + MAX_CHUNK_SIZE))
+            i=$((i + 1))
+            chunk_count=$i
           done
+
+          echo "chunk_count=$chunk_count" >> $GITHUB_OUTPUT
+
+      - name: Post comments with github-script
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const chunkCount = parseInt(process.env.CHUNK_COUNT || "0");
+            if (chunkCount === 0) {
+              console.log("No diff to post.");
+              return;
+            }
+
+            for (let i = 0; i < chunkCount; i++) {
+              // Each chunk output is available as process.env[`CHUNK_${i}`]
+              const chunk = process.env[`CHUNK_${i}`];
+              const body = `🧩 **Changes in \`discordclasses.json\` (part ${i + 1}/${chunkCount}):**\n\n\`\`\`diff\n${chunk}\n\`\`\``;
+
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body,
+              });
+              console.log(`Posted comment part ${i + 1}/${chunkCount}`);
+            }
+        env:
+          CHUNK_COUNT: ${{ steps.prepare.outputs.chunk_count }}
+          # Dynamically set chunk outputs as env vars
+          CHUNK_0: ${{ steps.prepare.outputs.chunk_0 }}
+          CHUNK_1: ${{ steps.prepare.outputs.chunk_1 }}
+          CHUNK_2: ${{ steps.prepare.outputs.chunk_2 }}
+          # Add more if you expect more chunks, or generate dynamically in a matrix
