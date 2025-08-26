@@ -3,94 +3,96 @@ const axios = require('axios');
 const _ = require('lodash');
 const levenshtein = require('fast-levenshtein');
 
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const GITHUB_SHA = process.env.GITHUB_SHA;
-const GITHUB_REPO = process.env.GITHUB_REPOSITORY;
-const GITHUB_SERVER_URL = process.env.GITHUB_SERVER_URL;
+// Load JSON
+const prev = JSON.parse(fs.readFileSync('previous.json'));
+const curr = JSON.parse(fs.readFileSync('current.json'));
 
-const current = JSON.parse(fs.readFileSync('current.json', 'utf8'));
-const previous = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
-
-function diffModules(prev, curr) {
-  const added = [];
-  const removed = [];
-  const moved = [];
-  const renamed = [];
-
-  // Check added and renamed/moved
-  for (const mod in curr) {
-    if (!prev[mod]) {
-      added.push({ module: mod, items: curr[mod] });
-      continue;
-    }
-    const prevItems = prev[mod];
-    const currItems = curr[mod];
-
-    for (const key in currItems) {
-      if (!prevItems[key]) {
-        // Try to detect renames
-        const match = Object.keys(prevItems).find(
-          k => levenshtein.get(k, key) <= 3 && prevItems[k] === currItems[key]
-        );
-        if (match) {
-          renamed.push({
-            item: match,
-            to: key,
-            fromModule: mod,
-            oldModule: Object.keys(prev).find(m => prev[m][match] !== undefined)
-          });
-        } else {
-          added.push({ module: mod, item: key });
-        }
-      }
+// Flatten module structure into {module, item, value}
+function flatten(json) {
+  const result = [];
+  for (const mod in json) {
+    for (const key in json[mod]) {
+      result.push({module: mod, item: key, value: json[mod][key]});
     }
   }
-
-  // Check removed
-  for (const mod in prev) {
-    if (!curr[mod]) {
-      removed.push({ module: mod, items: prev[mod] });
-      continue;
-    }
-    const prevItems = prev[mod];
-    const currItems = curr[mod];
-    for (const key in prevItems) {
-      if (!currItems[key]) removed.push({ module: mod, item: key });
-    }
-  }
-
-  // Detect moves without rename
-  for (const r of renamed) {
-    if (r.oldModule !== r.fromModule) moved.push(r);
-  }
-
-  return { added, removed, moved, renamed };
+  return result;
 }
 
-const diff = diffModules(previous, current);
+const prevFlat = flatten(prev);
+const currFlat = flatten(curr);
 
-// Build Discord message
-let message = '**Changes in discordclasses.json:**\n```diff\n';
+// Detect added/removed
+const added = _.differenceWith(currFlat, prevFlat, _.isEqual);
+const removed = _.differenceWith(prevFlat, currFlat, _.isEqual);
 
-// Add summary
-const summary = [];
+// Detect moved and/or renamed
+const moved = [];
+const renamed = [];
 
-diff.added.forEach(a => summary.push(`+ ${a.item || Object.keys(a.items).join(', ')} (module ${a.module})`));
-diff.removed.forEach(r => summary.push(`- ${r.item || Object.keys(r.items).join(', ')} (module ${r.module})`));
-diff.moved.forEach(m => summary.push(`* ${m.item} from module ${m.oldModule} to module ${m.fromModule} (renamed to "${m.to}")`));
-diff.renamed.forEach(r => {
-  if (!diff.moved.includes(r)) summary.push(`* ${r.item} renamed to "${r.to}" in module ${r.fromModule}`);
+for (const c of currFlat) {
+  const p = prevFlat.find(pf => pf.item === c.item);
+  if (p && p.module !== c.module) {
+    const renameMatch = prevFlat.find(pf => pf.value === c.value && pf.item !== c.item);
+    moved.push({
+      item: c.item,
+      fromModule: p.module,
+      toModule: c.module,
+      renamed: renameMatch ? c.item : null
+    });
+  }
+  if (!p) {
+    const nameMatch = prevFlat.find(pf => pf.value === c.value && pf.item !== c.item);
+    if (nameMatch) renamed.push({item: nameMatch.item, to: c.item, newModule: c.module});
+  }
+}
+
+// Build GitHub comment with collapsible large modules
+const githubSummary = [];
+const COLLAPSE_THRESHOLD = 30; // lines
+
+const moduleChanges = {};
+
+added.forEach(a => (moduleChanges[a.module] = moduleChanges[a.module] || []).push(`+ ${a.item}`));
+removed.forEach(r => (moduleChanges[r.module] = moduleChanges[r.module] || []).push(`- ${r.item}`));
+moved.forEach(m => {
+  const line = m.renamed
+    ? `* ${m.item} moved from module ${m.fromModule} to module ${m.toModule} (renamed)`
+    : `* ${m.item} moved from module ${m.fromModule} to module ${m.toModule}`;
+  moduleChanges[m.toModule] = moduleChanges[m.toModule] || [];
+  moduleChanges[m.toModule].push(line);
+});
+renamed.forEach(r => {
+  moduleChanges[r.newModule] = moduleChanges[r.newModule] || [];
+  moduleChanges[r.newModule].push(`* ${r.item} renamed to "${r.to}"`);
 });
 
-message += summary.join('\n');
+for (const mod in moduleChanges) {
+  const lines = moduleChanges[mod];
+  if (lines.length > COLLAPSE_THRESHOLD) {
+    githubSummary.push(`### Module ${mod} (${lines.length} changes, collapsed)`);
+  } else {
+    githubSummary.push(`### Module ${mod}\n${lines.join('\n')}`);
+  }
+}
 
-// Add full commit link at end (truncate Discord message to 2000 chars)
-const commitUrl = `${GITHUB_SERVER_URL}/${GITHUB_REPO}/commit/${GITHUB_SHA}`;
-let finalMessage = message.slice(0, 1990) + `\n\nFull commit changes here: ${commitUrl}\n\`\`\``;
+fs.writeFileSync('current_diff.txt', githubSummary.join('\n\n'));
 
-axios.post(DISCORD_WEBHOOK_URL, { content: finalMessage })
-  .then(() => console.log('Discord message sent!'))
-  .catch(e => console.error('Failed to send Discord webhook:', e));
+// Prepare Discord message (first 2000 chars)
+const discordMessage = `**Changes in discordclasses.json:**\n` +
+  '```diff\n' +
+  githubSummary.join('\n') +
+  '\n```\n' +
+  `Full commit here: ${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
 
-// Also save full diff to file for GitHub comment
-fs.writeFileSync('current_diff.txt', message);
+const snippet = discordMessage.slice(0, 2000);
+
+async function postDiscord() {
+  try {
+    await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: snippet });
+    console.log('Discord webhook posted successfully!');
+  } catch (e) {
+    console.error('Failed to send Discord webhook:', e);
+  }
+}
+
+postDiscord();
