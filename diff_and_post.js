@@ -7,7 +7,13 @@ const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8') || '{}');
 const curr = JSON.parse(fs.readFileSync('current.json', 'utf8') || '{}');
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_REPO = process.env.GITHUB_REPOSITORY;
+const GITHUB_SHA = process.env.GITHUB_SHA;
+const GITHUB_SERVER_URL = process.env.GITHUB_SERVER_URL;
+
 const MAX_DISCORD_CHARS = 2000;
+const MAX_GITHUB_COMMENT_CHARS = 65000;
 
 // --- Helper functions ---
 function moduleItems(obj) {
@@ -97,7 +103,6 @@ function formatModuleSection(text) {
 
 function compareModules(prevObj, currObj) {
   const sections = [];
-  const summary = [];
   const allModules = _.union(Object.keys(prevObj), Object.keys(currObj));
   const moves = detectMoves(prevObj, currObj);
 
@@ -161,4 +166,28 @@ async function postDiscord() {
   }
 }
 
-postDiscord();
+// --- Post to GitHub comments ---
+async function postGitHubComments() {
+  const { Octokit } = require("@octokit/rest");
+  const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+  let start = 0;
+  while(start<diffText.length){
+    const chunk = diffText.slice(start, start+MAX_GITHUB_COMMENT_CHARS);
+    start += MAX_GITHUB_COMMENT_CHARS;
+
+    await octokit.rest.repos.createCommitComment({
+      owner: GITHUB_REPO.split('/')[0],
+      repo: GITHUB_REPO.split('/')[1],
+      commit_sha: GITHUB_SHA,
+      body: `**Changes in discordclasses.json:**\n${chunk}`
+    });
+    console.log(`Posted GitHub comment chunk`);
+  }
+}
+
+// --- Run both ---
+(async () => {
+  await postDiscord();
+  await postGitHubComments();
+})();
