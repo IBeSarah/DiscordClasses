@@ -5,24 +5,19 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json
+      - discordclasses.json   # Trigger only when this file changes
 
 jobs:
   post-diff:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
-
-      - name: Install dependencies
+      - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
 
       - name: Post diff to Discord and GitHub
