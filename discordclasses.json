@@ -1,10 +1,10 @@
 {
   "315": {
-    "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b8",
-    "container": "container_ae16b8",
-    "closeButton": "closeButton_ae16b8"
+    "seasonalGiftBoxHeaderIcon": "seasonalGiftBoxHeaderIcon_ae16b7",
   },
   "567": {
+	      "container": "container_ae16b8",
+    "closeButton": "closeButton_ae16b8",
     "root": "root_d8dd99",
     "header": "header_d8dd99"
   },
@@ -19,7 +19,7 @@
     "createButton": "createButton_d9c882"
   },
   "1721": {
-    "premiumCards": "premiumCards__6df1a",
+    "premiumCards": "premiumCards__6df1b",
     "premiumCardHover": "premiumCardHover__6df1a",
     "tier2ApplicationHomeSubheader": "tier2ApplicationHomeSubheader__6df1a",
     "applicationHomeCard": "applicationHomeCard__6df1a",
