@@ -9,7 +9,7 @@ on:
       - base64entries.json
 
 jobs:
-  post-diff:
+  post-diffs:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,14 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
 
-      - name: Process discordclasses.json
+      - name: Prepare JSON files
+        run: |
+          git show HEAD:discordclasses.json > current_discordclasses.json || echo '{}' > current_discordclasses.json
+          git show HEAD^:discordclasses.json > previous_discordclasses.json || echo '{}' > previous_discordclasses.json
+          git show HEAD:base64entries.json > current_base64entries.json || echo '{}' > current_base64entries.json
+          git show HEAD^:base64entries.json > previous_base64entries.json || echo '{}' > previous_base64entries.json
+
+      - name: Post DiscordClasses diff
         run: node diff_and_post.js discordclasses.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -29,7 +36,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      - name: Process base64entries.json
+      - name: Post Base64Entries diff
         run: node diff_and_post.js base64entries.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
