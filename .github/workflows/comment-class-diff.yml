@@ -18,7 +18,7 @@ jobs:
       - name: Checkout main repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to get previous commit
+          fetch-depth: 2  # Needed to access previous commit
 
       # Checkout the private diff script repo
       - name: Checkout private diff repo
@@ -32,16 +32,6 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
         working-directory: diff-repo
-
-      # Prepare previous and current files for diff
-      - name: Prepare JSON files for diff
-        run: |
-          # For discordclasses.json
-          git show HEAD~1:discordclasses.json > previous_discordclasses.json
-          git show HEAD:discordclasses.json > current_discordclasses.json
-          # For base64entries.json
-          git show HEAD~1:base64entries.json > previous_base64entries.json
-          git show HEAD:base64entries.json > current_base64entries.json
 
       # Run diff for discordclasses.json
       - name: Run diff for discordclasses.json
