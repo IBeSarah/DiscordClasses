@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - discordclasses.json   # Trigger only when this file changes
+      - discordclasses.json
 
 jobs:
   post-diff:
@@ -16,6 +16,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Set up JSON files
+        run: |
+          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
+          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
 
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
