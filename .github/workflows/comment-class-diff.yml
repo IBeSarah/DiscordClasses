@@ -30,7 +30,7 @@ jobs:
         run: npm install lodash fast-levenshtein axios @octokit/rest
 
       - name: Run diff and post for discordclasses.json
-        run: node diff_and_post.js discordclasses.json
+        run: node "​/diff_and_post.js" discordclasses.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +38,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Run diff and post for base64entries.json
-        run: node diff_and_post.js base64entries.json
+        run: node "​/diff_and_post.js" base64entries.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
