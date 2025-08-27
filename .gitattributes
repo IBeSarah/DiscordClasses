@@ -1,2 +1,1 @@
-# Force JSON files to use LF endings and normalize whitespace
 *.json text eol=lf
