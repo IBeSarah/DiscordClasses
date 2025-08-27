@@ -12,8 +12,9 @@ on:
 jobs:
   post-diff:
     runs-on: ubuntu-latest
+
     steps:
-      # Checkout the public repo itself (default)
+      # Checkout the public repo
       - name: Checkout public repo
         uses: actions/checkout@v4
 
@@ -21,17 +22,18 @@ jobs:
       - name: Checkout private diff script repo
         uses: actions/checkout@v4
         with:
-          repository: StilLTheSameAccount/-       # private repo with "-/diff_and_post.js"
-          path: diff-repo                          # folder to checkout into
-          token: ${{ secrets.PRIVATE_REPO_TOKEN }} # PAT with read access to private repo
+          repository: StilLTheSameAccount/diff-repo
+          path: diff-repo
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }} # PAT with read access
 
-      # Install Node dependencies for diff script
+      # Install Node dependencies in the private repo
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
+        working-directory: diff-repo
 
       # Run diff for discordclasses.json
       - name: Run diff for discordclasses.json
-        run: node "diff-repo/-/diff_and_post.js" discordclasses.json
+        run: node "diff-repo/diffs/diff_and_post.js" discordclasses.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +42,7 @@ jobs:
 
       # Run diff for base64entries.json
       - name: Run diff for base64entries.json
-        run: node "diff-repo/-/diff_and_post.js" base64entries.json
+        run: node "diff-repo/diffs/diff_and_post.js" base64entries.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
