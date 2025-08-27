@@ -21,11 +21,11 @@ jobs:
       - name: Checkout private diff script repo
         uses: actions/checkout@v4
         with:
-          repository: StilLTheSameAccount/-
-          path: diff-repo
-          token: ${{ secrets.PRIVATE_REPO_TOKEN }}  # ✅ Must be set in public repo secrets
+          repository: StilLTheSameAccount/-       # private repo with "-/diff_and_post.js"
+          path: diff-repo                          # folder to checkout into
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }} # PAT with read access to private repo
 
-      # Install Node dependencies for the diff script
+      # Install Node dependencies for diff script
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
 
