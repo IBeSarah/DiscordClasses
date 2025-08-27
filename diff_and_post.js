@@ -4,9 +4,8 @@ const axios = require('axios');
 const levenshtein = require('fast-levenshtein');
 const { Octokit } = require('@octokit/rest');
 
-// Load JSON directly from git
-const prev = JSON.parse(require('child_process').execSync(`git show HEAD^:discordclasses.json`).toString());
-const curr = JSON.parse(require('child_process').execSync(`git show HEAD:discordclasses.json`).toString());
+const prev = JSON.parse(fs.readFileSync('previous.json', 'utf8'));
+const curr = JSON.parse(fs.readFileSync('current.json', 'utf8'));
 
 const addedModules = {};
 const removedModules = {};
@@ -46,7 +45,7 @@ for (const oldId of Object.keys(prev)) {
   }
 }
 
-// Added, Removed, Renamed keys
+// Detect added, removed, renamed keys
 for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
   const oldMod = prev[key] || {};
   const newMod = curr[key] || {};
@@ -70,17 +69,19 @@ for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
   }
 }
 
-function formatDiffBlock(title, moduleId, keys, type, toModuleId=null) {
+// Format diff blocks
+function formatDiffBlock(title, moduleId, keys, type, toModuleId = null) {
   if (!keys || keys.length === 0) return '';
   const lines = keys.map(k => {
     switch (type) {
       case 'added': return `+ "${k}": "${curr[moduleId][k]}"`;
       case 'removed': return `- "${k}": "${prev[moduleId][k]}"`;
-      case 'renamed': 
+      case 'renamed':
       case 'moved':
-        return `- "${k}": "${prev[moduleId][k]}"\n+ "${k}": "${curr[toModuleId||moduleId][k]}"`;
+        return `- "${k}": "${prev[moduleId][k]}"\n+ "${k}": "${curr[toModuleId || moduleId][k]}"`;
     }
   }).join('\n');
+
   return `### ${title} in module ${moduleId}${toModuleId ? ` -> ${toModuleId}` : ''}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
 }
 
@@ -93,6 +94,7 @@ for (const [mod, info] of Object.entries(movedModules)) githubOutput += formatDi
 
 if (!githubOutput) githubOutput = 'No changes detected.';
 
+// Split GitHub comments if too long
 const MAX_COMMENT_LENGTH = 65000;
 function splitText(text, maxLength) {
   const chunks = [];
@@ -103,12 +105,13 @@ function splitText(text, maxLength) {
   }
   return chunks;
 }
-
 const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+// Post GitHub comments
 (async () => {
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   for (let i = 0; i < githubChunks.length; i++) {
-    const body = githubChunks.length > 1 ? `**Part ${i+1} of ${githubChunks.length}**\n\n${githubChunks[i]}` : githubChunks[i];
+    const body = githubChunks.length > 1 ? `**Part ${i + 1} of ${githubChunks.length}**\n\n${githubChunks[i]}` : githubChunks[i];
     await octokit.rest.repos.createCommitComment({
       owner: process.env.GITHUB_REPOSITORY.split('/')[0],
       repo: process.env.GITHUB_REPOSITORY.split('/')[1],
@@ -134,6 +137,8 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
   const discordMessage = `**Module changes summary**\n${summaryLines.join('\n')}\n\nView full list of changes here: ${commitUrl}`;
 
-  await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage });
+  const messageToSend = discordMessage.length > 2000 ? discordMessage.slice(0, 1997) + '...' : discordMessage;
+
+  await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: messageToSend });
   console.log('Discord post successful');
 })();
