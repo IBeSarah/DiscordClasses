@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - discordclasses.json
-      - base64entries.json   # also trigger when this file changes
+      - base64entries.json
 
 jobs:
   post-diff:
@@ -18,25 +18,25 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up JSON files
-        run: |
-          git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
-          git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
-          git show HEAD:base64entries.json > current_base64.json || echo '{}' > current_base64.json
-          git show HEAD^:base64entries.json > previous_base64.json || echo '{}' > previous_base64.json
-
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios
+        run: npm install lodash fast-levenshtein axios @octokit/rest
 
-      - name: Post diff to Discord
-        run: node diff_and_post.js summary
+      - name: Post diffs for discordclasses.json
+        run: |
+          node diff_and_post.js discordclasses.json summary
+          node diff_and_post.js discordclasses.json github
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SERVER_URL: ${{ github.server_url }}
 
-      - name: Post full diff as GitHub commit comments
-        run: node diff_and_post.js github
+      - name: Post diffs for base64entries.json
+        run: |
+          node diff_and_post.js base64entries.json summary
+          node diff_and_post.js base64entries.json github
         env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
