@@ -121,24 +121,35 @@ const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
   }
 
   // Discord summary (short)
-  function summarize(mods) {
-    return Object.entries(mods).map(([mod, keys]) => {
-      if (typeof keys === 'object' && keys.to) return `Module ${mod}: Moved: ${keys.keys.length}`;
-      return `Module ${mod}: ${keys.length}`;
-    }).join(', ');
+function summarizeModuleCounts() {
+  const allModules = new Set([
+    ...Object.keys(addedModules),
+    ...Object.keys(removedModules),
+    ...Object.keys(renamedModules),
+    ...Object.keys(movedModules),
+  ]);
+
+  const lines = [];
+  for (const mod of allModules) {
+    const added = addedModules[mod]?.length || 0;
+    const removed = removedModules[mod]?.length || 0;
+    const renamed = renamedModules[mod]?.length || 0;
+    const moved = movedModules[mod]?.keys?.length || 0;
+    const parts = [];
+    if (added) parts.push(`Added: ${added}`);
+    if (removed) parts.push(`Removed: ${removed}`);
+    if (renamed) parts.push(`Renamed: ${renamed}`);
+    if (moved) parts.push(`Moved: ${moved}`);
+    if (parts.length) lines.push(`Module ${mod}: ${parts.join(', ')}`);
   }
+  return lines.join('\n');
+};
 
-  const summaryLines = [];
-  if (Object.keys(addedModules).length) summaryLines.push(`Added: ${summarize(addedModules)}`);
-  if (Object.keys(removedModules).length) summaryLines.push(`Removed: ${summarize(removedModules)}`);
-  if (Object.keys(renamedModules).length) summaryLines.push(`Renamed: ${summarize(renamedModules)}`);
-  if (Object.keys(movedModules).length) summaryLines.push(`Moved: ${summarize(movedModules)}`);
+const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+const discordMessage = `**Module changes summary**\n${summarizeModuleCounts()}\n\nView full list of changes here: ${commitUrl}`;
 
-  const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-  const discordMessage = `**Module changes summary**\n${summaryLines.join('\n')}\n\nView full list of changes here: ${commitUrl}`;
+const messageToSend = discordMessage.length > 2000 ? discordMessage.slice(0, 1997) + '...' : discordMessage;
 
-  const messageToSend = discordMessage.length > 2000 ? discordMessage.slice(0, 1997) + '...' : discordMessage;
-
-  await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: messageToSend });
-  console.log('Discord post successful');
+await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: messageToSend });
+console.log('Discord post successful');
 })();
