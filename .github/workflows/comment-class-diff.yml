@@ -7,24 +7,26 @@ on:
     paths:
       - discordclasses.json
       - base64entries.json
-  workflow_dispatch:  # Optional manual trigger
+  workflow_dispatch:
 
 jobs:
   post-diff:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the public repo
-      - name: Checkout public repo
+      # Checkout the main repo (with the JSON files)
+      - name: Checkout main repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Needed to access previous commit
 
-      # Checkout the private repo containing the diff script
-      - name: Checkout private diff script repo
+      # Checkout the private diff script repo
+      - name: Checkout private diff repo
         uses: actions/checkout@v4
         with:
           repository: StilLTheSameAccount/diff-repo
           path: diff-repo
-          token: ${{ secrets.PRIVATE_REPO_TOKEN }} # PAT with read access
+          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
 
       # Install Node dependencies in the private repo
       - name: Install Node dependencies
