@@ -1,4 +1,4 @@
-name: Post JSON Diff
+name: Post Class Diff
 
 on:
   push:
@@ -7,44 +7,38 @@ on:
     paths:
       - discordclasses.json
       - base64entries.json
-  workflow_dispatch:
 
 jobs:
   post-diff:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the main repo (with the JSON files)
-      - name: Checkout main repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Needed to access previous commit
+          fetch-depth: 2
 
-      # Checkout the private diff script repo
-      - name: Checkout private diff repo
-        uses: actions/checkout@v4
-        with:
-          repository: StilLTheSameAccount/diff-repo
-          path: diff-repo
-          token: ${{ secrets.PRIVATE_REPO_TOKEN }}
+      - name: Set up JSON files
+        run: |
+          # Save current and previous versions for both files
+          for file in discordclasses.json base64entries.json; do
+            git show HEAD:$file > current_$file || echo '{}' > current_$file
+            git show HEAD^:$file > previous_$file || echo '{}' > previous_$file
+          done
 
-      # Install Node dependencies in the private repo
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
-        working-directory: diff-repo
 
-      # Run diff for discordclasses.json
-      - name: Run diff for discordclasses.json
-        run: node "diff-repo/diffs/diff_and_post.js" discordclasses.json
+      - name: Run diff and post for discordclasses.json
+        run: node diff_and_post.js discordclasses.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
-      # Run diff for base64entries.json
-      - name: Run diff for base64entries.json
-        run: node "diff-repo/diffs/diff_and_post.js" base64entries.json
+      - name: Run diff and post for base64entries.json
+        run: node diff_and_post.js base64entries.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
