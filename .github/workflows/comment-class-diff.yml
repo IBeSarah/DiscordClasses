@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - discordclasses.json
+      - base64entries.json   # also trigger when this file changes
 
 jobs:
   post-diff:
@@ -21,14 +22,21 @@ jobs:
         run: |
           git show HEAD:discordclasses.json > current.json || echo '{}' > current.json
           git show HEAD^:discordclasses.json > previous.json || echo '{}' > previous.json
+          git show HEAD:base64entries.json > current_base64.json || echo '{}' > current_base64.json
+          git show HEAD^:base64entries.json > previous_base64.json || echo '{}' > previous_base64.json
 
       - name: Install Node dependencies
-        run: npm install lodash fast-levenshtein axios @octokit/rest
+        run: npm install lodash fast-levenshtein axios
 
-      - name: Post diff to Discord and GitHub
-        run: node diff_and_post.js
+      - name: Post diff to Discord
+        run: node diff_and_post.js summary
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+
+      - name: Post full diff as GitHub commit comments
+        run: node diff_and_post.js github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
