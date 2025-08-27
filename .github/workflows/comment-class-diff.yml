@@ -1,0 +1,49 @@
+name: Post JSON Diff from Public Repo
+
+on:
+  workflow_dispatch:        # Manual trigger
+  push:
+    branches:
+      - main               # Optional: triggers when main branch of private repo changes
+    paths-ignore:
+      - '**'               # Ignore all changes unless manually triggered
+
+jobs:
+  post-diff:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout private repo (self) to access diff script
+      - name: Checkout private repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # Checkout public DiscordClasses repo
+      - name: Checkout public DiscordClasses repo
+        uses: actions/checkout@v4
+        with:
+          repository: StilLTheSameAccount/DiscordClasses
+          path: discord-classes
+          token: ${{ secrets.DISCORD_CLASSES_PAT }}  # PAT with read access (public repo doesn't need a PAT but can use for future private repos)
+
+      # Install Node dependencies for diff script
+      - name: Install Node dependencies
+        run: npm install lodash fast-levenshtein axios @octokit/rest
+
+      # Run diff for discordclasses.json
+      - name: Run diff for discordclasses.json
+        run: node "-/diff_and_post.js" "discord-classes/discordclasses.json"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.DISCORD_CLASSES_PAT }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: StilLTheSameAccount/DiscordClasses
+
+      # Run diff for base64entries.json
+      - name: Run diff for base64entries.json
+        run: node "-/diff_and_post.js" "discord-classes/base64entries.json"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.DISCORD_CLASSES_PAT }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: StilLTheSameAccount/DiscordClasses
