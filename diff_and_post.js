@@ -120,19 +120,20 @@ const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
     });
   }
 
-// Discord summary (short, counts only, limit 5 modules)
+// Discord summary (counts only, limit 5 modules)
 function summarizeModuleCounts(maxModules = 5) {
-  const allModules = new Set([
+  const allModules = Array.from(new Set([
     ...Object.keys(addedModules),
     ...Object.keys(removedModules),
     ...Object.keys(renamedModules),
     ...Object.keys(movedModules),
-  ]);
+  ]));
 
   const lines = [];
-  let count = 0;
-  for (const mod of allModules) {
-    if (count >= maxModules) break; // stop after maxModules
+  let totalChanges = 0;
+
+  for (let i = 0; i < allModules.length; i++) {
+    const mod = allModules[i];
     const added = addedModules[mod]?.length || 0;
     const removed = removedModules[mod]?.length || 0;
     const renamed = renamedModules[mod]?.length || 0;
@@ -142,20 +143,42 @@ function summarizeModuleCounts(maxModules = 5) {
     if (removed) parts.push(`Removed: ${removed}`);
     if (renamed) parts.push(`Renamed: ${renamed}`);
     if (moved) parts.push(`Moved: ${moved}`);
-    if (parts.length) {
-      lines.push(`Module ${mod}: ${parts.join(', ')}`);
-      count++;
+
+    const changeCount = parts.reduce((acc, p) => acc + parseInt(p.split(': ')[1]), 0);
+    totalChanges += changeCount;
+
+    if (i < maxModules) {
+      if (parts.length) lines.push(`Module ${mod}: ${parts.join(', ')}`);
     }
   }
+
+  // Extra changes/modules not included
+  const remainingModules = allModules.length - maxModules;
+  if (remainingModules > 0) {
+    let remainingChanges = 0;
+    for (let i = maxModules; i < allModules.length; i++) {
+      const mod = allModules[i];
+      const added = addedModules[mod]?.length || 0;
+      const removed = removedModules[mod]?.length || 0;
+      const renamed = renamedModules[mod]?.length || 0;
+      const moved = movedModules[mod]?.keys?.length || 0;
+      remainingChanges += added + removed + renamed + moved;
+    }
+    lines.push(`${remainingChanges} more changes in ${remainingModules} modules not included`);
+  }
+
   return lines.join('\n');
-};
+}
 
 const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-const discordMessage = `### Module changes summary\n${summarizeModuleCounts(5)}\n\nSee full list of changes here: ${commitUrl}`;
+let discordMessage = `### Module changes summary\n${summarizeModuleCounts(5)}\nSee full list of changes here: ${commitUrl}`;
 
-const messageToSend = discordMessage.length > 2000 ? discordMessage.slice(0, 1997) + '...' : discordMessage;
+// Respect Discord 2000 character limit
+if (discordMessage.length > 2000) {
+  discordMessage = discordMessage.slice(0, 1997) + '...';
+}
 
-await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: messageToSend });
+await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage });
 console.log('Discord post successful');
 
 })();
