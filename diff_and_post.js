@@ -120,8 +120,8 @@ const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
     });
   }
 
-  // Discord summary (short)
-function summarizeModuleCounts() {
+// Discord summary (short, counts only, limit 5 modules)
+function summarizeModuleCounts(maxModules = 5) {
   const allModules = new Set([
     ...Object.keys(addedModules),
     ...Object.keys(removedModules),
@@ -130,7 +130,9 @@ function summarizeModuleCounts() {
   ]);
 
   const lines = [];
+  let count = 0;
   for (const mod of allModules) {
+    if (count >= maxModules) break; // stop after maxModules
     const added = addedModules[mod]?.length || 0;
     const removed = removedModules[mod]?.length || 0;
     const renamed = renamedModules[mod]?.length || 0;
@@ -140,16 +142,20 @@ function summarizeModuleCounts() {
     if (removed) parts.push(`Removed: ${removed}`);
     if (renamed) parts.push(`Renamed: ${renamed}`);
     if (moved) parts.push(`Moved: ${moved}`);
-    if (parts.length) lines.push(`Module ${mod}: ${parts.join(', ')}`);
+    if (parts.length) {
+      lines.push(`Module ${mod}: ${parts.join(', ')}`);
+      count++;
+    }
   }
   return lines.join('\n');
 };
 
 const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-const discordMessage = `**Module changes summary**\n${summarizeModuleCounts()}\n\nView full list of changes here: ${commitUrl}`;
+const discordMessage = `### Module changes summary\n${summarizeModuleCounts(5)}\n\nSee full list of changes here: ${commitUrl}`;
 
 const messageToSend = discordMessage.length > 2000 ? discordMessage.slice(0, 1997) + '...' : discordMessage;
 
 await axios.post(process.env.DISCORD_WEBHOOK_URL, { content: messageToSend });
 console.log('Discord post successful');
+
 })();
