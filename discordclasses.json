@@ -5,8 +5,8 @@
     "closeButton": "closeButton_ae16b8"
   },
   "567": {
-    "root": "root_d8dd98",
-    "header": "header_d8dd98"
+    "root": "root_d8dd99",
+    "header": "header_d8dd99"
   },
   "715": {
     "container": "container_d9c882",
@@ -7591,21 +7591,21 @@
     "dropdownOption": "dropdownOption__78ebf"
   },
   "295265": {
-    "inviteSmall": "inviteSmall_f1d98d",
-    "content": "content_f1d98d",
-    "info": "info_f1d98d",
-    "inviteLarge": "inviteLarge_f1d98d",
-    "guildIcon": "guildIcon_f1d98d",
-    "infoText": "infoText_f1d98d",
-    "name": "name_f1d98d",
-    "memberInfo": "memberInfo_f1d98d",
-    "dot": "dot_f1d98d",
-    "dotOnline": "dotOnline_f1d98d dot_f1d98d",
-    "dotOffline": "dotOffline_f1d98d dot_f1d98d",
-    "memberText": "memberText_f1d98d",
-    "actionButton": "actionButton_f1d98d",
-    "joinedCheckmark": "joinedCheckmark_f1d98d",
-    "buttonColorInGuild": "buttonColorInGuild_f1d98d"
+    "inviteSmall": "inviteSmall_f1d99d",
+    "content": "content_f1d99d",
+    "info": "info_f1d99d",
+    "inviteLarge": "inviteLarge_f1d99d",
+    "guildIcon": "guildIcon_f1d99d",
+    "infoText": "infoText_f1d99d",
+    "name": "name_f1d99d",
+    "memberInfo": "memberInfo_f1d99d",
+    "dot": "dot_f1d99d",
+    "dotOnline": "dotOnline_f1d99d dot_f1d99d",
+    "dotOffline": "dotOffline_f1d99d dot_f1d99d",
+    "memberText": "memberText_f1d99d",
+    "actionButton": "actionButton_f1d99d",
+    "joinedCheckmark": "joinedCheckmark_f1d99d",
+    "buttonColorInGuild": "buttonColorInGuild_f1d99d"
   },
   "295880": {
     "wrapper": "wrapper_b76614",
@@ -20643,18 +20643,18 @@
     "previewNoticeText": "previewNoticeText__60f3f"
   },
   "790680": {
-    "container": "container_d9814b",
-    "section": "section_d9814b",
-    "box": "box_d9814b",
-    "linkingBanner": "linkingBanner_d9814b",
-    "linkingBannerParent": "linkingBannerParent_d9814b",
-    "linkingBannerUpper": "linkingBannerUpper_d9814b",
-    "step": "step_d9814b",
-    "steps": "steps_d9814b",
-    "stepNumber": "stepNumber_d9814b",
-    "bannerArt": "bannerArt_d9814b",
-    "maxConnectionInfo": "maxConnectionInfo_d9814b",
-    "supportHeader": "supportHeader_d9814b"
+    "container": "container_d9914b",
+    "section": "section_d9914b",
+    "box": "box_d9914b",
+    "linkingBanner": "linkingBanner_d9914b",
+    "linkingBannerParent": "linkingBannerParent_d9914b",
+    "linkingBannerUpper": "linkingBannerUpper_d9914b",
+    "step": "step_d9914b",
+    "steps": "steps_d9914b",
+    "stepNumber": "stepNumber_d9914b",
+    "bannerArt": "bannerArt_d9914b",
+    "maxConnectionInfo": "maxConnectionInfo_d9914b",
+    "supportHeader": "supportHeader_d9914b"
   },
   "790952": {
     "circleIconButton": "circleIconButton__5bc7e",
