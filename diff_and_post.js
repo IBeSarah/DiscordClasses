@@ -136,7 +136,7 @@ const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${
 let discordMessage = isBase64 ? `**Base64 Module changes summary**\n` : `**Module changes summary**\n`;
 discordMessage += summaries.join('\n');
 if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
-discordMessage += `\nSee full list of changes here: ${commitUrl}`;
+discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
 
 if (discordMessage.length > 2000) {
   discordMessage = discordMessage.slice(0, 1990) + '...';
