@@ -11746,7 +11746,8 @@
     "line": "line__2debe",
     "appArch": "appArch__2debe",
     "os": "os__2debe",
-    "versionHash": "versionHash__2debe"
+    "versionHash": "versionHash__2debe",
+    "compactInfo": "compactInfo__2debe"
   },
   "447661": {
     "streamInfoContainer": "streamInfoContainer__0f85c",
@@ -25733,6 +25734,9 @@
     "rowRight": "rowRight__4a43b",
     "previewImage": "previewImage__4a43b",
     "acronym": "acronym__4a43b"
+  },
+  "989281": {
+    "links": "links__7aac8"
   },
   "989295": {
     "icon": "icon__2a871",
