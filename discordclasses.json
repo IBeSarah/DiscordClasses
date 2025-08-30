@@ -4017,6 +4017,10 @@
     "scrollerInner": "scrollerInner__36d07",
     "scrollerAllowSticky": "scrollerAllowSticky__36d07",
     "navigationDescription": "navigationDescription__36d07",
+    "chatGradientBase": "chatGradientBase__36d07",
+    "chatGradient": "chatGradient__36d07 chatGradientBase__36d07",
+    "chatTypingGradientAtBottom": "chatTypingGradientAtBottom__36d07 chatGradientBase__36d07",
+    "chatTypingGradientNotAtBottom": "chatTypingGradientNotAtBottom__36d07 chatGradientBase__36d07",
     "gradientDefault": "gradientDefault__36d07",
     "typingGradientNotAtBottom": "typingGradientNotAtBottom__36d07",
     "typingGradientAtBottom": "typingGradientAtBottom__36d07"
@@ -9408,6 +9412,7 @@
     "thumbIcon": "thumbIcon__3aab5"
   },
   "363862": {
+    "clipsEnabledIndicator": "clipsEnabledIndicator__8c88a",
     "clipBadgeText": "clipBadgeText__8c88a liveLarge_a7acae",
     "clipBadgeIcon": "clipBadgeIcon__8c88a"
   },
@@ -10550,8 +10555,7 @@
     "confirmationContainer": "confirmationContainer_e64651",
     "confirmationHeader": "confirmationHeader_e64651",
     "confirmationSubtitle": "confirmationSubtitle_e64651",
-    "openDiscordButton": "openDiscordButton_e64651",
-    "doneButton": "doneButton_e64651"
+    "actions": "actions_e64651"
   },
   "407067": {
     "header": "header_ab6641",
@@ -12897,6 +12901,7 @@
   "490745": {
     "override": "override_fa2640",
     "settingsColumn": "settingsColumn_fa2640",
+    "settingsVerticalScroller": "settingsVerticalScroller_fa2640",
     "settingsHorizontalScroller": "settingsHorizontalScroller_fa2640",
     "settingsContent": "settingsContent_fa2640",
     "header": "header_fa2640",
@@ -13932,6 +13937,10 @@
     "actionBarTrailing": "actionBarTrailing__53cea",
     "actionButtonWrapper": "actionButtonWrapper__53cea",
     "actionBarTrailingFullWidth": "actionBarTrailingFullWidth__53cea"
+  },
+  "525876": {
+    "roleDot": "roleDot__41e17",
+    "roleDotInline": "roleDotInline__41e17"
   },
   "526265": {
     "section": "section__25879"
@@ -20632,13 +20641,10 @@
     "containerWithRightCaret": "containerWithRightCaret_c2c6a6"
   },
   "791873": {
-    "modal": "modal__6fa2e",
     "body": "body__6fa2e",
     "seperator": "seperator__6fa2e",
     "description": "description__6fa2e",
-    "footer": "footer__6fa2e",
-    "headerImage": "headerImage__6fa2e",
-    "closeButton": "closeButton__6fa2e"
+    "headerImage": "headerImage__6fa2e"
   },
   "792323": {
     "combobox": "combobox__97e86",
