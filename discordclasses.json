@@ -4617,8 +4617,7 @@
     "successNoticeMessage": "successNoticeMessage__7fffd"
   },
   "179835": {
-    "floatingFooter": "floatingFooter__49d5b",
-    "footerButtons": "footerButtons__49d5b"
+    "fullbleedContent": "fullbleedContent__49d5b"
   },
   "180002": {
     "chipletFlexContainer": "chipletFlexContainer__3b3ff",
@@ -6643,6 +6642,7 @@
   "248319": {
     "root": "root__10a0c",
     "content": "content__10a0c",
+    "fullbleed": "fullbleed__10a0c",
     "iframe": "iframe__10a0c"
   },
   "248494": {
