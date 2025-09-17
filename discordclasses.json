@@ -2020,6 +2020,12 @@
     "header": "header_cd1bf7",
     "outerWrapping": "outerWrapping_cd1bf7"
   },
+  "77344": {
+    "headerIcons": "headerIcons_f5cf99",
+    "ellipseGroup": "ellipseGroup_f5cf99",
+    "ellipse": "ellipse_f5cf99",
+    "avatar": "avatar_f5cf99"
+  },
   "77839": {
     "scroller": "scroller_fb04e1",
     "body": "body_fb04e1",
@@ -23585,7 +23591,8 @@
     "rewardHighlightLogoCTAHeightBoost": "rewardHighlightLogoCTAHeightBoost__8a22c",
     "partnerBranding": "partnerBranding__8a22c",
     "rewardHighlightCTA": "rewardHighlightCTA__8a22c",
-    "rewardHighlightCTALabel": "rewardHighlightCTALabel__8a22c"
+    "rewardHighlightCTALabel": "rewardHighlightCTALabel__8a22c",
+    "rewardHighlightLogoCTADivider": "rewardHighlightLogoCTADivider__8a22c"
   },
   "896681": {
     "container": "container_c8f358",
