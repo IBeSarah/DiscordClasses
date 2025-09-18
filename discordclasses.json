@@ -12856,7 +12856,7 @@
     "item": "item__1bb32",
     "itemIcon": "itemIcon__1bb32",
     "filterSublabelTextContainer": "filterSublabelTextContainer__1bb32",
-    "inSelectedChannelLabel": "inSelectedChannelLabel__1bb32",
+    "labelWithElements": "labelWithElements__1bb32",
     "channelNameContainer": "channelNameContainer__1bb32",
     "channelName": "channelName__1bb32",
     "channelNameIcon": "channelNameIcon__1bb32",
@@ -20612,6 +20612,15 @@
     "container": "container_ea9851",
     "icon": "icon_ea9851"
   },
+  "793906": {
+    "layerContainer": "layerContainer__59d0d",
+    "clickTrapContainer": "clickTrapContainer__59d0d",
+    "trapClicks": "trapClicks__59d0d",
+    "layer": "layer__59d0d",
+    "emptyError": "emptyError__59d0d",
+    "layerHidden": "layerHidden__59d0d",
+    "disabledPointerEvents": "disabledPointerEvents__59d0d"
+  },
   "795482": {
     "buttonContainer": "buttonContainer__7e329",
     "keybind": "keybind__7e329",
@@ -20737,7 +20746,8 @@
     "underlineOnHover": "underlineOnHover__5dec7",
     "channel": "channel__5dec7",
     "perksDemoContainer": "perksDemoContainer__5dec7",
-    "perksDemoText": "perksDemoText__5dec7"
+    "perksDemoText": "perksDemoText__5dec7",
+    "frameApplicationNameTitleClickable": "frameApplicationNameTitleClickable__5dec7"
   },
   "800371": {
     "cloudPlaySection": "cloudPlaySection__1692d",
@@ -22128,6 +22138,7 @@
     "navScroller": "navScroller__409aa",
     "nav": "nav__409aa",
     "section": "section__409aa",
+    "sectionLabel": "sectionLabel__409aa",
     "label": "label__409aa",
     "fixedContent": "fixedContent__409aa"
   },
@@ -22196,14 +22207,12 @@
   },
   "849879": {
     "loading": "loading__9ed46",
-    "maybeLaterButton": "maybeLaterButton__9ed46",
     "bodyText": "bodyText__9ed46",
     "formDivider": "formDivider__9ed46",
     "formSection": "formSection__9ed46",
     "confirmationText": "confirmationText__9ed46",
     "headerContainer": "headerContainer__9ed46",
     "art": "art__9ed46",
-    "errorHeader": "errorHeader__9ed46",
     "errorBody": "errorBody__9ed46",
     "errorArt": "errorArt__9ed46"
   },
@@ -23621,15 +23630,6 @@
     "emptyHintFavorite": "emptyHintFavorite__2dc39",
     "loadIN": "loadIN__2dc39",
     "placeholder": "placeholder__2dc39"
-  },
-  "898585": {
-    "layerContainer": "layerContainer_da8173",
-    "clickTrapContainer": "clickTrapContainer_da8173",
-    "trapClicks": "trapClicks_da8173",
-    "layer": "layer_da8173",
-    "emptyError": "emptyError_da8173",
-    "layerHidden": "layerHidden_da8173",
-    "disabledPointerEvents": "disabledPointerEvents_da8173"
   },
   "899359": {
     "dimensionlessImage": "dimensionlessImage_a22bfd",
