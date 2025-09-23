@@ -4933,7 +4933,9 @@
   "197530": {
     "container": "container_c18b09",
     "heading": "heading_c18b09",
+    "maxInstancesWarning": "maxInstancesWarning_c18b09",
     "gameContainerWrapper": "gameContainerWrapper_c18b09",
+    "disabled": "disabled_c18b09",
     "gameContainer": "gameContainer_c18b09",
     "game": "game_c18b09",
     "image": "image_c18b09",
@@ -5952,13 +5954,6 @@
     "discrimClass": "discrimClass_a429ea",
     "alignRight": "alignRight_a429ea",
     "countdown": "countdown_a429ea alignRight_a429ea"
-  },
-  "241179": {
-    "container": "container__6f89e",
-    "disabled": "disabled__6f89e",
-    "checked": "checked__6f89e",
-    "input": "input__6f89e",
-    "slider": "slider__6f89e"
   },
   "242081": {
     "container": "container_f284f6",
@@ -16862,6 +16857,13 @@
     "placeholderPulse": "placeholderPulse_ce03f4",
     "emptyContainer": "emptyContainer_ce03f4",
     "checkmark": "checkmark_ce03f4"
+  },
+  "659780": {
+    "container": "container__3f21e",
+    "disabled": "disabled__3f21e",
+    "checked": "checked__3f21e",
+    "input": "input__3f21e",
+    "slider": "slider__3f21e"
   },
   "660091": {
     "videoHeight": "videoHeight__94748",
