@@ -1685,6 +1685,9 @@
     "actionedInfo": "actionedInfo__6b102",
     "dot": "dot__6b102"
   },
+  "59690": {
+    "productName": "productName__812f1"
+  },
   "59718": {
     "formItem": "formItem__1b11b"
   },
@@ -5198,6 +5201,9 @@
     "inputSensitivityBar": "inputSensitivityBar_ac7648",
     "inputSensitivityBarFill": "inputSensitivityBarFill_ac7648"
   },
+  "192676": {
+    "orbIconAligned": "orbIconAligned__18bf6"
+  },
   "192754": {
     "right": "right__89d2b",
     "down": "down__89d2b",
@@ -6039,6 +6045,15 @@
     "description": "description__1f7ec",
     "tagline": "tagline__1f7ec",
     "tag": "tag__1f7ec"
+  },
+  "217726": {
+    "baseProductCardContainer": "baseProductCardContainer__9701b",
+    "innerContainer": "innerContainer__9701b",
+    "baseProductCardDetailsContainer": "baseProductCardDetailsContainer__9701b",
+    "baseProductCardFooter": "baseProductCardFooter__9701b",
+    "hoveredVariantSwitcher": "hoveredVariantSwitcher__9701b",
+    "innerHover": "innerHover__9701b",
+    "hasVariantSwitcher": "hasVariantSwitcher__9701b"
   },
   "218634": {
     "svg": "svg__4f569",
@@ -7514,7 +7529,10 @@
     "mutualGuilds": "mutualGuilds_b50d96"
   },
   "292609": {
-    "container": "container__6f9f7"
+    "container": "container__6f9f7",
+    "primaryButton": "primaryButton__6f9f7",
+    "buttonInner": "buttonInner__6f9f7",
+    "buttonWrapper": "buttonWrapper__6f9f7"
   },
   "292660": {
     "container": "container_fb2e73",
@@ -9366,7 +9384,11 @@
     "strikethrough": "strikethrough__0fcb7"
   },
   "362320": {
-    "tooltipContainer": "tooltipContainer__652ee"
+    "tooltipContainer": "tooltipContainer__652ee",
+    "secondaryButton": "secondaryButton__652ee",
+    "buttonInner": "buttonInner__652ee",
+    "buttonWrapper": "buttonWrapper__652ee",
+    "dot": "dot__652ee"
   },
   "363350": {
     "summaryDivider": "summaryDivider__3aab5",
@@ -10196,6 +10218,7 @@
     "activeCard": "activeCard_a1e8da",
     "perkCardImage": "perkCardImage_a1e8da",
     "active": "active_a1e8da",
+    "toggleButton": "toggleButton_a1e8da",
     "footerContainer": "footerContainer_a1e8da",
     "footerDetails": "footerDetails_a1e8da",
     "statusContainer": "statusContainer_a1e8da"
@@ -12608,6 +12631,7 @@
     "container": "container__8fcbd",
     "contentContainer": "contentContainer__8fcbd",
     "description": "description__8fcbd",
+    "button": "button__8fcbd",
     "image": "image__8fcbd"
   },
   "477813": {
@@ -24459,6 +24483,9 @@
     "slowModeIcon": "slowModeIcon__7391f",
     "leadingIcon": "leadingIcon__7391f"
   },
+  "944525": {
+    "productCardBadge": "productCardBadge_b8a6bd"
+  },
   "944701": {
     "wrapper": "wrapper__44df5",
     "content": "content__44df5",
@@ -24849,7 +24876,8 @@
   "961820": {
     "game": "game__03b8d",
     "textContainer": "textContainer__03b8d",
-    "image": "image__03b8d"
+    "image": "image__03b8d",
+    "disableButton": "disableButton__03b8d"
   },
   "961850": {
     "buttonSparkleStar1": "buttonSparkleStar1_fc1723",
@@ -25902,6 +25930,9 @@
     "row": "row_e4169f",
     "userCell": "userCell_e4169f",
     "affinityCell": "affinityCell_e4169f"
+  },
+  "997033": {
+    "priceTag": "priceTag__3b1b0"
   },
   "997267": {
     "outerContainer": "outerContainer__2055a",
