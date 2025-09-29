@@ -7320,9 +7320,6 @@
     "userAppsBetaContent": "userAppsBetaContent__124d2",
     "icon": "icon__124d2"
   },
-  "303769": {
-    "sparkles": "sparkles_f99d90"
-  },
   "304187": {
     "container": "container__23ba6"
   },
@@ -12824,7 +12821,6 @@
     "colorSuccess": "colorSuccess_c1e9c4 colorDefault_c1e9c4",
     "groupLabel": "groupLabel_c1e9c4 labelContainer_c1e9c4",
     "loader": "loader_c1e9c4",
-    "sparkles": "sparkles_c1e9c4",
     "radioIcon": "radioIcon_c1e9c4"
   },
   "515528": {
@@ -22232,6 +22228,7 @@
     "channelListHidden": "channelListHidden_c48ade",
     "fullWidth": "fullWidth_c48ade",
     "panels": "panels_c48ade",
+    "disablePointersWhileSorting": "disablePointersWhileSorting_c48ade",
     "content": "content_c48ade",
     "activityPanel": "activityPanel_c48ade",
     "loader": "loader_c48ade",
@@ -24728,7 +24725,8 @@
     "modal": "modal_e3af39",
     "modalContent": "modalContent_e3af39",
     "leftPanel": "leftPanel_e3af39",
-    "rightPanel": "rightPanel_e3af39"
+    "rightPanel": "rightPanel_e3af39",
+    "spinner": "spinner_e3af39"
   },
   "955460": {
     "root": "root__11e4a",
