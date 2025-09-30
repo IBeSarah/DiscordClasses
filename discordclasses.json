@@ -19579,6 +19579,10 @@
   "760564": {
     "tabBarItem": "tabBarItem_e32080"
   },
+  "761588": {
+    "systemServiceContainer": "systemServiceContainer_b4186f",
+    "systemServiceTextContainer": "systemServiceTextContainer_b4186f"
+  },
   "762641": {
     "messageBlock": "messageBlock__2d815",
     "yellowMessageBlock": "yellowMessageBlock__2d815 messageBlock__2d815",
@@ -23203,8 +23207,7 @@
     "withHover": "withHover__979b1",
     "normalIconColor": "normalIconColor__979b1",
     "wishlistedOrHoveredIconColor": "wishlistedOrHoveredIconColor__979b1",
-    "disabledIconColor": "disabledIconColor__979b1",
-    "toastIcon": "toastIcon__979b1"
+    "disabledIconColor": "disabledIconColor__979b1"
   },
   "890332": {
     "container": "container_e131a9",
