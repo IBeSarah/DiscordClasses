@@ -12120,6 +12120,10 @@
     "navPrev": "navPrev__21d85 nav__21d85",
     "navNext": "navNext__21d85 nav__21d85"
   },
+  "463754": {
+    "upsellButton": "upsellButton_c91f9c",
+    "premiumUpsellBadge": "premiumUpsellBadge_c91f9c"
+  },
   "464992": {
     "actionContainer": "actionContainer__6446f",
     "actionIconContainer": "actionIconContainer__6446f",
@@ -14954,7 +14958,7 @@
     "guildIcon": "guildIcon__631c2"
   },
   "573335": {
-    "button": "button_bf1984"
+    "buttonWrapper": "buttonWrapper_bf1984"
   },
   "573567": {
     "manageSubscription": "manageSubscription__37c99"
@@ -22095,10 +22099,6 @@
   },
   "850171": {
     "b": "#bd282a"
-  },
-  "850274": {
-    "upsellButton": "upsellButton__71816",
-    "premiumUpsellBadge": "premiumUpsellBadge__71816"
   },
   "851339": {
     "container": "container_ac8a82",
