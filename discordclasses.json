@@ -2285,6 +2285,7 @@
     "largeImage": "largeImage__00943",
     "borderRadius0": "borderRadius0__00943",
     "smallImage": "smallImage__00943",
+    "activitySectionDetails": "activitySectionDetails__00943",
     "spotifySection": "spotifySection__00943 activitySection__00943",
     "embeddedActivityTopRow": "embeddedActivityTopRow__00943",
     "embeddedActivityName": "embeddedActivityName__00943",
@@ -4456,9 +4457,6 @@
   "172349": {
     "placeholderElement": "placeholderElement__6e847"
   },
-  "172463": {
-    "whatYouLoseButtonContainer": "whatYouLoseButtonContainer__1fb50"
-  },
   "172931": {
     "container": "container_d28fa1",
     "divider": "divider_d28fa1",
@@ -5836,6 +5834,17 @@
     "hiddenVoiceStatesAvatar": "hiddenVoiceStatesAvatar_adebba",
     "hiddenVoiceStatesText": "hiddenVoiceStatesText_adebba"
   },
+  "213301": {
+    "baseProductCardHoverContainer": "baseProductCardHoverContainer_fcbddd",
+    "baseProductCardContainer": "baseProductCardContainer_fcbddd",
+    "baseProductCardContentContainer": "baseProductCardContentContainer_fcbddd",
+    "innerContainer": "innerContainer_fcbddd",
+    "baseProductCardDetailsContainer": "baseProductCardDetailsContainer_fcbddd",
+    "baseProductCardFooter": "baseProductCardFooter_fcbddd",
+    "hoveredVariantSwitcher": "hoveredVariantSwitcher_fcbddd",
+    "innerHover": "innerHover_fcbddd",
+    "hasVariantSwitcher": "hasVariantSwitcher_fcbddd"
+  },
   "213605": {
     "buttonIcon": "buttonIcon__92b20",
     "allPaymentsToggleButton": "allPaymentsToggleButton__92b20",
@@ -5940,17 +5949,6 @@
     "description": "description__1f7ec",
     "tagline": "tagline__1f7ec",
     "tag": "tag__1f7ec"
-  },
-  "217726": {
-    "baseProductCardHoverContainer": "baseProductCardHoverContainer__9701b",
-    "baseProductCardContainer": "baseProductCardContainer__9701b",
-    "baseProductCardContentContainer": "baseProductCardContentContainer__9701b",
-    "innerContainer": "innerContainer__9701b",
-    "baseProductCardDetailsContainer": "baseProductCardDetailsContainer__9701b",
-    "baseProductCardFooter": "baseProductCardFooter__9701b",
-    "hoveredVariantSwitcher": "hoveredVariantSwitcher__9701b",
-    "innerHover": "innerHover__9701b",
-    "hasVariantSwitcher": "hasVariantSwitcher__9701b"
   },
   "218634": {
     "svg": "svg__4f569",
@@ -6297,7 +6295,11 @@
   "232644": {
     "card": "card__39b32",
     "container": "container__39b32",
+    "giftSent": "giftSent__39b32",
     "cardPreview": "cardPreview__39b32",
+    "cardStateIconWrapper": "cardStateIconWrapper__39b32",
+    "cardStateIcon": "cardStateIcon__39b32",
+    "checkmark": "checkmark__39b32",
     "profileEffectPreview": "profileEffectPreview__39b32",
     "avatarDecorationPreview": "avatarDecorationPreview__39b32",
     "nameplatePreview": "nameplatePreview__39b32",
@@ -8626,13 +8628,11 @@
     "preview": "preview__4d307",
     "reactions": "reactions__4d307",
     "jumbo": "jumbo__4d307",
-    "submit": "submit__4d307",
     "foot": "foot__4d307",
     "heading": "heading__4d307",
     "editor": "editor__4d307",
     "backButton": "backButton__4d307",
-    "closeButton": "closeButton__4d307",
-    "backButtonInnner": "backButtonInnner__4d307"
+    "closeButton": "closeButton__4d307"
   },
   "342891": {
     "notice": "notice__30f28",
@@ -16078,7 +16078,6 @@
     "noMargin": "noMargin__89307",
     "whatYouLoseItem": "whatYouLoseItem__89307",
     "whatYouLoseItemLeftColumn": "whatYouLoseItemLeftColumn__89307",
-    "whatYouLoseItemLearnMore": "whatYouLoseItemLearnMore__89307",
     "whatYouLoseItemRightColumn": "whatYouLoseItemRightColumn__89307",
     "textSingleLineEllipsis": "textSingleLineEllipsis__89307",
     "profileCard": "profileCard__89307",
