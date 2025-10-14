@@ -144,7 +144,6 @@
     "experimentOverlayTitle": "experimentOverlayTitle__2f4f7",
     "overlayTitleText": "overlayTitleText__2f4f7",
     "overlayButton": "overlayButton__2f4f7",
-    "overlayButtonInner": "overlayButtonInner__2f4f7",
     "overlayButtonContainer": "overlayButtonContainer__2f4f7",
     "hideWhenInactive": "hideWhenInactive__2f4f7",
     "experimentTitleIcon": "experimentTitleIcon__2f4f7",
@@ -159,8 +158,8 @@
     "selectedScreen": "selectedScreen__2f4f7",
     "selectedIcon": "selectedIcon__2f4f7",
     "liveIndicator": "liveIndicator__2f4f7",
-    "addStreamIcon": "addStreamIcon__2f4f7",
-    "addCTA": "addCTA__2f4f7",
+    "cta": "cta__2f4f7",
+    "addCta": "addCta__2f4f7",
     "absoluteFill": "absoluteFill__2f4f7",
     "videoWrapper": "videoWrapper__2f4f7",
     "blocked": "blocked__2f4f7",
@@ -587,6 +586,9 @@
     "icon": "icon__8a7fc",
     "iconButton": "iconButton__8a7fc",
     "floatingSearchTabsMask": "floatingSearchTabsMask__8a7fc"
+  },
+  "20492": {
+    "tabs": "tabs__90767"
   },
   "21054": {
     "userAvatar": "userAvatar__9ec1a",
@@ -8542,15 +8544,9 @@
     "tileContainer": "tileContainer_ad58e7"
   },
   "340036": {
-    "roleHeader": "roleHeader_e3f977",
-    "warningTitle": "warningTitle_e3f977",
     "warningIcon": "warningIcon_e3f977",
     "attachedRoleContainer": "attachedRoleContainer_e3f977",
-    "attachedRoleColor": "attachedRoleColor_e3f977",
-    "attachedRoleClose": "attachedRoleClose_e3f977",
-    "attachedRoleCloseIcon": "attachedRoleCloseIcon_e3f977",
-    "detachWarningHeading": "detachWarningHeading_e3f977",
-    "reattachRoleRow": "reattachRoleRow_e3f977"
+    "detachWarningHeading": "detachWarningHeading_e3f977"
   },
   "340669": {
     "container": "container_a51e6d",
@@ -9516,12 +9512,6 @@
     "channelSelectScrollerInner": "channelSelectScrollerInner_bd234e"
   },
   "377238": {
-    "header": "header_b404ff",
-    "subtitle": "subtitle_b404ff",
-    "title": "title_b404ff",
-    "modalCloseButton": "modalCloseButton_b404ff",
-    "content": "content_b404ff",
-    "cancel": "cancel_b404ff",
     "discriminatorChangeWarning": "discriminatorChangeWarning_b404ff"
   },
   "377409": {
@@ -9811,8 +9801,7 @@
     "header": "header_c6e099",
     "errorCodeMessage": "errorCodeMessage_c6e099",
     "description": "description_c6e099",
-    "outerButton": "outerButton_c6e099",
-    "button": "button_c6e099"
+    "outerButton": "outerButton_c6e099"
   },
   "388592": {
     "clickZone": "clickZone__29c87",
@@ -11986,10 +11975,6 @@
     "keyTrinket": "keyTrinket__82b10",
     "starTrinket": "starTrinket__82b10"
   },
-  "460982": {
-    "select": "select__00d1f",
-    "selectItemRow": "selectItemRow__00d1f"
-  },
   "461671": {
     "content": "content_a58267",
     "emphasized": "emphasized_a58267",
@@ -12154,7 +12139,8 @@
   },
   "467887": {
     "select": "select_b2fe93",
-    "selectItemRow": "selectItemRow_b2fe93"
+    "selectItemRow": "selectItemRow_b2fe93",
+    "title": "title_b2fe93"
   },
   "468424": {
     "header": "header_cd8d1b",
@@ -20394,8 +20380,7 @@
     "medium": "medium_ecf309",
     "small": "small_ecf309",
     "header": "header_ecf309",
-    "buttons": "buttons_ecf309",
-    "button": "button_ecf309"
+    "buttons": "buttons_ecf309"
   },
   "798925": {
     "root": "root_af8192"
@@ -20891,7 +20876,6 @@
     "tierSymbolUploaderInner": "tierSymbolUploaderInner__4ecd1"
   },
   "811130": {
-    "buttonColor": "buttonColor__7b3e8",
     "textButton": "textButton__7b3e8",
     "iconButton": "iconButton__7b3e8"
   },
@@ -21901,6 +21885,9 @@
     "upsellText": "upsellText__88422",
     "button": "button__88422"
   },
+  "852017": {
+    "tabs": "tabs__3f3a2"
+  },
   "852303": {
     "applicationDetails": "applicationDetails__94ab2",
     "noPadding": "noPadding__94ab2",
@@ -22279,8 +22266,8 @@
     "streamHiddenEmptyState": "streamHiddenEmptyState_c30e20",
     "streamHiddenCTA": "streamHiddenCTA_c30e20",
     "largePaddingTop": "largePaddingTop_c30e20",
-    "addStreamIcon": "addStreamIcon_c30e20",
-    "addCTA": "addCTA_c30e20"
+    "cta": "cta_c30e20",
+    "addCta": "addCta_c30e20"
   },
   "867038": {
     "container": "container__99d5f",
@@ -22566,10 +22553,6 @@
     "panelInner": "panelInner__86951",
     "panelRow": "panelRow__86951"
   },
-  "877757": {
-    "cta": "cta_a3a802",
-    "buttonReset": "buttonReset_a3a802"
-  },
   "877762": {
     "container": "container_d13feb",
     "row": "row_d13feb",
@@ -22661,14 +22644,6 @@
     "closeButton": "closeButton_e0f8ae",
     "instructionsLink": "instructionsLink_e0f8ae",
     "gameTile": "gameTile_e0f8ae"
-  },
-  "879488": {
-    "header": "header__6dc27",
-    "subtitle": "subtitle__6dc27",
-    "title": "title__6dc27",
-    "modalCloseButton": "modalCloseButton__6dc27",
-    "content": "content__6dc27",
-    "cancel": "cancel__6dc27"
   },
   "879615": {
     "wrapper": "wrapper__10e9a",
