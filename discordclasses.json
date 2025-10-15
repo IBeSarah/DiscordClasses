@@ -772,7 +772,8 @@
     "galleryItem": "galleryItem_d75751",
     "first": "first_d75751",
     "last": "last_d75751",
-    "inactive": "inactive_d75751"
+    "inactive": "inactive_d75751",
+    "obscured": "obscured_d75751"
   },
   "28025": {
     "devices": "devices_fe5040",
@@ -3617,7 +3618,10 @@
     "container": "container_a62a28",
     "socialProof": "socialProof_a62a28",
     "socialProofBackdrop": "socialProofBackdrop_a62a28",
-    "removeGameButton": "removeGameButton_a62a28"
+    "removeGameButton": "removeGameButton_a62a28",
+    "dropIndicatorAfter": "dropIndicatorAfter_a62a28",
+    "dropIndicatorBefore": "dropIndicatorBefore_a62a28",
+    "isDragging": "isDragging_a62a28"
   },
   "133495": {
     "modal": "modal_edf440",
@@ -9582,6 +9586,7 @@
     "guildsList": "guildsList__7db08",
     "infoDot": "infoDot__7db08",
     "controlsContainer": "controlsContainer__7db08",
+    "select": "select__7db08",
     "wrapper": "wrapper__7db08",
     "noResultsContainer": "noResultsContainer__7db08",
     "noResultsText": "noResultsText__7db08",
@@ -10737,7 +10742,6 @@
   "421200": {
     "headerBar": "headerBar__80679",
     "headerBarInner": "headerBarInner__80679",
-    "fullscreenHeaderBar": "fullscreenHeaderBar__80679",
     "tabs": "tabs__80679",
     "tabWrapper": "tabWrapper__80679",
     "tab": "tab__80679",
@@ -11761,7 +11765,6 @@
   "452785": {
     "inventory": "inventory__1feb0",
     "inventoryFilter": "inventoryFilter__1feb0",
-    "pageFullscreen": "pageFullscreen__1feb0",
     "controls": "controls__1feb0",
     "controlsLeftSide": "controlsLeftSide__1feb0",
     "controlsRightSide": "controlsRightSide__1feb0",
@@ -15036,9 +15039,6 @@
     "headerShortcut": "headerShortcut_ea12e5",
     "tips": "tips_ea12e5"
   },
-  "583073": {
-    "content": "content__61700"
-  },
   "583139": {
     "C": "CONNECTED_GAMES"
   },
@@ -16327,7 +16327,6 @@
     "themedPagination": "themedPagination__00dfb pagination__00dfb",
     "controls": "controls__00dfb",
     "arrowHitbox": "arrowHitbox__00dfb",
-    "arrow": "arrow__00dfb",
     "arrowHitboxPadding": "arrowHitboxPadding__00dfb",
     "dots": "dots__00dfb",
     "dot": "dot__00dfb",
@@ -18050,6 +18049,11 @@
   "707489": {
     "modalContent": "modalContent__2379f",
     "disclaimer": "disclaimer__2379f"
+  },
+  "707804": {
+    "container": "container_ab64fd",
+    "widgetPreview": "widgetPreview_ab64fd",
+    "gamePreview": "gamePreview_ab64fd"
   },
   "707892": {
     "colorSwatch": "colorSwatch__2d060",
@@ -19786,7 +19790,6 @@
   },
   "779485": {
     "countDownWrapper": "countDownWrapper__46b37",
-    "fullScreenWrapper": "fullScreenWrapper__46b37",
     "mobileWrapper": "mobileWrapper__46b37",
     "countdownLabel": "countdownLabel__46b37",
     "countdownBody": "countdownBody__46b37"
@@ -19800,16 +19803,8 @@
     "cta": "cta__1b24f"
   },
   "780187": {
-    "header": "header_ad198f",
-    "emailHeaderImg": "emailHeaderImg_ad198f",
-    "wumpusExclamationImg": "wumpusExclamationImg_ad198f",
-    "title": "title_ad198f",
-    "subtitle": "subtitle_ad198f",
     "description": "description_ad198f",
     "tooltip": "tooltip_ad198f",
-    "modalCloseButton": "modalCloseButton_ad198f",
-    "modalFooter": "modalFooter_ad198f",
-    "content": "content_ad198f",
     "help": "help_ad198f"
   },
   "780462": {
@@ -21602,9 +21597,6 @@
   "836636": {
     "description": "description_cd2e37"
   },
-  "836717": {
-    "container": "container__05e63"
-  },
   "836956": {
     "obscuredIcon": "obscuredIcon__43090"
   },
@@ -22989,12 +22981,10 @@
     "withText": "withText_e131a9",
     "voicePanelIntroductionHeader": "voicePanelIntroductionHeader_e131a9",
     "voicePanelIntroductionText": "voicePanelIntroductionText_e131a9",
-    "voicePanelIntroductionButton": "voicePanelIntroductionButton_e131a9",
     "voicePanelIntroductionWrapper": "voicePanelIntroductionWrapper_e131a9",
     "wrapper": "wrapper_e131a9",
     "viewAsRolesWarning": "viewAsRolesWarning_e131a9",
     "viewAsRolesWarningText": "viewAsRolesWarningText_e131a9",
-    "viewAsRolesWarningButton": "viewAsRolesWarningButton_e131a9",
     "disabled": "disabled_e131a9",
     "voiceButtonsContainer": "voiceButtonsContainer_e131a9"
   },
