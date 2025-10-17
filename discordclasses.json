@@ -10498,22 +10498,6 @@
     "localeImage": "localeImage_dda9b4",
     "select": "select_dda9b4"
   },
-  "406479": {
-    "content": "content__50a6f",
-    "header": "header__50a6f",
-    "tip": "tip__50a6f",
-    "footer": "footer__50a6f",
-    "applicationSearch": "applicationSearch__50a6f",
-    "radioGroup": "radioGroup__50a6f",
-    "gameSuggestion": "gameSuggestion__50a6f",
-    "gameSuggestionRadioItem": "gameSuggestionRadioItem__50a6f",
-    "otherFeedbackInput": "otherFeedbackInput__50a6f",
-    "gameInfoBox": "gameInfoBox__50a6f",
-    "gameIcon": "gameIcon__50a6f",
-    "smolGameIcon": "smolGameIcon__50a6f",
-    "customGameNameIcon": "customGameNameIcon__50a6f",
-    "gameTitle": "gameTitle__50a6f"
-  },
   "406671": {
     "confirmationContainer": "confirmationContainer_e64651",
     "confirmationHeader": "confirmationHeader_e64651",
@@ -14849,15 +14833,6 @@
     "container": "container_a28278",
     "switchIndicator": "switchIndicator_a28278",
     "thumb": "thumb_a28278"
-  },
-  "571818": {
-    "container": "container__0b003",
-    "contentVertical": "contentVertical__0b003",
-    "buttonsVertical": "buttonsVertical__0b003",
-    "contentHorizontal": "contentHorizontal__0b003",
-    "buttonsHorizontal": "buttonsHorizontal__0b003",
-    "prompt": "prompt__0b003",
-    "thankYouText": "thankYouText__0b003"
   },
   "572065": {
     "badgeUpgrade": "badgeUpgrade_fbcaba"
@@ -21686,8 +21661,7 @@
     "textContainer": "textContainer_e766f2",
     "connectionPlatforms": "connectionPlatforms_e766f2",
     "connectionIcon": "connectionIcon_e766f2",
-    "buttonRow": "buttonRow_e766f2",
-    "reportMissingActivity": "reportMissingActivity_e766f2"
+    "buttonRow": "buttonRow_e766f2"
   },
   "839763": {
     "container": "container__4328f",
@@ -25236,14 +25210,6 @@
     "questSelectorWrapper": "questSelectorWrapper__04a02",
     "copyInput": "copyInput__04a02",
     "sharePopover": "sharePopover__04a02"
-  },
-  "982629": {
-    "container": "container_cbd19d",
-    "contentHorizontal": "contentHorizontal_cbd19d",
-    "contentVertical": "contentVertical_cbd19d",
-    "description": "description_cbd19d",
-    "buttonsHorizontal": "buttonsHorizontal_cbd19d",
-    "buttonsVertical": "buttonsVertical_cbd19d"
   },
   "982710": {
     "payment": "payment_e9cb00",
