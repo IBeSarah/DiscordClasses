@@ -3280,6 +3280,17 @@
     "checkboxContainer": "checkboxContainer__657c0",
     "checkbox": "checkbox__657c0"
   },
+  "120230": {
+    "popoutWrapper": "popoutWrapper__9ac28",
+    "scroller": "scroller__9ac28",
+    "avatars": "avatars__9ac28",
+    "avatar": "avatar__9ac28",
+    "size16": "size16__9ac28",
+    "size20": "size20__9ac28",
+    "size24": "size24__9ac28",
+    "isLast": "isLast__9ac28",
+    "overflow": "overflow__9ac28"
+  },
   "120472": {
     "expandedProgressBarContainer": "expandedProgressBarContainer_a61c56",
     "expandedProgressBarContainerSettingsPage": "expandedProgressBarContainerSettingsPage_a61c56",
@@ -15021,17 +15032,6 @@
     "profilePreviewContainer": "profilePreviewContainer__8771c",
     "usernameContainer": "usernameContainer__8771c",
     "avatar": "avatar__8771c"
-  },
-  "581143": {
-    "popoutWrapper": "popoutWrapper_ef4a91",
-    "scroller": "scroller_ef4a91",
-    "avatars": "avatars_ef4a91",
-    "avatar": "avatar_ef4a91",
-    "size16": "size16_ef4a91",
-    "size20": "size20_ef4a91",
-    "size24": "size24_ef4a91",
-    "isLast": "isLast_ef4a91",
-    "overflow": "overflow_ef4a91"
   },
   "581857": {
     "row": "row_d6271c",
