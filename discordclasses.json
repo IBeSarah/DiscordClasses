@@ -3627,14 +3627,14 @@
   },
   "133458": {
     "container": "container_a62a28",
-    "dragTarget": "dragTarget_a62a28",
+    "dragHandleContainer": "dragHandleContainer_a62a28",
     "dragHandle": "dragHandle_a62a28",
     "socialProof": "socialProof_a62a28",
     "socialProofBackdrop": "socialProofBackdrop_a62a28",
     "removeGameButton": "removeGameButton_a62a28",
+    "isDragging": "isDragging_a62a28",
     "dropIndicatorAfter": "dropIndicatorAfter_a62a28",
-    "dropIndicatorBefore": "dropIndicatorBefore_a62a28",
-    "isDragging": "isDragging_a62a28"
+    "dropIndicatorBefore": "dropIndicatorBefore_a62a28"
   },
   "133495": {
     "modal": "modal_edf440",
@@ -18004,6 +18004,7 @@
   "707804": {
     "container": "container_ab64fd",
     "widgetPreview": "widgetPreview_ab64fd",
+    "gameDetailsCardPreview": "gameDetailsCardPreview_ab64fd",
     "gamePreview": "gamePreview_ab64fd"
   },
   "707892": {
@@ -18685,8 +18686,7 @@
     "changeButton": "changeButton__885c5",
     "warningIcon": "warningIcon__885c5",
     "warning": "warning__885c5",
-    "checkboxRow": "checkboxRow__885c5",
-    "hardwareWarning": "hardwareWarning__885c5"
+    "checkboxRow": "checkboxRow__885c5"
   },
   "734305": {
     "container": "container__577c3",
@@ -19644,6 +19644,8 @@
     "text-sm/normal": "text-sm/normal_e1364f",
     "card": "card_e1364f",
     "removeGameButton": "removeGameButton_e1364f",
+    "dragHandle": "dragHandle_e1364f",
+    "isDragging": "isDragging_e1364f",
     "clickableText": "clickableText_e1364f",
     "details": "details_e1364f",
     "commentIcon": "commentIcon_e1364f",
@@ -19652,7 +19654,11 @@
     "textAreaContainer": "textAreaContainer_e1364f text-sm/normal_e1364f",
     "editableCommentContainer": "editableCommentContainer_e1364f",
     "editableCommentText": "editableCommentText_e1364f",
-    "placeholder": "placeholder_e1364f"
+    "placeholder": "placeholder_e1364f",
+    "dropTarget": "dropTarget_e1364f",
+    "dropIndicatorAfter": "dropIndicatorAfter_e1364f",
+    "dropIndicatorBefore": "dropIndicatorBefore_e1364f",
+    "dragHandleContainer": "dragHandleContainer_e1364f"
   },
   "776421": {
     "wrapper": "wrapper__06283",
