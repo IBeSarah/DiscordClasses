@@ -13625,6 +13625,12 @@
   "519279": {
     "box": "box_f8c98c"
   },
+  "519338": {
+    "container": "container__8cc9a",
+    "circle": "circle__8cc9a",
+    "icon": "icon__8cc9a",
+    "header": "header__8cc9a"
+  },
   "519824": {
     "stageSystemMessage": "stageSystemMessage_e9ab2f",
     "iconContainer": "iconContainer_e9ab2f"
@@ -14896,12 +14902,6 @@
     "selected": "selected_afa88e",
     "circle": "circle_afa88e",
     "priceRowText": "priceRowText_afa88e"
-  },
-  "575140": {
-    "container": "container__8cc9a",
-    "circle": "circle__8cc9a",
-    "icon": "icon__8cc9a",
-    "header": "header__8cc9a"
   },
   "575169": {
     "avatarAnimation": "avatarAnimation_abf1df",
@@ -22634,6 +22634,7 @@
     "profileEffectShopPreviewCollectedModal": "profileEffectShopPreviewCollectedModal__6d099",
     "avatarDecorationPreview": "avatarDecorationPreview__6d099",
     "avatarDecorationDropShadow": "avatarDecorationDropShadow__6d099",
+    "avatar": "avatar__6d099",
     "threeItemBundle": "threeItemBundle__6d099",
     "avatarDecorationPreviewCollectedModal": "avatarDecorationPreviewCollectedModal__6d099",
     "nameplatePreview": "nameplatePreview__6d099",
