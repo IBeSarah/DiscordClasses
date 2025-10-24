@@ -173,6 +173,9 @@
     "voiceChannelEffectsContainer": "voiceChannelEffectsContainer__2f4f7",
     "stopStreamForeground": "stopStreamForeground__2f4f7"
   },
+  "7938": {
+    "icymiMessageWrapper": "icymiMessageWrapper__7d14e"
+  },
   "7994": {
     "scroller": "scroller_ac477d",
     "activityList": "activityList_ac477d"
@@ -710,6 +713,19 @@
     "banner": "banner__2db04",
     "text": "text__2db04",
     "button": "button__2db04"
+  },
+  "25493": {
+    "container": "container_df91b4",
+    "header": "header_df91b4",
+    "avatar": "avatar_df91b4",
+    "headerInfo": "headerInfo_df91b4",
+    "titleRow": "titleRow_df91b4",
+    "titleLeft": "titleLeft_df91b4",
+    "title": "title_df91b4",
+    "timestamp": "timestamp_df91b4",
+    "subtitle": "subtitle_df91b4",
+    "subtitleText": "subtitleText_df91b4",
+    "channelIcon": "channelIcon_df91b4"
   },
   "25874": {
     "container": "container__37e49",
@@ -4863,6 +4879,7 @@
     "spacing": "spacing__88264",
     "divider": "divider__88264",
     "footer": "footer__88264",
+    "eventActions": "eventActions__88264",
     "channelLocation": "channelLocation__88264 label",
     "externalLocation": "externalLocation__88264 label"
   },
@@ -8872,6 +8889,13 @@
     "closeButtonIcon": "closeButtonIcon__4ad81",
     "singleUserRoot": "singleUserRoot__4ad81"
   },
+  "348600": {
+    "container": "container_a08a9d",
+    "card": "card_a08a9d",
+    "content": "content_a08a9d",
+    "emojiContainer": "emojiContainer_a08a9d",
+    "statusText": "statusText_a08a9d"
+  },
   "348908": {
     "avatarContainer": "avatarContainer_efaad4",
     "avatar": "avatar_efaad4",
@@ -9124,6 +9148,11 @@
     "key": "key__98feb",
     "keySpan": "keySpan__98feb",
     "keyDiv": "keyDiv__98feb"
+  },
+  "357483": {
+    "container": "container__78320",
+    "content": "content__78320",
+    "preAlphaText": "preAlphaText__78320"
   },
   "357507": {
     "header": "header__7c901",
@@ -9527,6 +9556,20 @@
     "emojiContainer": "emojiContainer__75abc",
     "emojiContainerClickable": "emojiContainerClickable__75abc",
     "emojiJumbo": "emojiJumbo__75abc"
+  },
+  "372539": {
+    "container": "container__935b3",
+    "titleContainer": "titleContainer__935b3",
+    "title": "title__935b3",
+    "messagesContainer": "messagesContainer__935b3",
+    "eventContainer": "eventContainer__935b3",
+    "eventTimeAndUser": "eventTimeAndUser__935b3",
+    "eventTitle": "eventTitle__935b3",
+    "eventDescription": "eventDescription__935b3",
+    "eventDivider": "eventDivider__935b3",
+    "eventInfoContainer": "eventInfoContainer__935b3",
+    "eventLocationRow": "eventLocationRow__935b3",
+    "eventLocationText": "eventLocationText__935b3"
   },
   "372563": {
     "content": "content_e8c018",
@@ -17492,7 +17535,8 @@
     "familyCenterButtonContainer": "familyCenterButtonContainer__35e86",
     "withPadding": "withPadding__35e86",
     "directMessagesHeader": "directMessagesHeader__35e86",
-    "directMessagesButton": "directMessagesButton__35e86"
+    "directMessagesButton": "directMessagesButton__35e86",
+    "preAlphaText": "preAlphaText__35e86"
   },
   "687213": {
     "warning": "warning__915cb",
@@ -18187,6 +18231,10 @@
     "user": "user__60870",
     "checkbox": "checkbox__60870"
   },
+  "715632": {
+    "container": "container_a03ecd",
+    "messageContentContainer": "messageContentContainer_a03ecd"
+  },
   "715639": {
     "container": "container_f1a68f",
     "header": "header_f1a68f",
@@ -18195,6 +18243,13 @@
   "716176": {
     "wrapper": "wrapper__8b9fc",
     "lowImportance": "lowImportance__8b9fc"
+  },
+  "716587": {
+    "container": "container__0919a",
+    "card": "card__0919a",
+    "gameIcon": "gameIcon__0919a",
+    "gameInfo": "gameInfo__0919a",
+    "badge": "badge__0919a"
   },
   "716619": {
     "headerBackground": "headerBackground_b66356",
@@ -22283,6 +22338,10 @@
     "guildDropdown": "guildDropdown_f37cb1",
     "guildBadgeAndName": "guildBadgeAndName_f37cb1",
     "inviteButton": "inviteButton_f37cb1"
+  },
+  "869886": {
+    "container": "container_fb95a5",
+    "scrollContainer": "scrollContainer_fb95a5"
   },
   "869939": {
     "inline": "inline__99afd",
