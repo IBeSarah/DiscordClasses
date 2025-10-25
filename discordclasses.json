@@ -543,6 +543,14 @@
     "footer": "footer__0ea1a",
     "cta": "cta__0ea1a"
   },
+  "18845": {
+    "container": "container_c3474d",
+    "content": "content_c3474d",
+    "headerRow": "headerRow_c3474d",
+    "closeButton": "closeButton_c3474d",
+    "scroller": "scroller_c3474d",
+    "scrollerContent": "scrollerContent_c3474d"
+  },
   "19672": {
     "microphoneUnit": "microphoneUnit_de2d78",
     "microphoneUnitHeader": "microphoneUnitHeader_de2d78",
@@ -1489,6 +1497,7 @@
     "inlineSwitch": "inlineSwitch__28e57"
   },
   "54482": {
+    "popoutContainer": "popoutContainer_ce8328",
     "body": "body_ce8328",
     "menus": "menus_ce8328",
     "menuOverlay": "menuOverlay_ce8328",
@@ -7330,6 +7339,9 @@
     "checkbox": "checkbox_e17bcd",
     "subText": "subText_e17bcd"
   },
+  "285932": {
+    "options": "options__60a25"
+  },
   "286389": {
     "actionButton": "actionButton_f8fa06",
     "highlight": "highlight_f8fa06",
@@ -9810,6 +9822,7 @@
     "bottomOfPageVisibilitySensor": "bottomOfPageVisibilitySensor_f48ee4",
     "scroller": "scroller_f48ee4",
     "topOfPageGradient": "topOfPageGradient_f48ee4",
+    "topOfPageGradientWithCountdown": "topOfPageGradientWithCountdown_f48ee4",
     "bottomOfPageGradient": "bottomOfPageGradient_f48ee4"
   },
   "379249": {
@@ -20168,8 +20181,8 @@
   "788963": {
     "premiumTrialBadge": "premiumTrialBadge__4c1e4",
     "premiumOfferUnackedBadge": "premiumOfferUnackedBadge__4c1e4",
-    "premiumTrialAcknowledgedBadge": "premiumTrialAcknowledgedBadge__4c1e4",
     "premiumTrialBadgeIcon": "premiumTrialBadgeIcon__4c1e4",
+    "premiumOfferWithTimerAcknowledgedBadge": "premiumOfferWithTimerAcknowledgedBadge__4c1e4",
     "premiumTrialBadgeSelected": "premiumTrialBadgeSelected__4c1e4",
     "premiumOfferBadgeCopy": "premiumOfferBadgeCopy__4c1e4"
   },
@@ -25035,6 +25048,7 @@
   },
   "978276": {
     "container": "container__7a78a",
+    "sizeMedium": "sizeMedium__7a78a",
     "sizeSmall": "sizeSmall__7a78a",
     "placeholderDetailsCard": "placeholderDetailsCard__7a78a",
     "placeholderText": "placeholderText__7a78a",
