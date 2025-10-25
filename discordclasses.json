@@ -2857,6 +2857,10 @@
   "104844": {
     "icon": "icon_e59963"
   },
+  "104869": {
+    "backgroundImage": "backgroundImage__4b1a9",
+    "backgroundContainer": "backgroundContainer__4b1a9"
+  },
   "104940": {
     "safetyFlow": "safetyFlow__300a2",
     "container": "container__300a2",
@@ -8097,10 +8101,6 @@
     "linkTextContainer": "linkTextContainer_b1585f",
     "linkIcon": "linkIcon_b1585f",
     "linksContainer": "linksContainer_b1585f"
-  },
-  "315746": {
-    "backgroundImage": "backgroundImage__4b1a9",
-    "backgroundContainer": "backgroundContainer__4b1a9"
   },
   "315824": {
     "confettiTriggerWrapper": "confettiTriggerWrapper_d00019",
