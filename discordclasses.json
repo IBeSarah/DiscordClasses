@@ -11982,7 +11982,6 @@
     "inviteRowAvatar": "inviteRowAvatar__67dba",
     "inviteRowInfo": "inviteRowInfo__67dba",
     "inviteRowName": "inviteRowName__67dba",
-    "inviteRowButton": "inviteRowButton__67dba",
     "inviteRowEmptyState": "inviteRowEmptyState__67dba",
     "warningContainer": "warningContainer__67dba",
     "warningIcon": "warningIcon__67dba",
@@ -15942,9 +15941,7 @@
     "nameplate": "nameplate_a84142",
     "giftMainAnimationWrapper": "giftMainAnimationWrapper_a84142",
     "avatar": "avatar_a84142",
-    "bundlePreviewWrapper": "bundlePreviewWrapper_a84142",
-    "slayerStorefrontReviewImageWrapper": "slayerStorefrontReviewImageWrapper_a84142",
-    "slayerStorefrontReviewImage": "slayerStorefrontReviewImage_a84142"
+    "bundlePreviewWrapper": "bundlePreviewWrapper_a84142"
   },
   "611344": {
     "giftMainAnimation": "giftMainAnimation_d54fab",
@@ -17666,6 +17663,15 @@
     "zIndex1": "zIndex1__94da4",
     "trialMarketingMargin": "trialMarketingMargin__94da4",
     "bottomOfPageVisibilitySensor": "bottomOfPageVisibilitySensor__94da4"
+  },
+  "689157": {
+    "container": "container__2451c",
+    "profileEffectShopPreview": "profileEffectShopPreview__2451c",
+    "avatarDecorationPreview": "avatarDecorationPreview__2451c",
+    "twoItemBundle": "twoItemBundle__2451c",
+    "threeItemBundle": "threeItemBundle__2451c",
+    "nameplatePreview": "nameplatePreview__2451c",
+    "avatar": "avatar__2451c"
   },
   "689315": {
     "section": "section__1f6ca",
@@ -22580,7 +22586,8 @@
   },
   "874622": {
     "container": "container__1656b",
-    "icon": "icon__1656b"
+    "icon": "icon__1656b",
+    "warning": "warning__1656b"
   },
   "875210": {
     "header": "header_b87308",
@@ -22816,17 +22823,6 @@
     "icon": "icon__777cc",
     "toggledIconOn": "toggledIconOn__777cc",
     "tutorialTip": "tutorialTip__777cc"
-  },
-  "881873": {
-    "root": "root__28b18",
-    "noScroll": "noScroll__28b18",
-    "content": "content__28b18",
-    "closeButton": "closeButton__28b18",
-    "imageContainer": "imageContainer__28b18",
-    "image": "image__28b18",
-    "title": "title__28b18",
-    "text": "text__28b18",
-    "buttonContainer": "buttonContainer__28b18"
   },
   "881937": {
     "container": "container__6d099",
