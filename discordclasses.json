@@ -1857,6 +1857,13 @@
     "rolesHeading": "rolesHeading__373b5",
     "rolesList": "rolesList__373b5"
   },
+  "65538": {
+    "premiumBadge": "premiumBadge__6d7da",
+    "premiumAcknowledgedBadge": "premiumAcknowledgedBadge__6d7da",
+    "premiumUnacknowledgedBadge": "premiumUnacknowledgedBadge__6d7da",
+    "premiumUnacknowledgedBadgeCopy": "premiumUnacknowledgedBadgeCopy__6d7da",
+    "BadgeClockIcon": "BadgeClockIcon__6d7da"
+  },
   "65573": {
     "wrapper": "wrapper_b1e4f3",
     "list": "list_b1e4f3",
