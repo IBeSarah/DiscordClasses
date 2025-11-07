@@ -1530,6 +1530,9 @@
     "moreGuildsLarge": "moreGuildsLarge_bb856d",
     "defaultIcon": "defaultIcon_bb856d"
   },
+  "53179": {
+    "keybindContainer": "keybindContainer_eedc51"
+  },
   "53774": {
     "analyticsCard": "analyticsCard__0dfec",
     "analyticsCardTitle": "analyticsCardTitle__0dfec",
@@ -4725,7 +4728,6 @@
     "barBase": "barBase__0f481",
     "barButtonBase": "barButtonBase__0f481",
     "barButtonIcon": "barButtonIcon__0f481",
-    "barWithAppLauncherButton": "barWithAppLauncherButton__0f481",
     "bottomBar": "bottomBar__0f481 barBase__0f481",
     "jumpToPresentBar": "jumpToPresentBar__0f481 bottomBar__0f481 barBase__0f481",
     "spinner": "spinner__0f481",
@@ -10804,7 +10806,8 @@
     "seekableBar": "seekableBar__370d1",
     "bufferHovered": "bufferHovered__370d1",
     "timeDisplay": "timeDisplay__370d1",
-    "grabber": "grabber__370d1"
+    "grabber": "grabber__370d1",
+    "rounded": "rounded__370d1"
   },
   "412335": {
     "checkbox": "checkbox__3d31d"
@@ -11364,10 +11367,14 @@
   },
   "430799": {
     "modalRoot": "modalRoot_de2fa0",
+    "modalRootV2": "modalRootV2_de2fa0",
     "modalRootPortrait": "modalRootPortrait_de2fa0",
+    "modalRootPortraitV2": "modalRootPortraitV2_de2fa0",
     "modalRootLandscape": "modalRootLandscape_de2fa0",
     "modalBody": "modalBody_de2fa0",
     "modalBg": "modalBg_de2fa0",
+    "modalBgV2": "modalBgV2_de2fa0",
+    "modalBgV2Portrait": "modalBgV2Portrait_de2fa0",
     "modalContent": "modalContent_de2fa0",
     "videoCont": "videoCont_de2fa0",
     "videoContInnerRelative": "videoContInnerRelative_de2fa0",
@@ -11401,13 +11408,9 @@
     "accentOnHover": "accentOnHover_de2fa0",
     "questHeading": "questHeading_de2fa0",
     "contentFooter": "contentFooter_de2fa0",
-    "contentFooterPortrait": "contentFooterPortrait_de2fa0",
     "contentFooterButtonCont": "contentFooterButtonCont_de2fa0",
-    "claimBtn": "claimBtn_de2fa0",
-    "portraitCtaBtn": "portraitCtaBtn_de2fa0",
+    "contentFooterButtonContV2": "contentFooterButtonContV2_de2fa0",
     "portraitCtaBtnWrapper": "portraitCtaBtnWrapper_de2fa0",
-    "progressCont": "progressCont_de2fa0",
-    "questProgressRewardTile": "questProgressRewardTile_de2fa0",
     "transcriptOverlay": "transcriptOverlay_de2fa0",
     "transcriptCont": "transcriptCont_de2fa0",
     "transcriptContPortrait": "transcriptContPortrait_de2fa0",
@@ -11434,7 +11437,31 @@
     "play": "play_de2fa0",
     "playPauseAnimation": "playPauseAnimation_de2fa0",
     "transcriptBodySpinner": "transcriptBodySpinner_de2fa0",
-    "pauseText": "pauseText_de2fa0"
+    "pauseText": "pauseText_de2fa0",
+    "closeModalBtnWrapper": "closeModalBtnWrapper_de2fa0",
+    "floatingShareButtonContainer": "floatingShareButtonContainer_de2fa0",
+    "dotSpacer": "dotSpacer_de2fa0",
+    "dotSpacerPortrait": "dotSpacerPortrait_de2fa0",
+    "adDetailsTextPrimary": "adDetailsTextPrimary_de2fa0",
+    "adDetailsTextPrimaryPortrait": "adDetailsTextPrimaryPortrait_de2fa0",
+    "addFourPxMarginRight": "addFourPxMarginRight_de2fa0",
+    "adDetailsTextSecondary": "adDetailsTextSecondary_de2fa0",
+    "adDetailsTextSecondaryPortrait": "adDetailsTextSecondaryPortrait_de2fa0",
+    "modalBodyWithBorder": "modalBodyWithBorder_de2fa0",
+    "videoContRoundedCorners": "videoContRoundedCorners_de2fa0",
+    "contentHeaderGameInfoHoverable": "contentHeaderGameInfoHoverable_de2fa0",
+    "contentHeaderGameInfoHoverableExpired": "contentHeaderGameInfoHoverableExpired_de2fa0",
+    "contentFooterV1": "contentFooterV1_de2fa0",
+    "contentFooterV2": "contentFooterV2_de2fa0",
+    "contentFooterPortraitV2": "contentFooterPortraitV2_de2fa0",
+    "contentFooterPortraitV1": "contentFooterPortraitV1_de2fa0",
+    "portraitContentRow": "portraitContentRow_de2fa0",
+    "contentFooterAdInfo": "contentFooterAdInfo_de2fa0",
+    "adInfoClickable": "adInfoClickable_de2fa0",
+    "portraitButtonsContainer": "portraitButtonsContainer_de2fa0",
+    "portraitButtonRow": "portraitButtonRow_de2fa0",
+    "contentFooterAdDetailedInfo": "contentFooterAdDetailedInfo_de2fa0",
+    "contentFooterAdDetailedInfoPortrait": "contentFooterAdDetailedInfoPortrait_de2fa0"
   },
   "430864": {
     "markup": "markup__75297",
@@ -21777,6 +21804,12 @@
     "content": "content_cd3207",
     "contentBody": "contentBody_cd3207"
   },
+  "835338": {
+    "progressWrapper": "progressWrapper__14966",
+    "confetti": "confetti__14966",
+    "progressCont": "progressCont__14966",
+    "questProgressRewardTile": "questProgressRewardTile__14966"
+  },
   "836227": {
     "list": "list_c441f0",
     "activeThreadsList": "activeThreadsList_c441f0",
@@ -22754,6 +22787,7 @@
     "emojiAliasInputDisabled": "emojiAliasInputDisabled_e7d73e",
     "emojiDisabled": "emojiDisabled_e7d73e",
     "uploader": "uploader_e7d73e",
+    "fileInput": "fileInput_e7d73e",
     "emojiUploadUploadRequirementsList": "emojiUploadUploadRequirementsList_e7d73e",
     "emojiSettings": "emojiSettings_e7d73e",
     "emojiUploadContainer": "emojiUploadContainer_e7d73e"
@@ -25541,6 +25575,7 @@
     "voiceAvatar": "voiceAvatar_f910d0",
     "border": "border_f910d0",
     "speaking": "speaking_f910d0",
+    "latched": "latched_f910d0",
     "callAvatarMask": "callAvatarMask_f910d0",
     "callAvatarMaskContainer": "callAvatarMaskContainer_f910d0"
   },
