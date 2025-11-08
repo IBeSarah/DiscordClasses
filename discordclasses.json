@@ -19022,6 +19022,16 @@
     "withDisplayNameStyles": "withDisplayNameStyles_f4bc97",
     "infoSpacing": "infoSpacing_f4bc97"
   },
+  "739499": {
+    "infobox": "infobox__63c3c",
+    "header": "header__63c3c",
+    "expandButton": "expandButton__63c3c",
+    "panel": "panel__63c3c",
+    "content": "content__63c3c",
+    "divider": "divider__63c3c",
+    "infoList": "infoList__63c3c",
+    "form": "form__63c3c"
+  },
   "740076": {
     "infoBox": "infoBox__75df3"
   },
