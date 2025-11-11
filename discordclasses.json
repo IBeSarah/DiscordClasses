@@ -951,6 +951,9 @@
     "selectGuildPseudoCta": "selectGuildPseudoCta__39466",
     "emptyStateWrapper": "emptyStateWrapper__39466"
   },
+  "30625": {
+    "layer": "layer__14c44"
+  },
   "30787": {
     "container": "container__7bdb0",
     "appIcon": "appIcon__7bdb0"
@@ -7838,14 +7841,10 @@
   },
   "303010": {
     "overlayBackgroundNux": "overlayBackgroundNux__3db18",
-    "overlayInprocessBackgroundNux": "overlayInprocessBackgroundNux__3db18",
     "mainContainer": "mainContainer__3db18",
     "mainTitleContainer": "mainTitleContainer__3db18",
     "widgetCalloutContainer": "widgetCalloutContainer__3db18",
-    "widgetCallout": "widgetCallout__3db18",
-    "nuxImage": "nuxImage__3db18",
-    "mainTitleBody": "mainTitleBody__3db18",
-    "mainTitle": "mainTitle__3db18"
+    "widgetCallout": "widgetCallout__3db18"
   },
   "303572": {
     "inviteContainer": "inviteContainer__23437",
@@ -12318,6 +12317,9 @@
     "nav": "nav__21d85",
     "navPrev": "navPrev__21d85 nav__21d85",
     "navNext": "navNext__21d85 nav__21d85"
+  },
+  "464239": {
+    "layer": "layer__529b0"
   },
   "464992": {
     "actionContainer": "actionContainer__6446f",
