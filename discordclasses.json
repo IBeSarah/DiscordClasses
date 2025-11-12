@@ -4648,10 +4648,6 @@
     "image": "image__879ae",
     "close": "close__879ae"
   },
-  "176870": {
-    "dragHandleButton": "dragHandleButton__7f511",
-    "dragClickTooltipText": "dragClickTooltipText__7f511"
-  },
   "177119": {
     "blockedEdit": "blockedEdit_b7ab2c",
     "blockedSend": "blockedSend_b7ab2c",
@@ -5895,14 +5891,14 @@
     "hasBottomContent": "hasBottomContent_fcbddd",
     "headerContainer": "headerContainer_fcbddd",
     "footerContainer": "footerContainer_fcbddd",
-    "footerContent": "footerContent_fcbddd",
-    "footerGradient": "footerGradient_fcbddd",
+    "footerInfoContainer": "footerInfoContainer_fcbddd",
+    "footerInfoLeft": "footerInfoLeft_fcbddd",
     "priceContainer": "priceContainer_fcbddd",
     "footerButtonContainer": "footerButtonContainer_fcbddd",
-    "footerInfoContainer": "footerInfoContainer_fcbddd",
-    "removePaddingOnHover": "removePaddingOnHover_fcbddd",
+    "footerButtonGroup": "footerButtonGroup_fcbddd",
     "hovered": "hovered_fcbddd",
-    "shadowOnHover": "shadowOnHover_fcbddd"
+    "footerGradient": "footerGradient_fcbddd",
+    "productName": "productName_fcbddd"
   },
   "213605": {
     "buttonIcon": "buttonIcon__92b20",
@@ -10866,8 +10862,7 @@
   "415734": {
     "container": "container__62dd3",
     "dragHandleButton": "dragHandleButton__62dd3",
-    "dragAndDropHitbox": "dragAndDropHitbox__62dd3",
-    "opacity": "opacity__62dd3",
+    "dragAndDropTarget": "dragAndDropTarget__62dd3",
     "isDragging": "isDragging__62dd3",
     "dropIndicatorAfter": "dropIndicatorAfter__62dd3",
     "dropIndicatorBefore": "dropIndicatorBefore__62dd3"
@@ -17486,6 +17481,11 @@
     "cellType": "cellType_a45742",
     "cellCount": "cellCount_a45742"
   },
+  "680604": {
+    "button": "button__66b20",
+    "tooltipText": "tooltipText__66b20",
+    "menu": "menu__66b20"
+  },
   "680765": {
     "selectFieldContainer": "selectFieldContainer__5fa2f",
     "fullWidth": "fullWidth__5fa2f",
@@ -17992,6 +17992,7 @@
   },
   "700875": {
     "title": "title__3c320",
+    "subtitle": "subtitle__3c320",
     "divider": "divider__3c320"
   },
   "700977": {
