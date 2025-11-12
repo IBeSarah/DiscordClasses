@@ -11154,13 +11154,6 @@
   "427600": {
     "icon": "icon__33e19"
   },
-  "427954": {
-    "spriteContainer": "spriteContainer__51d15",
-    "sprite": "sprite__51d15",
-    "popoutButton": "popoutButton__51d15",
-    "pillContentContainer": "pillContentContainer__51d15",
-    "pillButtonText": "pillButtonText__51d15"
-  },
   "428150": {
     "confirmation": "confirmation__6220d",
     "confirmationHeader": "confirmationHeader__6220d",
@@ -25353,6 +25346,7 @@
     "paymentText": "paymentText_e9cb00",
     "paymentBreakdown": "paymentBreakdown_e9cb00",
     "paymentDetail": "paymentDetail_e9cb00",
+    "additionalInformationButtonContainer": "additionalInformationButtonContainer_e9cb00",
     "guildProductDetail": "guildProductDetail_e9cb00 paymentDetail_e9cb00",
     "date": "date_e9cb00",
     "amount": "amount_e9cb00",
