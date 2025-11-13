@@ -7857,15 +7857,6 @@
     "clickable": "clickable__23437",
     "footerAlignment": "footerAlignment__23437"
   },
-  "304055": {
-    "bannerContainer": "bannerContainer__3f9a4",
-    "giftIcon": "giftIcon__3f9a4",
-    "nitroIcon": "nitroIcon__3f9a4",
-    "textContainer": "textContainer__3f9a4",
-    "textHeader": "textHeader__3f9a4",
-    "textHeaderWithIcon": "textHeaderWithIcon__3f9a4",
-    "banner": "banner__3f9a4"
-  },
   "304247": {
     "chat": "chat_f02135"
   },
@@ -10791,6 +10782,8 @@
   "412553": {
     "sectionContainer": "sectionContainer__61424",
     "sectionContainerNitroLocked": "sectionContainerNitroLocked__61424",
+    "sectionContainerNitroLockedBackground": "sectionContainerNitroLockedBackground__61424",
+    "brandRefresh": "brandRefresh__61424",
     "sectionHeader": "sectionHeader__61424",
     "sectionTitle": "sectionTitle__61424",
     "sectionHeaderContent": "sectionHeaderContent__61424",
@@ -19450,6 +19443,7 @@
     "categorySectionLast": "categorySectionLast_c656ac",
     "categorySectionNitroDivider": "categorySectionNitroDivider_c656ac",
     "categorySectionNitroLocked": "categorySectionNitroLocked_c656ac",
+    "brandRefresh": "brandRefresh_c656ac",
     "header": "header_c656ac",
     "inactiveNitroHeader": "inactiveNitroHeader_c656ac",
     "activeNitroHeader": "activeNitroHeader_c656ac",
@@ -20279,6 +20273,7 @@
     "glowAnimation": "glowAnimation_b3fb5f",
     "nitroTopDividerLockContainer": "nitroTopDividerLockContainer_b3fb5f",
     "nitroTopDividerLockBorder": "nitroTopDividerLockBorder_b3fb5f",
+    "brandRefresh": "brandRefresh_b3fb5f",
     "nitroTopDividerLockCircle": "nitroTopDividerLockCircle_b3fb5f",
     "nitroTopDividerLockBorderReversed": "nitroTopDividerLockBorderReversed_b3fb5f",
     "nitroTopDividerLower": "nitroTopDividerLower_b3fb5f",
