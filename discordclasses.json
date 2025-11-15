@@ -1803,16 +1803,13 @@
   },
   "62868": {
     "back": "back_e125f1",
-    "modalFooter": "modalFooter_e125f1",
-    "discountFooterBackground": "discountFooterBackground_e125f1",
-    "modalFooterDiscount": "modalFooterDiscount_e125f1",
-    "discountColor": "discountColor_e125f1",
-    "discountFooterText": "discountFooterText_e125f1"
+    "modalFooter": "modalFooter_e125f1"
   },
   "63053": {
     "nameplatePreview": "nameplatePreview_e144e0",
     "large": "large_e144e0",
     "xlarge": "xlarge_e144e0",
+    "xsmall": "xsmall_e144e0",
     "small": "small_e144e0",
     "overlayContainer": "overlayContainer_e144e0",
     "avatarContainer": "avatarContainer_e144e0",
@@ -3111,6 +3108,7 @@
     "icon": "icon_f2170c",
     "label": "label_f2170c",
     "content": "content_f2170c",
+    "close": "close_f2170c",
     "leading": "leading_f2170c",
     "timer": "timer_f2170c",
     "userIcon": "userIcon_f2170c",
@@ -4841,7 +4839,6 @@
     "botTagRegular": "botTagRegular__82f07 botTag__82f07",
     "botTagInvert": "botTagInvert__82f07 botTag__82f07",
     "botTagNotStaffWarning": "botTagNotStaffWarning__82f07 botTag__82f07",
-    "botTagRemix": "botTagRemix__82f07",
     "botTagVerified": "botTagVerified__82f07",
     "botText": "botText__82f07"
   },
@@ -8705,7 +8702,6 @@
   "336501": {
     "container": "container__32c39",
     "containerFaint": "containerFaint__32c39",
-    "button": "button__32c39",
     "keybindStreamContainer": "keybindStreamContainer__32c39",
     "keybindShortcutReminder": "keybindShortcutReminder__32c39",
     "notificationContainer": "notificationContainer__32c39",
@@ -9059,6 +9055,9 @@
     "channelBenefitTagline": "channelBenefitTagline_fa0751",
     "intangibleBenefitRow": "intangibleBenefitRow_fa0751",
     "intangibleBenefitIcon": "intangibleBenefitIcon_fa0751"
+  },
+  "346751": {
+    "navigatorIcon": "navigatorIcon__15430"
   },
   "347044": {
     "list": "list__83c7c",
@@ -11969,7 +11968,6 @@
     "container": "container__0f2e8",
     "contentTitle": "contentTitle__0f2e8",
     "additionalParticipantBadge": "additionalParticipantBadge__0f2e8",
-    "isAutoHeight": "isAutoHeight__0f2e8",
     "usesCardRows": "usesCardRows__0f2e8",
     "cardRow": "cardRow__0f2e8",
     "openOnHover": "openOnHover__0f2e8",
@@ -12190,6 +12188,7 @@
     "animation": "animation_ee23ac"
   },
   "457454": {
+    "listTitle": "listTitle_a5d75d",
     "collapsibleContainer": "collapsibleContainer_a5d75d",
     "hoverDivider": "hoverDivider_a5d75d"
   },
@@ -12593,7 +12592,8 @@
     "content": "content_ba8a2f"
   },
   "473936": {
-    "promotionalFooter": "promotionalFooter__82bb4"
+    "promotionalFooter": "promotionalFooter__82bb4",
+    "nameplatePreviewContainer": "nameplatePreviewContainer__82bb4"
   },
   "474047": {
     "quickSelect": "quickSelect_ebaca5",
@@ -13354,7 +13354,6 @@
     "badgeImage": "badgeImage_b62c4e",
     "longerMessagesImage": "longerMessagesImage_b62c4e",
     "moreGuildsImage": "moreGuildsImage_b62c4e",
-    "remixingImage": "remixingImage_b62c4e",
     "soundboardImage": "soundboardImage_b62c4e",
     "superReactionsImage": "superReactionsImage_b62c4e",
     "uploadImage": "uploadImage_b62c4e",
@@ -18040,6 +18039,7 @@
     "newBadge": "newBadge__17510"
   },
   "700875": {
+    "header": "header__3c320",
     "title": "title__3c320",
     "subtitle": "subtitle__3c320",
     "divider": "divider__3c320"
@@ -18306,6 +18306,8 @@
     "searchContainer": "searchContainer_e73f2a",
     "list": "list_e73f2a",
     "section": "section_e73f2a",
+    "dropping": "dropping_e73f2a",
+    "dragging": "dragging_e73f2a",
     "chevronIcon": "chevronIcon_e73f2a",
     "sectionCollapsible": "sectionCollapsible_e73f2a",
     "row": "row_e73f2a",
@@ -22090,6 +22092,8 @@
   "845442": {
     "baseControlItem": "baseControlItem_dbfbe0",
     "compact": "compact_dbfbe0",
+    "clickable": "clickable_dbfbe0",
+    "baseControlItemDescription": "baseControlItemDescription_dbfbe0",
     "baseControlItemLeadingElement": "baseControlItemLeadingElement_dbfbe0",
     "baseControlItemTrailingElements": "baseControlItemTrailingElements_dbfbe0",
     "baseControlItemTitle": "baseControlItemTitle_dbfbe0",
@@ -23038,10 +23042,7 @@
     "centerLeftPointer": "centerLeftPointer_b00844",
     "topLeftPointer": "topLeftPointer_b00844",
     "bottomLeftPointer": "bottomLeftPointer_b00844",
-    "gifTag": "gifTag_b00844",
-    "earlyAccessText": "earlyAccessText_b00844",
-    "earlyAccessIcon": "earlyAccessIcon_b00844",
-    "earlyAccessBadgeContainer": "earlyAccessBadgeContainer_b00844"
+    "gifTag": "gifTag_b00844"
   },
   "882741": {
     "container": "container__5a2df",
