@@ -4407,28 +4407,6 @@
     "closeCircleButton": "closeCircleButton__2a891",
     "closeCircle": "closeCircle__2a891"
   },
-  "164208": {
-    "colorBrand": "colorBrand__675aa",
-    "colorPrimary": "colorPrimary__675aa",
-    "upsellTooltipWrapper": "upsellTooltipWrapper__675aa",
-    "caretTopCenter": "caretTopCenter__675aa",
-    "caretTopRight": "caretTopRight__675aa",
-    "caretTopLeft": "caretTopLeft__675aa",
-    "caretBottomCenter": "caretBottomCenter__675aa",
-    "caretBottomLeft": "caretBottomLeft__675aa",
-    "caretBottomRight": "caretBottomRight__675aa",
-    "caretLeftCenter": "caretLeftCenter__675aa",
-    "caretLeftTop": "caretLeftTop__675aa",
-    "caretRightCenter": "caretRightCenter__675aa",
-    "caretRightTop": "caretRightTop__675aa",
-    "upsellTooltipHeader": "upsellTooltipHeader__675aa",
-    "upsellTooltipText": "upsellTooltipText__675aa",
-    "upsellButtonsContainer": "upsellButtonsContainer__675aa",
-    "upsellButtonsAdjacent": "upsellButtonsAdjacent__675aa",
-    "upsellButtonsStacked": "upsellButtonsStacked__675aa",
-    "fullWidthImage": "fullWidthImage__675aa",
-    "content": "content__675aa"
-  },
   "165016": {
     "ctaButtons": "ctaButtons_a77fde",
     "cta": "cta_a77fde",
@@ -5902,7 +5880,7 @@
     "footerContainer": "footerContainer_fcbddd",
     "footerInfoContainer": "footerInfoContainer_fcbddd",
     "footerInfoLeft": "footerInfoLeft_fcbddd",
-    "priceContainer": "priceContainer_fcbddd",
+    "footerInfoShrinkOnHover": "footerInfoShrinkOnHover_fcbddd",
     "footerButtonContainer": "footerButtonContainer_fcbddd",
     "footerButtonGroup": "footerButtonGroup_fcbddd",
     "hovered": "hovered_fcbddd",
@@ -7613,18 +7591,13 @@
     "loadingWrapper": "loadingWrapper__65b48"
   },
   "290181": {
-    "productCardContainer": "productCardContainer_ca5fa9",
-    "headerContainer": "headerContainer_ca5fa9",
+    "defaultCursor": "defaultCursor_ca5fa9",
+    "rewardImage": "rewardImage_ca5fa9",
     "unlockRewardBadge": "unlockRewardBadge_ca5fa9",
-    "footerContainer": "footerContainer_ca5fa9",
-    "footerContent": "footerContent_ca5fa9",
     "footerInfoContainer": "footerInfoContainer_ca5fa9",
     "footerInfo": "footerInfo_ca5fa9",
-    "progressContainer": "progressContainer_ca5fa9",
-    "footerButtonContainer": "footerButtonContainer_ca5fa9",
-    "hovered": "hovered_ca5fa9",
-    "productCardContentContainer": "productCardContentContainer_ca5fa9",
-    "productPreviewContainer": "productPreviewContainer_ca5fa9",
+    "progressTextContainer": "progressTextContainer_ca5fa9",
+    "readyToClaimText": "readyToClaimText_ca5fa9",
     "questionIconContainer": "questionIconContainer_ca5fa9"
   },
   "290550": {
@@ -8127,32 +8100,6 @@
     "wideBannerContentContainer": "wideBannerContentContainer__08415",
     "shelfBlockContainer": "shelfBlockContainer__08415",
     "shopScroll": "shopScroll__08415"
-  },
-  "310696": {
-    "outerContainer": "outerContainer__092f9",
-    "outerContainerGiftInventory": "outerContainerGiftInventory__092f9",
-    "outerContainerEmbed": "outerContainerEmbed__092f9",
-    "questSplashContainer": "questSplashContainer__092f9",
-    "questSplashImage": "questSplashImage__092f9",
-    "header": "header__092f9",
-    "outerContainerXs": "outerContainerXs__092f9",
-    "headerContent": "headerContent__092f9",
-    "headerContentEmbed": "headerContentEmbed__092f9",
-    "headerExpandedContent": "headerExpandedContent__092f9",
-    "headerExpandedWrapper": "headerExpandedWrapper__092f9",
-    "headerCollapsedContent": "headerCollapsedContent__092f9",
-    "headerCollapsedClickableContainer": "headerCollapsedClickableContainer__092f9",
-    "headerCollapsedContentRewardWrapper": "headerCollapsedContentRewardWrapper__092f9",
-    "headerCollapsedRewardTile": "headerCollapsedRewardTile__092f9",
-    "headerCollapsedContentCopyWrapper": "headerCollapsedContentCopyWrapper__092f9",
-    "headerCollapsedContentCopyLogos": "headerCollapsedContentCopyLogos__092f9",
-    "iconLogotypeContainer": "iconLogotypeContainer__092f9",
-    "partnerBranding": "partnerBranding__092f9",
-    "partnerBrandingLogotypes": "partnerBrandingLogotypes__092f9",
-    "questInfo": "questInfo__092f9",
-    "heading": "heading__092f9",
-    "iconsContainer": "iconsContainer__092f9",
-    "iconWrapper": "iconWrapper__092f9"
   },
   "312439": {
     "tile": "tile_eaee1d"
@@ -12502,6 +12449,9 @@
     "art": "art_cb3bbe",
     "modalContent": "modalContent_cb3bbe"
   },
+  "471159": {
+    "questsCard": "questsCard__6fbeb"
+  },
   "471561": {
     "button": "button_fb7f94",
     "icon": "icon_fb7f94",
@@ -14525,9 +14475,6 @@
     "defaultGradient": "defaultGradient__99a7e",
     "splashGradient": "splashGradient__99a7e",
     "cover": "cover__99a7e"
-  },
-  "556260": {
-    "questsCard": "questsCard__72a00"
   },
   "556295": {
     "iconLive": "iconLive__46869"
@@ -21691,6 +21638,22 @@
     "backgroundImages": "backgroundImages__4d7bb",
     "iconImage": "iconImage__4d7bb"
   },
+  "825502": {
+    "outerContainer": "outerContainer_a963de",
+    "outerContainerSm": "outerContainerSm_a963de",
+    "outerContainerXs": "outerContainerXs_a963de",
+    "questRewardEmbed": "questRewardEmbed_a963de",
+    "questRewardEmbedSm": "questRewardEmbedSm_a963de",
+    "questRewardEmbedXs": "questRewardEmbedXs_a963de",
+    "taskDetails": "taskDetails_a963de",
+    "taskInstructions": "taskInstructions_a963de",
+    "fullWidthShinyCtaButtonWrapper": "fullWidthShinyCtaButtonWrapper_a963de",
+    "ctaButtonWrapper": "ctaButtonWrapper_a963de",
+    "learnMoreLink": "learnMoreLink_a963de",
+    "root": "root_a963de",
+    "rewardTileWrapper": "rewardTileWrapper_a963de",
+    "rewardTileExpired": "rewardTileExpired_a963de"
+  },
   "827154": {
     "giftButton": "giftButton__82222",
     "innerGiftButton": "innerGiftButton__82222",
@@ -22166,6 +22129,32 @@
     "purchaseConfirmation": "purchaseConfirmation__2dea3 confirmationContainer__2dea3",
     "confirmationTitle": "confirmationTitle__2dea3",
     "confirmationSubtitle": "confirmationSubtitle__2dea3"
+  },
+  "849138": {
+    "outerContainer": "outerContainer__97d8c",
+    "outerContainerGiftInventory": "outerContainerGiftInventory__97d8c",
+    "outerContainerEmbed": "outerContainerEmbed__97d8c",
+    "questSplashContainer": "questSplashContainer__97d8c",
+    "questSplashImage": "questSplashImage__97d8c",
+    "header": "header__97d8c",
+    "outerContainerXs": "outerContainerXs__97d8c",
+    "headerContent": "headerContent__97d8c",
+    "headerContentEmbed": "headerContentEmbed__97d8c",
+    "headerExpandedContent": "headerExpandedContent__97d8c",
+    "headerExpandedWrapper": "headerExpandedWrapper__97d8c",
+    "headerCollapsedContent": "headerCollapsedContent__97d8c",
+    "headerCollapsedClickableContainer": "headerCollapsedClickableContainer__97d8c",
+    "headerCollapsedContentRewardWrapper": "headerCollapsedContentRewardWrapper__97d8c",
+    "headerCollapsedRewardTile": "headerCollapsedRewardTile__97d8c",
+    "headerCollapsedContentCopyWrapper": "headerCollapsedContentCopyWrapper__97d8c",
+    "headerCollapsedContentCopyLogos": "headerCollapsedContentCopyLogos__97d8c",
+    "iconLogotypeContainer": "iconLogotypeContainer__97d8c",
+    "partnerBranding": "partnerBranding__97d8c",
+    "partnerBrandingLogotypes": "partnerBrandingLogotypes__97d8c",
+    "questInfo": "questInfo__97d8c",
+    "heading": "heading__97d8c",
+    "iconsContainer": "iconsContainer__97d8c",
+    "iconWrapper": "iconWrapper__97d8c"
   },
   "849879": {
     "loading": "loading__9ed46",
@@ -25740,22 +25729,6 @@
   },
   "997033": {
     "insufficientOrbs": "insufficientOrbs__3b1b0"
-  },
-  "997267": {
-    "outerContainer": "outerContainer__2055a",
-    "outerContainerSm": "outerContainerSm__2055a",
-    "outerContainerXs": "outerContainerXs__2055a",
-    "questRewardEmbed": "questRewardEmbed__2055a",
-    "questRewardEmbedSm": "questRewardEmbedSm__2055a",
-    "questRewardEmbedXs": "questRewardEmbedXs__2055a",
-    "taskDetails": "taskDetails__2055a",
-    "taskInstructions": "taskInstructions__2055a",
-    "fullWidthShinyCtaButtonWrapper": "fullWidthShinyCtaButtonWrapper__2055a",
-    "ctaButtonWrapper": "ctaButtonWrapper__2055a",
-    "learnMoreLink": "learnMoreLink__2055a",
-    "root": "root__2055a",
-    "rewardTileWrapper": "rewardTileWrapper__2055a",
-    "rewardTileExpired": "rewardTileExpired__2055a"
   },
   "997328": {
     "errors": "errors__7962e"
