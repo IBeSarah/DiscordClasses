@@ -1082,7 +1082,8 @@
     "hiddenMembers": "hiddenMembers_c8ffbb",
     "memberGroupsPlaceholder": "memberGroupsPlaceholder_c8ffbb",
     "roleIcon": "roleIcon_c8ffbb",
-    "fullWidth": "fullWidth_c8ffbb"
+    "fullWidth": "fullWidth_c8ffbb",
+    "roleGroup": "roleGroup_c8ffbb"
   },
   "32490": {
     "addAnotherRuleCardContainer": "addAnotherRuleCardContainer__0c1e8",
@@ -1466,6 +1467,17 @@
     "bannerContainer": "bannerContainer__71cd5",
     "headingContainer": "headingContainer__71cd5",
     "buttonContainer": "buttonContainer__71cd5"
+  },
+  "49552": {
+    "progressContainer": "progressContainer__9258b",
+    "unset": "unset__9258b",
+    "blue": "blue__9258b",
+    "orange": "orange__9258b",
+    "fill": "fill__9258b",
+    "progress": "progress__9258b",
+    "glow": "glow__9258b",
+    "empty": "empty__9258b",
+    "bar": "bar__9258b"
   },
   "49792": {
     "paymentInfoGroup": "paymentInfoGroup_c0544c",
@@ -16225,6 +16237,11 @@
   "620842": {
     "card": "card_b846e5"
   },
+  "622349": {
+    "memberList": "memberList__21f98",
+    "memberListItem": "memberListItem__21f98",
+    "empty": "empty__21f98"
+  },
   "623146": {
     "row": "row__23bf1",
     "icon": "icon__23bf1"
@@ -20305,6 +20322,7 @@
     "roleRemoveButton": "roleRemoveButton_dfa8b6",
     "roleIcon": "roleIcon_dfa8b6",
     "roleName": "roleName_dfa8b6",
+    "clickable": "clickable_dfa8b6",
     "roleRemoveIcon": "roleRemoveIcon_dfa8b6",
     "roleRemoveIconFocused": "roleRemoveIconFocused_dfa8b6",
     "roleVerifiedIcon": "roleVerifiedIcon_dfa8b6",
