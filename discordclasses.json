@@ -7798,11 +7798,12 @@
     "zoomEnabled": "zoomEnabled__1505a",
     "zoomDragging": "zoomDragging__1505a",
     "minimap": "minimap__1505a",
-    "fadeOut": "fadeOut__1505a",
     "minimapVideo": "minimapVideo__1505a",
     "minimapIndicator": "minimapIndicator__1505a",
+    "zoomControlsContainer": "zoomControlsContainer__1505a",
+    "idle": "idle__1505a",
     "zoomControls": "zoomControls__1505a",
-    "zoomLevelIndicator": "zoomLevelIndicator__1505a"
+    "zoomControlsRow": "zoomControlsRow__1505a"
   },
   "327484": {
     "recommendationReason": "recommendationReason__6efad",
@@ -12415,11 +12416,7 @@
     "image": "image_e8b59c",
     "loadingPlaceholder": "loadingPlaceholder_e8b59c",
     "body": "body_e8b59c",
-    "actionButtons": "actionButtons_e8b59c",
-    "jumpButton": "jumpButton_e8b59c",
-    "loading": "loading_e8b59c",
-    "visible": "visible_e8b59c",
-    "closeIcon": "closeIcon_e8b59c"
+    "actionButtons": "actionButtons_e8b59c"
   },
   "509510": {
     "panel": "panel__0939d",
@@ -13352,8 +13349,7 @@
   "538807": {
     "badgeImageContainer": "badgeImageContainer__9953c",
     "badgeImage": "badgeImage__9953c",
-    "progressCircleContainer": "progressCircleContainer__9953c",
-    "progressCircleText": "progressCircleText__9953c"
+    "progressCircleContainer": "progressCircleContainer__9953c"
   },
   "538925": {
     "tile": "tile_ba65b0",
