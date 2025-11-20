@@ -1820,8 +1820,7 @@
     "selected": "selected__8a3d7",
     "disabled": "disabled__8a3d7",
     "lockedBadgeContainer": "lockedBadgeContainer__8a3d7",
-    "lockedBadge": "lockedBadge__8a3d7",
-    "redCircle": "redCircle__8a3d7"
+    "lockedBadge": "lockedBadge__8a3d7"
   },
   "63452": {
     "container": "container_fb1c43"
@@ -8092,7 +8091,6 @@
     "wideBannerArt": "wideBannerArt__08415",
     "wideBannerArtOrbs": "wideBannerArtOrbs__08415",
     "wideBannerOrbsHeading": "wideBannerOrbsHeading__08415",
-    "wideBannerBlockButton": "wideBannerBlockButton__08415",
     "wideBannerTextContainer": "wideBannerTextContainer__08415",
     "wideBannerContentContainer": "wideBannerContentContainer__08415",
     "wideBannerWithCTAContentContainer": "wideBannerWithCTAContentContainer__08415",
@@ -9594,6 +9592,7 @@
     "container": "container__6b38f",
     "textContainer": "textContainer__6b38f",
     "caret": "caret__6b38f",
+    "dismissButton": "dismissButton__6b38f",
     "icon": "icon__6b38f",
     "dot": "dot__6b38f",
     "inline": "inline__6b38f",
@@ -22115,14 +22114,12 @@
   },
   "845442": {
     "baseControlItem": "baseControlItem_dbfbe0",
-    "compact": "compact_dbfbe0",
     "clickable": "clickable_dbfbe0",
     "baseControlItemDescription": "baseControlItemDescription_dbfbe0",
     "baseControlItemLeadingElement": "baseControlItemLeadingElement_dbfbe0",
     "baseControlItemTrailingElements": "baseControlItemTrailingElements_dbfbe0",
     "baseControlItemTitle": "baseControlItemTitle_dbfbe0",
-    "baseControlItemContent": "baseControlItemContent_dbfbe0",
-    "secondaryTitle": "secondaryTitle_dbfbe0"
+    "baseControlItemContent": "baseControlItemContent_dbfbe0"
   },
   "845859": {
     "container": "container__203bc",
@@ -25066,10 +25063,10 @@
   },
   "968413": {
     "container": "container__16719",
+    "children": "children__16719",
     "scrollRight": "scrollRight__16719",
     "scrollLeft": "scrollLeft__16719",
     "scrollBoth": "scrollBoth__16719",
-    "children": "children__16719",
     "actions": "actions__16719"
   },
   "968803": {
