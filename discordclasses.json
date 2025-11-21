@@ -11193,7 +11193,9 @@
     "carousel": "carousel__38ccf",
     "modalHeaderButtonsContainer": "modalHeaderButtonsContainer__38ccf",
     "modalHeaderButton": "modalHeaderButton__38ccf",
-    "wishlistButton": "wishlistButton__38ccf"
+    "wishlistButton": "wishlistButton__38ccf",
+    "logoContainer": "logoContainer__38ccf",
+    "logo": "logo__38ccf"
   },
   "424271": {
     "avatar": "avatar__8c0e2",
@@ -22300,7 +22302,9 @@
     "fieldset": "fieldset__7ed4d",
     "collapsablePaneHeader": "collapsablePaneHeader__7ed4d",
     "collapsiblePaneList": "collapsiblePaneList__7ed4d",
-    "error": "error__7ed4d"
+    "error": "error__7ed4d",
+    "timeInput": "timeInput__7ed4d",
+    "periodText": "periodText__7ed4d"
   },
   "855364": {
     "actionsStreamPreview": "actionsStreamPreview__34f7d",
