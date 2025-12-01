@@ -3811,6 +3811,9 @@
     "breadcrumbActive": "breadcrumbActive_befe67",
     "breadcrumbInactive": "breadcrumbInactive_befe67"
   },
+  "135443": {
+    "container": "container__75920"
+  },
   "135867": {
     "stickerPreviews": "stickerPreviews_a4cf0b",
     "stickerPreviewContainer": "stickerPreviewContainer_a4cf0b",
@@ -5514,11 +5517,6 @@
     "titleRightIcon": "titleRightIcon__9fa5a",
     "activityContainer": "activityContainer__9fa5a",
     "activitySuggestion": "activitySuggestion__9fa5a",
-    "wumpusRocketOuterContainer": "wumpusRocketOuterContainer__9fa5a",
-    "wumpusReducedMotion": "wumpusReducedMotion__9fa5a",
-    "wumpusRocketInnerContainer": "wumpusRocketInnerContainer__9fa5a",
-    "slide": "slide__9fa5a",
-    "wumpusRocket": "wumpusRocket__9fa5a",
     "poster": "poster__9fa5a",
     "posterDivider": "posterDivider__9fa5a",
     "clickableBanner": "clickableBanner__9fa5a"
@@ -11415,7 +11413,6 @@
   "431048": {
     "container": "container__19cf2",
     "containerPadding": "containerPadding__19cf2",
-    "image": "image__19cf2",
     "body": "body__19cf2"
   },
   "431085": {
@@ -12765,6 +12762,7 @@
   "481446": {
     "triggerButton": "triggerButton__64c86",
     "panel": "panel__64c86",
+    "disablePanelAnimation": "disablePanelAnimation__64c86",
     "icon": "icon__64c86",
     "iconClosed": "iconClosed__64c86"
   },
