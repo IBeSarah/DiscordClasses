@@ -584,12 +584,14 @@
     "freeTrialPillWithSparkles": "freeTrialPillWithSparkles_e4ef5c"
   },
   "17845": {
+    "logoHeader": "logoHeader_f1578d",
     "container": "container_f1578d",
     "header": "header_f1578d",
     "contentGrid": "contentGrid_f1578d",
     "descriptionAndButtonContainer": "descriptionAndButtonContainer_f1578d",
-    "usersListHeader": "usersListHeader_f1578d",
-    "premiumGroupIcon": "premiumGroupIcon_f1578d"
+    "descriptionContainer": "descriptionContainer_f1578d",
+    "buttonContainer": "buttonContainer_f1578d",
+    "usersListHeader": "usersListHeader_f1578d"
   },
   "18039": {
     "pageControlContainer": "pageControlContainer_c15210",
@@ -4993,7 +4995,6 @@
     "nameplate": "nameplate__2c8c0",
     "profileEffectShopPreview": "profileEffectShopPreview__2c8c0",
     "bundlePreview": "bundlePreview__2c8c0",
-    "bundlePreviewContainer": "bundlePreviewContainer__2c8c0",
     "easterEggContainer": "easterEggContainer__2c8c0"
   },
   "186425": {
@@ -14313,6 +14314,7 @@
     "spinner": "spinner__83b1d"
   },
   "540432": {
+    "container": "container__95e0a",
     "labelContainer": "labelContainer__95e0a",
     "filterSection": "filterSection__95e0a",
     "dateFilter": "dateFilter__95e0a",
@@ -22412,9 +22414,6 @@
     "errorBody": "errorBody__9ed46",
     "errorArt": "errorArt__9ed46"
   },
-  "850171": {
-    "b": "#bd282a"
-  },
   "851339": {
     "container": "container_ac8a82"
   },
@@ -23239,18 +23238,6 @@
     "icon": "icon__777cc",
     "toggledIconOn": "toggledIconOn__777cc",
     "tutorialTip": "tutorialTip__777cc"
-  },
-  "881937": {
-    "container": "container__6d099",
-    "profileEffectShopPreview": "profileEffectShopPreview__6d099",
-    "profileEffectShopPreviewCollectedModal": "profileEffectShopPreviewCollectedModal__6d099",
-    "avatarDecorationPreview": "avatarDecorationPreview__6d099",
-    "avatarDecorationDropShadow": "avatarDecorationDropShadow__6d099",
-    "avatar": "avatar__6d099",
-    "threeItemBundle": "threeItemBundle__6d099",
-    "avatarDecorationPreviewCollectedModal": "avatarDecorationPreviewCollectedModal__6d099",
-    "nameplatePreview": "nameplatePreview__6d099",
-    "nameplatePreviewCollectedModal": "nameplatePreviewCollectedModal__6d099"
   },
   "882313": {
     "textboxContainer": "textboxContainer__7e1d8"
