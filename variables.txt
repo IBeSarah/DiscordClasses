@@ -1,4 +1,3 @@
-
 .theme-dark {
     --app-border-frame: hsl(var(--opacity-12-hsl)/0.12156862745098039);
     --app-frame-background: var(--neutral-78);
