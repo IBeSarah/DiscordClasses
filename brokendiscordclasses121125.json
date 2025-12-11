@@ -5114,6 +5114,11 @@
     "loadingHeader": "_32c75a165652a80d-loadingHeader",
     "hidden": "_32c75a165652a80d-hidden"
   },
+  "195006": {
+    "aboutContainer": "_17a6db595cc72fed-aboutContainer",
+    "divider": "_17a6db595cc72fed-divider",
+    "informationContainer": "_17a6db595cc72fed-informationContainer"
+  },
   "195262": {
     "hamburger": "_9293f6b2fc12398a-hamburger",
     "container": "_9293f6b2fc12398a-container",
@@ -8846,11 +8851,6 @@
     "dmIcon": "_06fb54b93b7ce763-dmIcon",
     "channelNameSection": "_06fb54b93b7ce763-channelNameSection",
     "channelTypeIcon": "_06fb54b93b7ce763-channelTypeIcon"
-  },
-  "330187": {
-    "aboutContainer": "_17a6db595cc72fed-aboutContainer",
-    "divider": "_17a6db595cc72fed-divider",
-    "informationContainer": "_17a6db595cc72fed-informationContainer"
   },
   "330374": {
     "syncing": "a706ba33cbeb179a-syncing",
