@@ -93,6 +93,7 @@
   "3083": {
     "scroller": "_3b92361cacc65834-scroller",
     "hasToolbar": "_3b92361cacc65834-hasToolbar",
+    "editingHeader": "_3b92361cacc65834-editingHeader",
     "ukTeenDisclaimer": "_3b92361cacc65834-ukTeenDisclaimer"
   },
   "3311": {
@@ -1295,8 +1296,8 @@
     "previewMessage": "_5d148ffac19e7fb1-previewMessage",
     "previewHeader": "_5d148ffac19e7fb1-previewHeader",
     "previewAvatars": "_5d148ffac19e7fb1-previewAvatars",
-    "ttsPreviewWrapper": "_5d148ffac19e7fb1-ttsPreviewWrapper",
-    "reducedMotion": "_5d148ffac19e7fb1-reducedMotion"
+    "reducedMotion": "_5d148ffac19e7fb1-reducedMotion",
+    "appearanceUpsell": "_5d148ffac19e7fb1-appearanceUpsell"
   },
   "54497": {
     "accountProfileCard": "_1fed1dd06c7aabf7-accountProfileCard",
@@ -6910,16 +6911,6 @@
     "modalPreview": "ced2f2b335a767e2-modalPreview",
     "modalFooter": "ced2f2b335a767e2-modalFooter"
   },
-  "258678": {
-    "button": "fb7f9476ada049c8-button",
-    "icon": "fb7f9476ada049c8-icon",
-    "banner": "fb7f9476ada049c8-banner",
-    "buttonInner": "fb7f9476ada049c8-buttonInner",
-    "themeColor": "fb7f9476ada049c8-themeColor",
-    "primary": "fb7f9476ada049c8-primary",
-    "secondary": "fb7f9476ada049c8-secondary",
-    "bannerColor": "fb7f9476ada049c8-bannerColor"
-  },
   "259163": {
     "container": "c8c710e94d6c035c-container"
   },
@@ -8456,7 +8447,8 @@
     "invoiceDiscountText": "_257663d4c4e80a6b-invoiceDiscountText",
     "invoiceDiscountTag": "_257663d4c4e80a6b-invoiceDiscountTag",
     "totalRow": "_257663d4c4e80a6b-totalRow",
-    "slayerStorefrontProductPreview": "_257663d4c4e80a6b-slayerStorefrontProductPreview"
+    "slayerStorefrontProductPreview": "_257663d4c4e80a6b-slayerStorefrontProductPreview",
+    "rentalDescription": "_257663d4c4e80a6b-rentalDescription"
   },
   "316515": {
     "headerContainer": "bdedd943df1d89dd-headerContainer"
@@ -10373,6 +10365,9 @@
   "395051": {
     "roleInputContainer": "cfa6c7afccc96c4f-roleInputContainer",
     "roleColorContainer": "cfa6c7afccc96c4f-roleColorContainer"
+  },
+  "395356": {
+    "header": "_363359b5c2d9ffc8-header"
   },
   "395510": {
     "guildSelector": "c3d9481c21f6c807-guildSelector",
@@ -14582,6 +14577,9 @@
     "gameImage3": "_1d004c24f7fca406-gameImage3",
     "image": "_1d004c24f7fca406-image"
   },
+  "557142": {
+    "modalHeader": "_2ecf4bd42deb3263-modalHeader"
+  },
   "557208": {
     "header": "ab66419eae73260f-header",
     "headerTitle": "ab66419eae73260f-headerTitle",
@@ -18475,9 +18473,7 @@
     "sessionMoreButton": "_803f2f55621144fb-sessionMoreButton",
     "sessionCheckbox": "_803f2f55621144fb-sessionCheckbox",
     "logOutAllButton": "_803f2f55621144fb-logOutAllButton",
-    "loading": "_803f2f55621144fb-loading",
-    "tools": "_803f2f55621144fb-tools",
-    "toolsTitle": "_803f2f55621144fb-toolsTitle"
+    "loading": "_803f2f55621144fb-loading"
   },
   "714367": {
     "hr": "_0f7f70da7503165e-hr",
@@ -24581,12 +24577,6 @@
   "958389": {
     "category": "_3ddc0d8784daab3c-category",
     "channelIcon": "_3ddc0d8784daab3c-channelIcon"
-  },
-  "958429": {
-    "neverShow": "_6480d1c51952f276-neverShow",
-    "cancelButton": "_6480d1c51952f276-cancelButton",
-    "footerButtons": "_6480d1c51952f276-footerButtons",
-    "radioMessageContainer": "_6480d1c51952f276-radioMessageContainer"
   },
   "959045": {
     "title": "_2412bd85e1228fe6-title",
