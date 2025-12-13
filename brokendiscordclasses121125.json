@@ -594,8 +594,7 @@
     "footerContainer": "_5a2dfc677f2b8493-footerContainer",
     "footerContainerNonPremium": "_5a2dfc677f2b8493-footerContainerNonPremium",
     "coachmarkHeaderContainer": "_5a2dfc677f2b8493-coachmarkHeaderContainer",
-    "coachmarkHeaderTextContainer": "_5a2dfc677f2b8493-coachmarkHeaderTextContainer",
-    "badgeAndCloseRow": "_5a2dfc677f2b8493-badgeAndCloseRow",
+    "headerAndCloseRow": "_5a2dfc677f2b8493-headerAndCloseRow",
     "subtitle": "_5a2dfc677f2b8493-subtitle",
     "coachmarkFooterContainer": "_5a2dfc677f2b8493-coachmarkFooterContainer",
     "nitroIcon": "_5a2dfc677f2b8493-nitroIcon",
@@ -1226,6 +1225,7 @@
     "actionBarTrailing": "_8a031a135bfcb9ba-actionBarTrailing",
     "actionButtonWrapper": "_8a031a135bfcb9ba-actionButtonWrapper",
     "actionBarTrailingFullWidth": "_8a031a135bfcb9ba-actionBarTrailingFullWidth",
+    "actionBarCheckbox": "_8a031a135bfcb9ba-actionBarCheckbox",
     "actionBarLayoutChatInput": "_8a031a135bfcb9ba-actionBarLayoutChatInput"
   },
   "52140": {
@@ -1476,8 +1476,6 @@
     "bgGradientHighlight": "cb36986bcdc8c377-bgGradientHighlight",
     "iconWrapper": "cb36986bcdc8c377-iconWrapper",
     "activeVoiceIcon": "cb36986bcdc8c377-activeVoiceIcon",
-    "tooltip": "cb36986bcdc8c377-tooltip",
-    "tooltipContent": "cb36986bcdc8c377-tooltipContent",
     "tooltipHeader": "cb36986bcdc8c377-tooltipHeader",
     "buttonWrapper": "cb36986bcdc8c377-buttonWrapper",
     "descriptionWrapper": "cb36986bcdc8c377-descriptionWrapper",
@@ -4580,10 +4578,7 @@
     "textSm": "c9d15c8a962de3c8-textSm",
     "activityContainer": "c9d15c8a962de3c8-activityContainer",
     "iconOnly": "c9d15c8a962de3c8-iconOnly",
-    "activitiesTooltip": "c9d15c8a962de3c8-activitiesTooltip",
-    "tooltipText": "c9d15c8a962de3c8-tooltipText",
     "icon": "c9d15c8a962de3c8-icon",
-    "hasMultipleActivities": "c9d15c8a962de3c8-hasMultipleActivities",
     "truncated": "c9d15c8a962de3c8-truncated",
     "textWithIconContainer": "c9d15c8a962de3c8-textWithIconContainer",
     "activityCounter": "c9d15c8a962de3c8-activityCounter",
@@ -5295,8 +5290,7 @@
   "199912": {
     "scroller": "fcb62805acc5d0cc-scroller",
     "connections": "fcb62805acc5d0cc-connections",
-    "appsConnections": "fcb62805acc5d0cc-appsConnections",
-    "note": "fcb62805acc5d0cc-note"
+    "appsConnections": "fcb62805acc5d0cc-appsConnections"
   },
   "200471": {
     "container": "_8279f38edc620354-container",
@@ -10996,7 +10990,6 @@
     "title": "edbb22df99c39831-title",
     "fastTravel": "edbb22df99c39831-fastTravel",
     "fastTravelChevron": "edbb22df99c39831-fastTravelChevron",
-    "navigationTooltip": "edbb22df99c39831-navigationTooltip",
     "appIcon": "edbb22df99c39831-appIcon",
     "guildIcon": "edbb22df99c39831-guildIcon"
   },
@@ -11219,7 +11212,6 @@
     "inner": "e131a99484292a19-inner",
     "channel": "e131a99484292a19-channel",
     "noiseCancellationPopout": "e131a99484292a19-noiseCancellationPopout",
-    "noiseCancellationTooltip": "e131a99484292a19-noiseCancellationTooltip",
     "krispLogo": "e131a99484292a19-krispLogo",
     "krispLink": "e131a99484292a19-krispLink",
     "connection": "e131a99484292a19-connection",
@@ -12018,7 +12010,6 @@
     "guildIconV2Container": "_85d1663d6a9fc7f6-guildIconV2Container",
     "guildBadge": "_85d1663d6a9fc7f6-guildBadge",
     "disableColor": "_85d1663d6a9fc7f6-disableColor",
-    "tierTooltipTitle": "_85d1663d6a9fc7f6-tierTooltipTitle",
     "boostedGuildTierMutedIconWithVisibleBanner": "_85d1663d6a9fc7f6-boostedGuildTierMutedIconWithVisibleBanner",
     "boostedGuildTierIconBackgroundWithVisibleBanner": "_85d1663d6a9fc7f6-boostedGuildTierIconBackgroundWithVisibleBanner"
   },
@@ -12390,8 +12381,7 @@
     "button": "_63abbca6d53b6035-button",
     "back": "_63abbca6d53b6035-back",
     "forward": "_63abbca6d53b6035-forward",
-    "disabled": "_63abbca6d53b6035-disabled",
-    "navigationTooltip": "_63abbca6d53b6035-navigationTooltip"
+    "disabled": "_63abbca6d53b6035-disabled"
   },
   "470276": {
     "content": "c30e20083a9cfc88-content",
@@ -14124,9 +14114,6 @@
     "sharePromptContainer": "_56d6c209a82ec9e8-sharePromptContainer",
     "sharePromptContent": "_56d6c209a82ec9e8-sharePromptContent",
     "closeButton": "_56d6c209a82ec9e8-closeButton"
-  },
-  "545104": {
-    "checkbox": "_3d31dfda1426a908-checkbox"
   },
   "545429": {
     "content": "f7034805b8d6babc-content",
@@ -16335,7 +16322,6 @@
     "subscriptionCostRow": "_3d62f5ba2345de8d-subscriptionCostRow",
     "invoiceItemLabelWithIcon": "_3d62f5ba2345de8d-invoiceItemLabelWithIcon",
     "invoiceItemLabelIcon": "_3d62f5ba2345de8d-invoiceItemLabelIcon",
-    "invoiceItemTooltip": "_3d62f5ba2345de8d-invoiceItemTooltip",
     "subscriptionDetailsToggle": "_3d62f5ba2345de8d-subscriptionDetailsToggle",
     "subscriptionDetailsToggleCaret": "_3d62f5ba2345de8d-subscriptionDetailsToggleCaret",
     "subscriptionPeriodResetNotice": "_3d62f5ba2345de8d-subscriptionPeriodResetNotice",
@@ -16692,6 +16678,7 @@
     "starTrinket": "_82b1020fcf7b96bd-starTrinket"
   },
   "640856": {
+    "container": "_50e22d8b0c6ff6cb-container",
     "popoutRoleDot": "_50e22d8b0c6ff6cb-popoutRoleDot",
     "popoutRoleCircle": "_50e22d8b0c6ff6cb-popoutRoleCircle"
   },
@@ -18011,6 +17998,9 @@
   "699261": {
     "description": "_509fec6f9f542916-description",
     "image": "_509fec6f9f542916-image"
+  },
+  "699369": {
+    "note": "eb110a19ea3d101d-note"
   },
   "699728": {
     "container": "_8ef774be6ff7f0c4-container",
@@ -21885,6 +21875,9 @@
     "column": "_65a39f3e8becc34d-column",
     "divider": "_65a39f3e8becc34d-divider"
   },
+  "855013": {
+    "note": "f37d39ae7423d877-note"
+  },
   "855183": {
     "header": "d0b769b126b63b86-header",
     "content": "d0b769b126b63b86-content",
@@ -22119,6 +22112,7 @@
   },
   "861526": {
     "container": "c501831bd1d46894-container",
+    "withMargin": "c501831bd1d46894-withMargin",
     "textContainer": "c501831bd1d46894-textContainer",
     "headerContainer": "c501831bd1d46894-headerContainer",
     "icon": "c501831bd1d46894-icon"
@@ -22421,8 +22415,7 @@
     "profileBanner": "_9c3bea41fd465666-profileBanner",
     "profileButtons": "_9c3bea41fd465666-profileButtons",
     "profileRolesSection": "_9c3bea41fd465666-profileRolesSection",
-    "profileAppConnections": "_9c3bea41fd465666-profileAppConnections",
-    "profileNote": "_9c3bea41fd465666-profileNote"
+    "profileAppConnections": "_9c3bea41fd465666-profileAppConnections"
   },
   "871943": {
     "headerContainerGift": "_57a8750a60d28276-headerContainerGift",
@@ -24778,10 +24771,6 @@
   },
   "962552": {
     "tag": "c6d62487042b90fc-tag"
-  },
-  "962793": {
-    "tooltip": "a877b397b04fdd13-tooltip",
-    "tooltipContent": "a877b397b04fdd13-tooltipContent"
   },
   "962828": {
     "thankYouCard": "b851f5f658eb4f6c-thankYouCard",
