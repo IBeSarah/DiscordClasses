@@ -9714,15 +9714,6 @@
     "premiumIcon": "_175e2a45f20d98e9-premiumIcon",
     "ctaButtonText": "_175e2a45f20d98e9-ctaButtonText"
   },
-  "368317": {
-    "splash": "_15293d44d152f857-splash",
-    "gameIcon": "_15293d44d152f857-gameIcon",
-    "gameName": "_15293d44d152f857-gameName",
-    "installSize": "_15293d44d152f857-installSize",
-    "divider": "_15293d44d152f857-divider",
-    "selector": "_15293d44d152f857-selector",
-    "terms": "_15293d44d152f857-terms"
-  },
   "368489": {
     "bar": "_8452288fe5be9b1d-bar",
     "commandInfo": "_8452288fe5be9b1d-commandInfo",
@@ -12312,6 +12303,15 @@
     "body": "_0d52dc82ba0d2e5a-body",
     "logos": "_0d52dc82ba0d2e5a-logos",
     "error": "_0d52dc82ba0d2e5a-error"
+  },
+  "467721": {
+    "splash": "_15293d44d152f857-splash",
+    "gameIcon": "_15293d44d152f857-gameIcon",
+    "gameName": "_15293d44d152f857-gameName",
+    "installSize": "_15293d44d152f857-installSize",
+    "divider": "_15293d44d152f857-divider",
+    "selector": "_15293d44d152f857-selector",
+    "terms": "_15293d44d152f857-terms"
   },
   "468234": {
     "banner": "_68edb95846a37624-banner",
