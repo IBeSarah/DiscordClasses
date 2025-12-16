@@ -9827,6 +9827,9 @@
     "swipeWrapper": "_452c3efa19b9d3b3-swipeWrapper",
     "swipe": "_452c3efa19b9d3b3-swipe"
   },
+  "372881": {
+    "anchor": "_24335ee26d049b2d-anchor"
+  },
   "372982": {
     "icon": "_9f2f44248e9e5c33-icon",
     "small": "_9f2f44248e9e5c33-small",
@@ -11987,7 +11990,9 @@
     "channelSelectionFormItem": "_4c08473a6cdffac2-channelSelectionFormItem",
     "channelName": "_4c08473a6cdffac2-channelName",
     "channelSelection": "_4c08473a6cdffac2-channelSelection",
-    "warning": "_4c08473a6cdffac2-warning"
+    "warning": "_4c08473a6cdffac2-warning",
+    "notificationToggle": "_4c08473a6cdffac2-notificationToggle",
+    "ageVerificationNotice": "_4c08473a6cdffac2-ageVerificationNotice"
   },
   "453223": {
     "container": "_0b56311ebc6682e2-container",
@@ -13506,7 +13511,8 @@
     "footer": "_8826425bb0684b12-footer",
     "eventActions": "_8826425bb0684b12-eventActions",
     "channelLocation": "_8826425bb0684b12-channelLocation label",
-    "externalLocation": "_8826425bb0684b12-externalLocation label"
+    "externalLocation": "_8826425bb0684b12-externalLocation label",
+    "ageVerificationNoticeSpacing": "_8826425bb0684b12-ageVerificationNoticeSpacing"
   },
   "518894": {
     "buttonsContainer": "_89253581b3e6feb0-buttonsContainer",
@@ -14553,9 +14559,6 @@
     "winButton": "c38106a3f0c3ca76-winButton",
     "winButtonMinMax": "c38106a3f0c3ca76-winButtonMinMax",
     "winButtonClose": "c38106a3f0c3ca76-winButtonClose c38106a3f0c3ca76-winButton"
-  },
-  "556047": {
-    "notificationToggle": "_74570f682534f753-notificationToggle"
   },
   "556329": {
     "container": "_744778f417b4a710-container",
@@ -17520,13 +17523,6 @@
     "videoSizer": "a21736575ea33af0-videoSizer",
     "focusedVideo": "a21736575ea33af0-focusedVideo"
   },
-  "676641": {
-    "content": "_1cd5e7e64bfbe76f-content",
-    "header": "_1cd5e7e64bfbe76f-header",
-    "subtitle": "_1cd5e7e64bfbe76f-subtitle",
-    "modalCloseButton": "_1cd5e7e64bfbe76f-modalCloseButton",
-    "cancel": "_1cd5e7e64bfbe76f-cancel"
-  },
   "677210": {
     "root": "_7f7273e3e762eb9d-root",
     "nativePicker": "_7f7273e3e762eb9d-nativePicker",
@@ -18279,8 +18275,9 @@
   "710421": {
     "privacyLevel": "_735fbaad0aef581e-privacyLevel",
     "publicIcon": "_735fbaad0aef581e-publicIcon",
-    "verticalSpacing": "_735fbaad0aef581e-verticalSpacing",
-    "errorMessage": "_735fbaad0aef581e-errorMessage"
+    "errorMessage": "_735fbaad0aef581e-errorMessage",
+    "notificationToggle": "_735fbaad0aef581e-notificationToggle",
+    "ageVerificationNotice": "_735fbaad0aef581e-ageVerificationNotice"
   },
   "710600": {
     "panelContainer": "a83780a9129423a5-panelContainer",
@@ -20565,6 +20562,7 @@
   "797991": {
     "modal": "_5ab33a3adebcb3d6-modal",
     "header": "_5ab33a3adebcb3d6-header",
+    "titleContainer": "_5ab33a3adebcb3d6-titleContainer",
     "closeButton": "_5ab33a3adebcb3d6-closeButton",
     "scroller": "_5ab33a3adebcb3d6-scroller",
     "grid": "_5ab33a3adebcb3d6-grid"
@@ -22817,9 +22815,6 @@
     "blockedIcon": "_7a70a677dab584df-blockedIcon",
     "blockedMessageText": "_7a70a677dab584df-blockedMessageText",
     "blockedAction": "_7a70a677dab584df-blockedAction"
-  },
-  "884874": {
-    "newChannel": "_599fa27f4d2464c6-newChannel"
   },
   "884878": {
     "syntaxAfter": "ada32f6ad5a36c58-syntaxAfter",
