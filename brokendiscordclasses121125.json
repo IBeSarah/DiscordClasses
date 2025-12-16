@@ -509,22 +509,7 @@
     "fieldset": "fec5bfb64098f96b-fieldset"
   },
   "23512": {
-    "container": "ef2eb43282958c32-container",
-    "content": "ef2eb43282958c32-content",
-    "headerCaption": "ef2eb43282958c32-headerCaption",
-    "form": "ef2eb43282958c32-form",
-    "icon": "ef2eb43282958c32-icon",
-    "header": "ef2eb43282958c32-header",
-    "checkboxOption": "ef2eb43282958c32-checkboxOption",
-    "disabled": "ef2eb43282958c32-disabled",
-    "footerImage": "ef2eb43282958c32-footerImage",
-    "updatedHeader": "ef2eb43282958c32-updatedHeader",
-    "updatedForm": "ef2eb43282958c32-updatedForm",
-    "checklistRow": "ef2eb43282958c32-checklistRow",
     "checklistIcon": "ef2eb43282958c32-checklistIcon",
-    "roleRow": "ef2eb43282958c32-roleRow",
-    "roleDot": "ef2eb43282958c32-roleDot",
-    "roleName": "ef2eb43282958c32-roleName",
     "table": "ef2eb43282958c32-table",
     "tableContainer": "ef2eb43282958c32-tableContainer",
     "tableHeader": "ef2eb43282958c32-tableHeader",
@@ -713,6 +698,12 @@
     "star": "_98c7bb4db473bc75-star",
     "starLeft": "_98c7bb4db473bc75-starLeft",
     "starRight": "_98c7bb4db473bc75-starRight"
+  },
+  "28005": {
+    "messagePreviewLine": "e2dd9f62bbefba8d-messagePreviewLine",
+    "messageContent": "e2dd9f62bbefba8d-messageContent",
+    "messageContentTrailingIcon": "e2dd9f62bbefba8d-messageContentTrailingIcon",
+    "colorTextFeedbackPositive": "e2dd9f62bbefba8d-colorTextFeedbackPositive"
   },
   "28034": {
     "messages": "_1ccd1ba5cb2270c2-messages",
@@ -986,7 +977,6 @@
   },
   "44463": {
     "spacing": "a959b15304ce5719-spacing",
-    "error": "a959b15304ce5719-error",
     "card": "a959b15304ce5719-card a959b15304ce5719-spacing"
   },
   "44592": {
@@ -2591,6 +2581,8 @@
     "link": "_972a0d22c8afa7f0-link",
     "linkButton": "_972a0d22c8afa7f0-linkButton",
     "linkButtonIcon": "_972a0d22c8afa7f0-linkButtonIcon",
+    "timestamp": "_972a0d22c8afa7f0-timestamp",
+    "username": "_972a0d22c8afa7f0-username",
     "closeButton": "_972a0d22c8afa7f0-closeButton",
     "reducedClickTarget": "_972a0d22c8afa7f0-reducedClickTarget",
     "closeButtonForceShow": "_972a0d22c8afa7f0-closeButtonForceShow",
@@ -4457,6 +4449,7 @@
   },
   "171532": {
     "card": "abfd909f61de9fdf-card",
+    "cardContainer": "abfd909f61de9fdf-cardContainer",
     "cardMedium": "abfd909f61de9fdf-cardMedium",
     "cardSmall": "abfd909f61de9fdf-cardSmall",
     "cardImageContainer": "abfd909f61de9fdf-cardImageContainer",
@@ -4476,7 +4469,11 @@
     "bottomGradient": "abfd909f61de9fdf-bottomGradient",
     "iconAsset": "abfd909f61de9fdf-iconAsset",
     "badge": "abfd909f61de9fdf-badge",
-    "wishlistButtonContainer": "abfd909f61de9fdf-wishlistButtonContainer",
+    "cardButtonsContainer": "abfd909f61de9fdf-cardButtonsContainer",
+    "wishlistButton": "abfd909f61de9fdf-wishlistButton",
+    "forwardButton": "abfd909f61de9fdf-forwardButton",
+    "cardButtonContainer": "abfd909f61de9fdf-cardButtonContainer",
+    "cardButtonContainerHovered": "abfd909f61de9fdf-cardButtonContainerHovered",
     "pulse": "abfd909f61de9fdf-pulse",
     "placeholderCard": "abfd909f61de9fdf-placeholderCard",
     "placeholderDescription": "abfd909f61de9fdf-placeholderDescription",
@@ -6785,8 +6782,6 @@
     "pollContainer": "b7e1cb0370c2dd0e-pollContainer",
     "confirmText": "b7e1cb0370c2dd0e-confirmText",
     "threadRoleMentionFailure": "b7e1cb0370c2dd0e-threadRoleMentionFailure",
-    "nitroFileSizeUpsell": "b7e1cb0370c2dd0e-nitroFileSizeUpsell",
-    "nitroBadgeSvg": "b7e1cb0370c2dd0e-nitroBadgeSvg",
     "ctaButtonContainer": "b7e1cb0370c2dd0e-ctaButtonContainer"
   },
   "253623": {
@@ -6910,6 +6905,10 @@
     "modalContent": "ced2f2b335a767e2-modalContent",
     "modalPreview": "ced2f2b335a767e2-modalPreview",
     "modalFooter": "ced2f2b335a767e2-modalFooter"
+  },
+  "258678": {
+    "bannerButton": "fb7f9476ada049c8-bannerButton",
+    "disabled": "fb7f9476ada049c8-disabled"
   },
   "259163": {
     "container": "c8c710e94d6c035c-container"
@@ -8546,10 +8545,6 @@
   "321159": {
     "container": "_6c21f4f70f1e833a-container"
   },
-  "321301": {
-    "bannerButton": "de800837163648e8-bannerButton",
-    "disabled": "de800837163648e8-disabled"
-  },
   "321347": {
     "main": "c08b38911b1dcc2f-main",
     "fullBorderWithGradient": "c08b38911b1dcc2f-fullBorderWithGradient",
@@ -9485,8 +9480,6 @@
     "spinnerVideo": "_921c50dc4baa4b4f-spinnerVideo",
     "image": "_921c50dc4baa4b4f-image",
     "block": "_921c50dc4baa4b4f-block",
-    "button": "_921c50dc4baa4b4f-button",
-    "linkButton": "_921c50dc4baa4b4f-linkButton",
     "inviteIcon": "_921c50dc4baa4b4f-inviteIcon",
     "inviteLargeIcon": "_921c50dc4baa4b4f-inviteLargeIcon _921c50dc4baa4b4f-inviteIcon",
     "downloadButtonSubtext": "_921c50dc4baa4b4f-downloadButtonSubtext"
@@ -12623,22 +12616,6 @@
     "discountOfferContainer": "_5521c625eee7bda5-discountOfferContainer",
     "discountOfferContent": "_5521c625eee7bda5-discountOfferContent",
     "nitroIcon": "_5521c625eee7bda5-nitroIcon"
-  },
-  "482554": {
-    "noScroll": "_6515e2dee2dfdb8e-noScroll",
-    "container": "_6515e2dee2dfdb8e-container _6515e2dee2dfdb8e-noScroll",
-    "sequencer": "_6515e2dee2dfdb8e-sequencer",
-    "innerSequencer": "_6515e2dee2dfdb8e-innerSequencer",
-    "modal": "_6515e2dee2dfdb8e-modal",
-    "overviewSidebar": "_6515e2dee2dfdb8e-overviewSidebar",
-    "header": "_6515e2dee2dfdb8e-header",
-    "closeButton": "_6515e2dee2dfdb8e-closeButton",
-    "footer": "_6515e2dee2dfdb8e-footer",
-    "overviewSteps": "_6515e2dee2dfdb8e-overviewSteps",
-    "overviewStep": "_6515e2dee2dfdb8e-overviewStep",
-    "stepIndex": "_6515e2dee2dfdb8e-stepIndex",
-    "stepTitle": "_6515e2dee2dfdb8e-stepTitle",
-    "selected": "_6515e2dee2dfdb8e-selected"
   },
   "482563": {
     "items": "_3ff9235ed5dedd8d-items",
@@ -19041,6 +19018,31 @@
     "divider": "_1fcacb0d444cb493-divider",
     "spacingLarge": "_1fcacb0d444cb493-spacingLarge"
   },
+  "733005": {
+    "container": "_50e4ecc92cc862b6-container",
+    "content": "_50e4ecc92cc862b6-content",
+    "headerCaption": "_50e4ecc92cc862b6-headerCaption",
+    "form": "_50e4ecc92cc862b6-form",
+    "icon": "_50e4ecc92cc862b6-icon",
+    "header": "_50e4ecc92cc862b6-header",
+    "checkboxOption": "_50e4ecc92cc862b6-checkboxOption",
+    "disabled": "_50e4ecc92cc862b6-disabled",
+    "footerImage": "_50e4ecc92cc862b6-footerImage",
+    "updatedHeader": "_50e4ecc92cc862b6-updatedHeader",
+    "updatedForm": "_50e4ecc92cc862b6-updatedForm",
+    "checklistRow": "_50e4ecc92cc862b6-checklistRow",
+    "checklistIcon": "_50e4ecc92cc862b6-checklistIcon",
+    "roleRow": "_50e4ecc92cc862b6-roleRow",
+    "roleDot": "_50e4ecc92cc862b6-roleDot",
+    "roleName": "_50e4ecc92cc862b6-roleName",
+    "table": "_50e4ecc92cc862b6-table",
+    "tableContainer": "_50e4ecc92cc862b6-tableContainer",
+    "tableHeader": "_50e4ecc92cc862b6-tableHeader",
+    "permissionsTable": "_50e4ecc92cc862b6-permissionsTable",
+    "permissionRow": "_50e4ecc92cc862b6-permissionRow",
+    "bullet": "_50e4ecc92cc862b6-bullet",
+    "bulletWarning": "_50e4ecc92cc862b6-bulletWarning _50e4ecc92cc862b6-bullet"
+  },
   "733070": {
     "section": "_999b58b4e43c632d-section",
     "guildSelectOptionIcon": "_999b58b4e43c632d-guildSelectOptionIcon"
@@ -22551,11 +22553,12 @@
     "mockMessageAvatar": "_9c01943db9d3d4b1-mockMessageAvatar"
   },
   "875292": {
-    "previewContents": "_36852d62378f0835-previewContents",
+    "previewContainer": "_36852d62378f0835-previewContainer",
+    "upsellContainer": "_36852d62378f0835-upsellContainer",
     "previewBox": "_36852d62378f0835-previewBox",
-    "previewDescription": "_36852d62378f0835-previewDescription",
-    "previewBorder": "_36852d62378f0835-previewBorder",
-    "upsell": "_36852d62378f0835-upsell"
+    "previewContents": "_36852d62378f0835-previewContents",
+    "previewDescriptionContainer": "_36852d62378f0835-previewDescriptionContainer",
+    "previewDescriptionUpsell": "_36852d62378f0835-previewDescriptionUpsell"
   },
   "875699": {
     "empty": "_7ff05402592519cc-empty",
@@ -22894,6 +22897,13 @@
     "powerupCard": "ef07112874c7cc4f-powerupCard",
     "image": "ef07112874c7cc4f-image",
     "contentContainer": "ef07112874c7cc4f-contentContainer"
+  },
+  "887444": {
+    "forwardPreview": "f4b524c32c183432-forwardPreview",
+    "linkContainer": "f4b524c32c183432-linkContainer",
+    "linkIcon": "f4b524c32c183432-linkIcon",
+    "applicationInfo": "f4b524c32c183432-applicationInfo",
+    "cardImage": "f4b524c32c183432-cardImage"
   },
   "887477": {
     "guildStatus": "f9f04c96ff5e7a45-guildStatus",
@@ -24153,11 +24163,8 @@
     "spritePremiumPulsing": "_04eede68d145ae81-spritePremiumPulsing",
     "inactive": "_04eede68d145ae81-inactive",
     "active": "_04eede68d145ae81-active",
-    "premiumTooltip": "_04eede68d145ae81-premiumTooltip",
-    "premiumTooltipContainer": "_04eede68d145ae81-premiumTooltipContainer",
     "premiumUnlockAnimation": "_04eede68d145ae81-premiumUnlockAnimation",
-    "shrink": "_04eede68d145ae81-shrink",
-    "premiumTooltipText": "_04eede68d145ae81-premiumTooltipText"
+    "shrink": "_04eede68d145ae81-shrink"
   },
   "940559": {
     "emptyStateContainer": "_6542848b4c2d4ab8-emptyStateContainer"
@@ -25121,6 +25128,22 @@
     "messageContent": "fc958fc3c8bd9e8b-messageContent",
     "originalMessageAuthorAvatar": "fc958fc3c8bd9e8b-originalMessageAuthorAvatar",
     "newBadge": "fc958fc3c8bd9e8b-newBadge"
+  },
+  "975101": {
+    "noScroll": "b071d449c343cb88-noScroll",
+    "container": "b071d449c343cb88-container b071d449c343cb88-noScroll",
+    "sequencer": "b071d449c343cb88-sequencer",
+    "innerSequencer": "b071d449c343cb88-innerSequencer",
+    "modal": "b071d449c343cb88-modal",
+    "overviewSidebar": "b071d449c343cb88-overviewSidebar",
+    "header": "b071d449c343cb88-header",
+    "closeButton": "b071d449c343cb88-closeButton",
+    "footer": "b071d449c343cb88-footer",
+    "overviewSteps": "b071d449c343cb88-overviewSteps",
+    "overviewStep": "b071d449c343cb88-overviewStep",
+    "stepIndex": "b071d449c343cb88-stepIndex",
+    "stepTitle": "b071d449c343cb88-stepTitle",
+    "selected": "b071d449c343cb88-selected"
   },
   "975317": {
     "container": "_251d4c1d6684d118-container",
