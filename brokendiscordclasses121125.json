@@ -674,7 +674,8 @@
     "container": "_4e30a003110eaaf1-container",
     "popoutHeaderContainer": "_4e30a003110eaaf1-popoutHeaderContainer",
     "headerDivider": "_4e30a003110eaaf1-headerDivider",
-    "settingNudgeText": "_4e30a003110eaaf1-settingNudgeText"
+    "settingNudgeText": "_4e30a003110eaaf1-settingNudgeText",
+    "voiceChannelGiftingBreadcrumb": "_4e30a003110eaaf1-voiceChannelGiftingBreadcrumb"
   },
   "27174": {
     "container": "_52c9db19a26ac50b-container",
@@ -1559,9 +1560,7 @@
     "chipGrid": "ff7bda1c2c64b8b6-chipGrid"
   },
   "66776": {
-    "circleButtonBase": "_90d725a74e7171b7-circleButtonBase",
-    "listItemTooltip": "_90d725a74e7171b7-listItemTooltip",
-    "listItemTooltipContent": "_90d725a74e7171b7-listItemTooltipContent"
+    "circleButtonBase": "_90d725a74e7171b7-circleButtonBase"
   },
   "67103": {
     "root": "_929588cafbc03b62-root",
@@ -6478,8 +6477,7 @@
     "backgroundOverlay": "a230e00e14310f70-backgroundOverlay",
     "heroImage": "a230e00e14310f70-heroImage",
     "content": "a230e00e14310f70-content",
-    "specialText": "a230e00e14310f70-specialText",
-    "specialTextLink": "a230e00e14310f70-specialTextLink a230e00e14310f70-specialText",
+    "link": "a230e00e14310f70-link",
     "closeClickable": "a230e00e14310f70-closeClickable"
   },
   "240370": {
@@ -9968,7 +9966,8 @@
     "shopHomeLink": "_8067953d83f4b8a8-shopHomeLink",
     "alignedRightContent": "_8067953d83f4b8a8-alignedRightContent",
     "wishlistButton": "_8067953d83f4b8a8-wishlistButton",
-    "balanceWidgetMenu": "_8067953d83f4b8a8-balanceWidgetMenu"
+    "balanceWidgetMenu": "_8067953d83f4b8a8-balanceWidgetMenu",
+    "newBadge": "_8067953d83f4b8a8-newBadge"
   },
   "379481": {
     "container": "_9b0bb5a24b6706b6-container",
@@ -17620,7 +17619,7 @@
   },
   "682288": {
     "listItemWrapper": "_918165dab2b1e10b-listItemWrapper",
-    "listItemTooltip": "_918165dab2b1e10b-listItemTooltip",
+    "listItemTooltipContent": "_918165dab2b1e10b-listItemTooltipContent",
     "selected": "_918165dab2b1e10b-selected"
   },
   "682310": {
@@ -17755,6 +17754,12 @@
     "countryItem": "_61a011270c9135f1-countryItem",
     "countryName": "_61a011270c9135f1-countryName",
     "countryCode": "_61a011270c9135f1-countryCode"
+  },
+  "687068": {
+    "container": "_3a590bee48558ff9-container",
+    "header": "_3a590bee48558ff9-header",
+    "applicationIcon": "_3a590bee48558ff9-applicationIcon",
+    "items": "_3a590bee48558ff9-items"
   },
   "687130": {
     "fillParent": "_078ba7e849715dc7-fillParent",
@@ -21068,7 +21073,8 @@
     "popoutTextSecondary": "af3b89684c536957-popoutTextSecondary",
     "streamingPopoutHero": "af3b89684c536957-streamingPopoutHero",
     "streamCTA": "af3b89684c536957-streamCTA",
-    "maybeClickable": "af3b89684c536957-maybeClickable"
+    "maybeClickable": "af3b89684c536957-maybeClickable",
+    "popoutGiftingBreadcrumb": "af3b89684c536957-popoutGiftingBreadcrumb"
   },
   "814855": {
     "container": "ab64fd2612fba03d-container",
@@ -23015,6 +23021,7 @@
     "card": "_39b322c2a73a9168-card",
     "container": "_39b322c2a73a9168-container",
     "smallCard": "_39b322c2a73a9168-smallCard",
+    "smallSquareCard": "_39b322c2a73a9168-smallSquareCard",
     "largeCard": "_39b322c2a73a9168-largeCard",
     "isOwned": "_39b322c2a73a9168-isOwned",
     "cardPreview": "_39b322c2a73a9168-cardPreview",
@@ -25070,6 +25077,7 @@
     "premiumCardHover": "_6df1abcb56d96feb-premiumCardHover",
     "tier2ApplicationHomeSubheader": "_6df1abcb56d96feb-tier2ApplicationHomeSubheader",
     "applicationHomeCard": "_6df1abcb56d96feb-applicationHomeCard",
+    "narrow": "_6df1abcb56d96feb-narrow",
     "card": "_6df1abcb56d96feb-card",
     "withGiftBanner": "_6df1abcb56d96feb-withGiftBanner",
     "borderGradient": "_6df1abcb56d96feb-borderGradient",
@@ -25078,7 +25086,8 @@
     "wordmark": "_6df1abcb56d96feb-wordmark",
     "wumpus": "_6df1abcb56d96feb-wumpus",
     "inCard": "_6df1abcb56d96feb-inCard",
-    "inCorner": "_6df1abcb56d96feb-inCorner",
+    "outerCorner": "_6df1abcb56d96feb-outerCorner",
+    "insideCorner": "_6df1abcb56d96feb-insideCorner",
     "bigCloud": "_6df1abcb56d96feb-bigCloud",
     "smallCloud": "_6df1abcb56d96feb-smallCloud",
     "divider": "_6df1abcb56d96feb-divider",
@@ -25093,6 +25102,7 @@
     "premiumCardsHeader": "_6df1abcb56d96feb-premiumCardsHeader",
     "tier0CardOrder": "_6df1abcb56d96feb-tier0CardOrder",
     "tier2CardOrder": "_6df1abcb56d96feb-tier2CardOrder",
+    "premiumGroupCardOrder": "_6df1abcb56d96feb-premiumGroupCardOrder",
     "cardTitle": "_6df1abcb56d96feb-cardTitle",
     "betaPill": "_6df1abcb56d96feb-betaPill",
     "cardHeader": "_6df1abcb56d96feb-cardHeader"
@@ -25870,7 +25880,8 @@
     "guildNameTextLimitedSize": "b1f768426adf64d9-guildNameTextLimitedSize",
     "muteText": "b1f768426adf64d9-muteText",
     "muteTextWithActivity": "b1f768426adf64d9-muteTextWithActivity",
-    "invitesDisabledTooltip": "b1f768426adf64d9-invitesDisabledTooltip"
+    "invitesDisabledTooltip": "b1f768426adf64d9-invitesDisabledTooltip",
+    "guildTooltipWrapper": "b1f768426adf64d9-guildTooltipWrapper"
   },
   "998595": {
     "body": "ceece4f260fd0d49-body",
