@@ -9956,13 +9956,6 @@
   "379398": {
     "headerBar": "_8067953d83f4b8a8-headerBar",
     "headerBarInner": "_8067953d83f4b8a8-headerBarInner",
-    "tabs": "_8067953d83f4b8a8-tabs",
-    "tabWrapper": "_8067953d83f4b8a8-tabWrapper",
-    "tab": "_8067953d83f4b8a8-tab",
-    "selected": "_8067953d83f4b8a8-selected",
-    "tabWithMenuContainer": "_8067953d83f4b8a8-tabWithMenuContainer",
-    "tabWithChevron": "_8067953d83f4b8a8-tabWithChevron",
-    "discordLogo": "_8067953d83f4b8a8-discordLogo",
     "shopHomeLink": "_8067953d83f4b8a8-shopHomeLink",
     "alignedRightContent": "_8067953d83f4b8a8-alignedRightContent",
     "wishlistButton": "_8067953d83f4b8a8-wishlistButton",
@@ -10576,6 +10569,17 @@
     "textSection": "_72cd3c61001cedfe-textSection",
     "avatar": "_72cd3c61001cedfe-avatar",
     "bannerImage": "_72cd3c61001cedfe-bannerImage"
+  },
+  "402749": {
+    "container": "_354ecbbf936fa060-container",
+    "measurements": "_354ecbbf936fa060-measurements",
+    "tabs": "_354ecbbf936fa060-tabs",
+    "tabWrapper": "_354ecbbf936fa060-tabWrapper",
+    "tab": "_354ecbbf936fa060-tab",
+    "selected": "_354ecbbf936fa060-selected",
+    "tabWithMenuContainer": "_354ecbbf936fa060-tabWithMenuContainer",
+    "tabWithChevron": "_354ecbbf936fa060-tabWithChevron",
+    "more": "_354ecbbf936fa060-more"
   },
   "402766": {
     "addAnotherRuleCardContainer": "_0c1e8ab5048a296a-addAnotherRuleCardContainer",
@@ -25066,7 +25070,10 @@
     "productListings": "f5cb449bda771516-productListings"
   },
   "973638": {
-    "searchBar": "_824d3e523b2b8c14-searchBar"
+    "searchBar": "_824d3e523b2b8c14-searchBar",
+    "searchIcon": "_824d3e523b2b8c14-searchIcon",
+    "searchIconContainerHidden": "_824d3e523b2b8c14-searchIconContainerHidden",
+    "searchFloating": "_824d3e523b2b8c14-searchFloating"
   },
   "973994": {
     "streamInfoContainer": "_0f85c573201c2410-streamInfoContainer",
