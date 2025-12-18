@@ -7,8 +7,6 @@ on:
     paths:
       - discordclasses.json
       - base64entries.json
-      - brokendiscordclasses121125.json
-      - base64entriesbroken.json
 
 jobs:
   post-diff:
@@ -22,14 +20,8 @@ jobs:
 
       - name: Set up JSON files
         run: |
-          FILES=(
-            discordclasses.json
-            base64entries.json
-            brokendiscordclasses121125.json
-            base64entriesbroken.json
-          )
-
-          for file in "${FILES[@]}"; do
+          # Save current and previous versions for both files
+          for file in discordclasses.json base64entries.json; do
             git show HEAD:$file > current_$file || echo '{}' > current_$file
             git show HEAD^:$file > previous_$file || echo '{}' > previous_$file
           done
@@ -37,18 +29,16 @@ jobs:
       - name: Install Node dependencies
         run: npm install lodash fast-levenshtein axios @octokit/rest
 
-      - name: Run diff and post for all JSON files
-        run: |
-          FILES=(
-            discordclasses.json
-            base64entries.json
-            brokendiscordclasses121125.json
-            base64entriesbroken.json
-          )
+      - name: Run diff and post for discordclasses.json
+        run: node diff_and_post.js discordclasses.json
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-          for file in "${FILES[@]}"; do
-            node diff_and_post.js "$file"
-          done
+      - name: Run diff and post for base64entries.json
+        run: node diff_and_post.js base64entries.json
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
