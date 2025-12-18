@@ -4405,6 +4405,7 @@
     "settingsTabBar": "dc2e0e7839a6713a-settingsTabBar",
     "settingsTabBarItem": "dc2e0e7839a6713a-settingsTabBarItem",
     "contentPanel": "dc2e0e7839a6713a-contentPanel",
+    "userSettingsContentPanel": "dc2e0e7839a6713a-userSettingsContentPanel baseContentPanel",
     "item": "dc2e0e7839a6713a-item",
     "badge": "dc2e0e7839a6713a-badge",
     "loadingContainer": "dc2e0e7839a6713a-loadingContainer"
@@ -4448,7 +4449,6 @@
   },
   "171532": {
     "card": "abfd909f61de9fdf-card",
-    "cardContainer": "abfd909f61de9fdf-cardContainer",
     "cardMedium": "abfd909f61de9fdf-cardMedium",
     "cardSmall": "abfd909f61de9fdf-cardSmall",
     "cardImageContainer": "abfd909f61de9fdf-cardImageContainer",
@@ -4456,6 +4456,7 @@
     "cardDark": "abfd909f61de9fdf-cardDark abfd909f61de9fdf-card",
     "cardHighlighted": "abfd909f61de9fdf-cardHighlighted",
     "cardDarkHighlighted": "abfd909f61de9fdf-cardDarkHighlighted",
+    "cardNotLoaded": "abfd909f61de9fdf-cardNotLoaded",
     "cardAnimation": "abfd909f61de9fdf-cardAnimation",
     "cardBackgroundImage": "abfd909f61de9fdf-cardBackgroundImage",
     "cardImage": "abfd909f61de9fdf-cardImage",
@@ -4475,8 +4476,7 @@
     "cardButtonContainerHovered": "abfd909f61de9fdf-cardButtonContainerHovered",
     "pulse": "abfd909f61de9fdf-pulse",
     "placeholderCard": "abfd909f61de9fdf-placeholderCard",
-    "placeholderDescription": "abfd909f61de9fdf-placeholderDescription",
-    "placeholderTitle": "abfd909f61de9fdf-placeholderTitle"
+    "placeholderText": "abfd909f61de9fdf-placeholderText"
   },
   "171573": {
     "sectionDescription": "_8d74205817b61e29-sectionDescription",
@@ -5137,26 +5137,6 @@
     "themed": "_9293f6b2fc12398a-themed",
     "themedMobile": "_9293f6b2fc12398a-themedMobile",
     "titleClickable": "_9293f6b2fc12398a-titleClickable"
-  },
-  "195349": {
-    "settingCard": "_1a4ef2934d882343-settingCard",
-    "active": "_1a4ef2934d882343-active",
-    "shield": "_1a4ef2934d882343-shield _41f68f5eee7f9abd-desaturateUserColors",
-    "cardIcon": "_1a4ef2934d882343-cardIcon",
-    "cardFolder": "_1a4ef2934d882343-cardFolder",
-    "adminWarning": "_1a4ef2934d882343-adminWarning",
-    "folderHeader": "_1a4ef2934d882343-folderHeader",
-    "folderTitle": "_1a4ef2934d882343-folderTitle",
-    "sectionTitle": "_1a4ef2934d882343-sectionTitle",
-    "roleMemberList": "_1a4ef2934d882343-roleMemberList",
-    "divider": "_1a4ef2934d882343-divider",
-    "memberRow": "_1a4ef2934d882343-memberRow",
-    "rowHeight": "_1a4ef2934d882343-rowHeight",
-    "rowLabel": "_1a4ef2934d882343-rowLabel",
-    "rowBotTag": "_1a4ef2934d882343-rowBotTag",
-    "rowLabelSubText": "_1a4ef2934d882343-rowLabelSubText",
-    "removeIcon": "_1a4ef2934d882343-removeIcon",
-    "disabledRemoveIcon": "_1a4ef2934d882343-disabledRemoveIcon"
   },
   "195581": {
     "container": "_581dd2288501a0d4-container"
@@ -6751,7 +6731,8 @@
     "contextMenu": "_39ec2e3dfb4fd2f2-contextMenu"
   },
   "252153": {
-    "infoBox": "_75df3147325650db-infoBox"
+    "infoBox": "_75df3147325650db-infoBox",
+    "learnMoreText": "_75df3147325650db-learnMoreText"
   },
   "252154": {
     "body": "c01f07dcc8e4e745-body",
@@ -7136,6 +7117,26 @@
   "267238": {
     "profilePreviewTitle": "_14af962dc18af767-profilePreviewTitle",
     "nameplatePreviewPlaceholder": "_14af962dc18af767-nameplatePreviewPlaceholder"
+  },
+  "267263": {
+    "settingCard": "_1a4ef2934d882343-settingCard",
+    "active": "_1a4ef2934d882343-active",
+    "shield": "_1a4ef2934d882343-shield _41f68f5eee7f9abd-desaturateUserColors",
+    "cardIcon": "_1a4ef2934d882343-cardIcon",
+    "cardFolder": "_1a4ef2934d882343-cardFolder",
+    "adminWarning": "_1a4ef2934d882343-adminWarning",
+    "folderHeader": "_1a4ef2934d882343-folderHeader",
+    "folderTitle": "_1a4ef2934d882343-folderTitle",
+    "sectionTitle": "_1a4ef2934d882343-sectionTitle",
+    "roleMemberList": "_1a4ef2934d882343-roleMemberList",
+    "divider": "_1a4ef2934d882343-divider",
+    "memberRow": "_1a4ef2934d882343-memberRow",
+    "rowHeight": "_1a4ef2934d882343-rowHeight",
+    "rowLabel": "_1a4ef2934d882343-rowLabel",
+    "rowBotTag": "_1a4ef2934d882343-rowBotTag",
+    "rowLabelSubText": "_1a4ef2934d882343-rowLabelSubText",
+    "removeIcon": "_1a4ef2934d882343-removeIcon",
+    "disabledRemoveIcon": "_1a4ef2934d882343-disabledRemoveIcon"
   },
   "267431": {
     "premiumChannelIcon": "_15e7f26a0e7e8cbc-premiumChannelIcon"
@@ -7649,14 +7650,6 @@
     "header": "_20c9227d08ac9eca-header",
     "thumbnailStackContainer": "_20c9227d08ac9eca-thumbnailStackContainer",
     "buttonsContainer": "_20c9227d08ac9eca-buttonsContainer"
-  },
-  "288336": {
-    "value": "f494f45ebe148b34-value",
-    "icon": "f494f45ebe148b34-icon",
-    "label": "f494f45ebe148b34-label",
-    "option": "f494f45ebe148b34-option",
-    "optionLabelContainer": "f494f45ebe148b34-optionLabelContainer",
-    "sublabel": "f494f45ebe148b34-sublabel"
   },
   "289033": {
     "container": "_2637a2609f343032-container",
@@ -8293,11 +8286,8 @@
     "titleCenter": "_22234b2370d4de10-titleCenter _22234b2370d4de10-title",
     "titleLeft": "_22234b2370d4de10-titleLeft _22234b2370d4de10-title",
     "body": "_22234b2370d4de10-body",
-    "buttonSkipCenterAlign": "_22234b2370d4de10-buttonSkipCenterAlign",
-    "buttonSkipLeftAlign": "_22234b2370d4de10-buttonSkipLeftAlign",
     "bodyCenter": "_22234b2370d4de10-bodyCenter _22234b2370d4de10-body",
     "bodyLeft": "_22234b2370d4de10-bodyLeft _22234b2370d4de10-body",
-    "buttonContainer": "_22234b2370d4de10-buttonContainer",
     "popoutRoot": "_22234b2370d4de10-popoutRoot",
     "arrowAlignmentMiddle": "_22234b2370d4de10-arrowAlignmentMiddle",
     "arrowAlignmentTop": "_22234b2370d4de10-arrowAlignmentTop",
@@ -9073,6 +9063,10 @@
     "container": "_60fa3b8f3ca9845f-container",
     "isHidden": "_60fa3b8f3ca9845f-isHidden",
     "withAccentColor": "_60fa3b8f3ca9845f-withAccentColor"
+  },
+  "339531": {
+    "dynamicGraphicContainer": "_47887c0f64dc003b-dynamicGraphicContainer",
+    "dynamicGraphicForegroundImage": "_47887c0f64dc003b-dynamicGraphicForegroundImage"
   },
   "340206": {
     "container": "ae9703bae4894004-container",
@@ -17012,7 +17006,6 @@
     "resizeHandle": "e2f668d9fc610569-resizeHandle",
     "resizePill": "e2f668d9fc610569-resizePill",
     "upsell": "e2f668d9fc610569-upsell",
-    "subscribeButton": "e2f668d9fc610569-subscribeButton",
     "upsellCountdownContainer": "e2f668d9fc610569-upsellCountdownContainer",
     "upsellContainer": "e2f668d9fc610569-upsellContainer"
   },
@@ -17817,7 +17810,6 @@
     "icon": "_6c75d92c128c46b0-icon",
     "credentialList": "_6c75d92c128c46b0-credentialList",
     "credentialItem": "_6c75d92c128c46b0-credentialItem",
-    "credentialOptions": "_6c75d92c128c46b0-credentialOptions",
     "footer": "_6c75d92c128c46b0-footer"
   },
   "689926": {
@@ -22729,13 +22721,12 @@
     "poweredBy": "c7a70f215fc3be44-poweredBy"
   },
   "879149": {
-    "upsellButton": "_0b69f200eb3bf411-upsellButton",
     "upsellContainer": "_0b69f200eb3bf411-upsellContainer",
-    "upsellContainerShadow": "_0b69f200eb3bf411-upsellContainerShadow",
+    "upsellRedesignEnabled": "_0b69f200eb3bf411-upsellRedesignEnabled",
+    "expressiveGradientBg": "_0b69f200eb3bf411-expressiveGradientBg",
     "upsellContainerFloating": "_0b69f200eb3bf411-upsellContainerFloating",
     "upsellContainerInline": "_0b69f200eb3bf411-upsellContainerInline",
-    "upsellText": "_0b69f200eb3bf411-upsellText",
-    "lockIcon": "_0b69f200eb3bf411-lockIcon"
+    "upsellText": "_0b69f200eb3bf411-upsellText"
   },
   "879626": {
     "previewContainer": "_9a2440711fa58802-previewContainer",
@@ -24462,13 +24453,6 @@
     "promotedBadge": "_8c0340445cac64f9-promotedBadge",
     "promotedBadgeIcon": "_8c0340445cac64f9-promotedBadgeIcon",
     "partnerBranding": "_8c0340445cac64f9-partnerBranding"
-  },
-  "952624": {
-    "emailVerificationModal": "a2241ad72fa50431-emailVerificationModal",
-    "animationContainer": "a2241ad72fa50431-animationContainer",
-    "title": "a2241ad72fa50431-title",
-    "body": "a2241ad72fa50431-body",
-    "container": "a2241ad72fa50431-container"
   },
   "952632": {
     "container": "_56b499323a8eda0b-container",
