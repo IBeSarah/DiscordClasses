@@ -1733,6 +1733,11 @@
     "RFC1738": "RFC1738",
     "RFC3986": "RFC3986"
   },
+  "72743": {
+    "participant": "_0e7ccf2be75971d0-participant",
+    "hovering": "_0e7ccf2be75971d0-hovering",
+    "avatar": "_0e7ccf2be75971d0-avatar"
+  },
   "72775": {
     "channelTextArea": "_740174f3d6a2c8fe-channelTextArea",
     "highlighted": "_740174f3d6a2c8fe-highlighted",
@@ -2271,6 +2276,7 @@
   "94720": {
     "wrapper": "cb9592ad77576717-wrapper",
     "normal": "cb9592ad77576717-normal",
+    "haven": "cb9592ad77576717-haven",
     "minimum": "cb9592ad77576717-minimum",
     "video": "cb9592ad77576717-video",
     "fullScreen": "cb9592ad77576717-fullScreen",
@@ -6651,6 +6657,12 @@
     "orderedList": "_1ad33b657a4b113a-orderedList",
     "unorderedList": "_1ad33b657a4b113a-unorderedList"
   },
+  "246447": {
+    "wrapper": "_49d3a4be7924861a-wrapper",
+    "vingette": "_49d3a4be7924861a-vingette",
+    "character": "_49d3a4be7924861a-character",
+    "flip": "_49d3a4be7924861a-flip"
+  },
   "246470": {
     "qrLogin": "e16417fd9812ee39-qrLogin",
     "qrLoginInner": "e16417fd9812ee39-qrLoginInner",
@@ -7046,6 +7058,20 @@
     "footer": "_0eeeeda0f47c3f1e-footer",
     "footerContent": "_0eeeeda0f47c3f1e-footerContent",
     "lockIcon": "_0eeeeda0f47c3f1e-lockIcon"
+  },
+  "263731": {
+    "row": "_5adc3c5373eedda6-row",
+    "havenWrapper": "_5adc3c5373eedda6-havenWrapper",
+    "haven": "_5adc3c5373eedda6-haven",
+    "overlay": "_5adc3c5373eedda6-overlay",
+    "out": "_5adc3c5373eedda6-out",
+    "welcome": "_5adc3c5373eedda6-welcome",
+    "environment": "_5adc3c5373eedda6-environment",
+    "background": "_5adc3c5373eedda6-background",
+    "video": "_5adc3c5373eedda6-video",
+    "noInteract": "_5adc3c5373eedda6-noInteract",
+    "bottomActions": "_5adc3c5373eedda6-bottomActions",
+    "hidden": "_5adc3c5373eedda6-hidden"
   },
   "263753": {
     "keyRecorder": "_90f76fe726e5dadd-keyRecorder"
@@ -15683,6 +15709,9 @@
     "backgroundImageFilter": "_06f116858aaf7661-backgroundImageFilter",
     "loader": "_06f116858aaf7661-loader"
   },
+  "604878": {
+    "star": "a54554d1f718e56e-star"
+  },
   "605716": {
     "detailsList": "_85e60ebb0bd06fb0-detailsList",
     "nestedDetailsList": "_85e60ebb0bd06fb0-nestedDetailsList",
@@ -15789,6 +15818,7 @@
     "animated": "_94748c73ac5ff785-animated",
     "normal": "_94748c73ac5ff785-normal",
     "minimum": "_94748c73ac5ff785-minimum",
+    "haven": "_94748c73ac5ff785-haven",
     "noChat": "_94748c73ac5ff785-noChat",
     "fullScreen": "_94748c73ac5ff785-fullScreen",
     "video": "_94748c73ac5ff785-video",
@@ -17199,6 +17229,15 @@
     "nameContainer": "_8e75f9d969241b38-nameContainer",
     "unlocked": "_8e75f9d969241b38-unlocked"
   },
+  "663537": {
+    "seat": "_68e91bfe440e16fa-seat",
+    "claimed": "_68e91bfe440e16fa-claimed",
+    "seatWrapper": "_68e91bfe440e16fa-seatWrapper",
+    "image": "_68e91bfe440e16fa-image",
+    "shadow": "_68e91bfe440e16fa-shadow",
+    "nux": "_68e91bfe440e16fa-nux",
+    "noAnimation": "_68e91bfe440e16fa-noAnimation"
+  },
   "663595": {
     "overlayBackgroundNux": "_3db180a915f095ca-overlayBackgroundNux",
     "mainContainer": "_3db180a915f095ca-mainContainer",
@@ -17590,6 +17629,10 @@
     "bansSearchContainer": "_4b8d892e5bcb9bd7-bansSearchContainer",
     "searchButton": "_4b8d892e5bcb9bd7-searchButton",
     "paginationInput": "_4b8d892e5bcb9bd7-paginationInput"
+  },
+  "678668": {
+    "clouds": "_51c0191a08f8908d-clouds",
+    "cloud": "_51c0191a08f8908d-cloud"
   },
   "678878": {
     "pill": "_4f4b612c94fca7f0-pill",
@@ -19281,6 +19324,24 @@
     "closeButtonContainer": "_96095bc7cda36b6c-closeButtonContainer",
     "closeButtonIcon": "_96095bc7cda36b6c-closeButtonIcon",
     "closeButton": "_96095bc7cda36b6c-closeButton"
+  },
+  "743852": {
+    "column": "_535e0e3eb4b332ab-column",
+    "row": "_535e0e3eb4b332ab-row",
+    "gap": "_535e0e3eb4b332ab-gap",
+    "chatFlow": "_535e0e3eb4b332ab-chatFlow",
+    "hidden": "_535e0e3eb4b332ab-hidden",
+    "chat": "_535e0e3eb4b332ab-chat",
+    "history": "_535e0e3eb4b332ab-history",
+    "idle": "_535e0e3eb4b332ab-idle",
+    "message": "_535e0e3eb4b332ab-message",
+    "noAnimate": "_535e0e3eb4b332ab-noAnimate",
+    "messageIn": "_535e0e3eb4b332ab-messageIn",
+    "out": "_535e0e3eb4b332ab-out",
+    "content": "_535e0e3eb4b332ab-content",
+    "attachment": "_535e0e3eb4b332ab-attachment",
+    "outerInput": "_535e0e3eb4b332ab-outerInput",
+    "input": "_535e0e3eb4b332ab-input"
   },
   "744099": {
     "upsellHeader": "d9161fe9b78d5bb9-upsellHeader",
@@ -23478,6 +23539,21 @@
     "customGiftContent": "_231eb2f893fd8406-customGiftContent",
     "customGiftHeader": "_231eb2f893fd8406-customGiftHeader",
     "categoryList": "_231eb2f893fd8406-categoryList"
+  },
+  "908134": {
+    "block": "_8dcfb9355b860ed3-block",
+    "clickable": "_8dcfb9355b860ed3-clickable",
+    "header": "_8dcfb9355b860ed3-header",
+    "controlPopout": "_8dcfb9355b860ed3-controlPopout",
+    "hidden": "_8dcfb9355b860ed3-hidden",
+    "songBlock": "_8dcfb9355b860ed3-songBlock",
+    "selected": "_8dcfb9355b860ed3-selected",
+    "visualizer": "_8dcfb9355b860ed3-visualizer",
+    "playing": "_8dcfb9355b860ed3-playing",
+    "dot": "_8dcfb9355b860ed3-dot",
+    "bounce": "_8dcfb9355b860ed3-bounce",
+    "paused": "_8dcfb9355b860ed3-paused",
+    "muted": "_8dcfb9355b860ed3-muted"
   },
   "908771": {
     "table": "e7d73e5106887df1-table",
