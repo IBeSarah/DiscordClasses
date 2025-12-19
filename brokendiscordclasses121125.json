@@ -2402,7 +2402,8 @@
     "category": "a1e0e01524490cf9-category",
     "categoryIcon": "a1e0e01524490cf9-categoryIcon a1e0e01524490cf9-category",
     "selected": "a1e0e01524490cf9-selected",
-    "categoryIconIcon": "a1e0e01524490cf9-categoryIconIcon"
+    "categoryIconIcon": "a1e0e01524490cf9-categoryIconIcon",
+    "defaultsShortcut": "a1e0e01524490cf9-defaultsShortcut"
   },
   "98420": {
     "scroller": "_28fdc02c1d2fcad1-scroller",
@@ -12692,16 +12693,12 @@
     "popoutOpen": "_37e49614b9f110a9-popoutOpen",
     "hasColorGlow": "_37e49614b9f110a9-hasColorGlow",
     "buttonChevronIcon": "_37e49614b9f110a9-buttonChevronIcon",
-    "voiceFilterWarning": "_37e49614b9f110a9-voiceFilterWarning",
     "buttons": "_37e49614b9f110a9-buttons",
-    "tooltipWithSubtext": "_37e49614b9f110a9-tooltipWithSubtext",
     "containerListenAlongVisible": "_37e49614b9f110a9-containerListenAlongVisible",
     "containerQuestBarVisible": "_37e49614b9f110a9-containerQuestBarVisible",
     "containerRtcOpened": "_37e49614b9f110a9-containerRtcOpened",
     "iconForeground": "_37e49614b9f110a9-iconForeground",
-    "plated": "_37e49614b9f110a9-plated",
-    "accountButtonsTooltip": "_37e49614b9f110a9-accountButtonsTooltip",
-    "accountButtonsTooltipContent": "_37e49614b9f110a9-accountButtonsTooltipContent"
+    "plated": "_37e49614b9f110a9-plated"
   },
   "484698": {
     "playButton": "_0cb5674cd6f6750c-playButton",
@@ -13997,7 +13994,6 @@
   "536780": {
     "container": "_0d7935199308d4a9-container",
     "textContainer": "_0d7935199308d4a9-textContainer",
-    "reconnectButton": "_0d7935199308d4a9-reconnectButton",
     "headerText": "_0d7935199308d4a9-headerText",
     "newBadge": "_0d7935199308d4a9-newBadge"
   },
@@ -17391,7 +17387,12 @@
     "cardPreview": "_6d1908c48c1f2850-cardPreview",
     "cardPreviewNoScale": "_6d1908c48c1f2850-cardPreviewNoScale",
     "bundlePreview": "_6d1908c48c1f2850-bundlePreview",
-    "moreOverlay": "_6d1908c48c1f2850-moreOverlay"
+    "moreOverlay": "_6d1908c48c1f2850-moreOverlay",
+    "wrapperContainer": "_6d1908c48c1f2850-wrapperContainer",
+    "contextContainer": "_6d1908c48c1f2850-contextContainer",
+    "contextIcon": "_6d1908c48c1f2850-contextIcon",
+    "fireIcon": "_6d1908c48c1f2850-fireIcon",
+    "heartIcon": "_6d1908c48c1f2850-heartIcon"
   },
   "669790": {
     "externalProductWrapper": "_320c63b08edf1cb5-externalProductWrapper",
@@ -18068,6 +18069,16 @@
   "702301": {
     "peopleListItem": "cc61794aab086a2e-peopleListItem",
     "active": "cc61794aab086a2e-active"
+  },
+  "702631": {
+    "grid": "_78100b425f72eb35-grid",
+    "loadingContainer": "_78100b425f72eb35-loadingContainer",
+    "tooltipContent": "_78100b425f72eb35-tooltipContent",
+    "card": "_78100b425f72eb35-card",
+    "highlightOverlay": "_78100b425f72eb35-highlightOverlay",
+    "plusIconContainer": "_78100b425f72eb35-plusIconContainer",
+    "cardBackgroundImage": "_78100b425f72eb35-cardBackgroundImage",
+    "cardImage": "_78100b425f72eb35-cardImage"
   },
   "703098": {
     "select": "a16aea1526925c2c-select",
@@ -20289,12 +20300,13 @@
   },
   "784569": {
     "button": "_67645e1530f1195d-button",
-    "orangeGlow": "_67645e1530f1195d-orangeGlow",
     "redGlow": "_67645e1530f1195d-redGlow",
     "enabled": "_67645e1530f1195d-enabled",
     "disabled": "_67645e1530f1195d-disabled",
     "plated": "_67645e1530f1195d-plated",
-    "plateMuted": "_67645e1530f1195d-plateMuted"
+    "plateMuted": "_67645e1530f1195d-plateMuted",
+    "greenTooltip": "_67645e1530f1195d-greenTooltip",
+    "greenTooltipContent": "_67645e1530f1195d-greenTooltipContent"
   },
   "784592": {
     "expressionPickerButton": "_7b84894a962b7eda-expressionPickerButton",
@@ -25832,6 +25844,11 @@
     "video": "c6ad882b26d6c159-video",
     "backgroundVideo": "c6ad882b26d6c159-backgroundVideo",
     "highlightVideo": "c6ad882b26d6c159-highlightVideo"
+  },
+  "993874": {
+    "upsellContainer": "e75cd33c1dc15e1e-upsellContainer",
+    "contentContainer": "e75cd33c1dc15e1e-contentContainer",
+    "buttonContainer": "e75cd33c1dc15e1e-buttonContainer"
   },
   "994238": {
     "desktopTooltip": "_7b5657fed2f9a537-desktopTooltip",
