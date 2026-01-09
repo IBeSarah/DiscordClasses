@@ -4558,9 +4558,6 @@
     "hangStatusIcon": "c9d15c8a962de3c8-hangStatusIcon"
   },
   "176260": {
-    "popout": "cba5926a3ea0ad97-popout",
-    "popoutContent": "cba5926a3ea0ad97-popoutContent",
-    "footer": "cba5926a3ea0ad97-footer",
     "searchBar": "cba5926a3ea0ad97-searchBar",
     "customizationContainer": "cba5926a3ea0ad97-customizationContainer",
     "iconSelector": "cba5926a3ea0ad97-iconSelector",
@@ -10083,10 +10080,12 @@
     "animatedText": "c1b3dc805953693d-animatedText"
   },
   "383749": {
-    "modal": "be5f0438771ae94c-modal",
     "content": "be5f0438771ae94c-content",
     "closeButton": "be5f0438771ae94c-closeButton",
     "artwork": "be5f0438771ae94c-artwork",
+    "titleContainer": "be5f0438771ae94c-titleContainer",
+    "title": "be5f0438771ae94c-title",
+    "subtitle": "be5f0438771ae94c-subtitle",
     "features": "be5f0438771ae94c-features",
     "feature": "be5f0438771ae94c-feature",
     "featureCopy": "be5f0438771ae94c-featureCopy",
@@ -11702,7 +11701,6 @@
     "heroImagePlaceholder": "_0ea1a3c81197a370-heroImagePlaceholder",
     "heroImageContainer": "_0ea1a3c81197a370-heroImageContainer",
     "grid": "_0ea1a3c81197a370-grid",
-    "socialProof": "_0ea1a3c81197a370-socialProof",
     "stillSyncing": "_0ea1a3c81197a370-stillSyncing",
     "footer": "_0ea1a3c81197a370-footer",
     "cta": "_0ea1a3c81197a370-cta"
@@ -12511,6 +12509,7 @@
     "marginBottom8": "fd297e0eff2da25e-marginBottom8",
     "marginTop20": "fd297e0eff2da25e-marginTop20",
     "marginBottom20": "fd297e0eff2da25e-marginBottom20",
+    "marginBottom24": "fd297e0eff2da25e-marginBottom24",
     "marginTop40": "fd297e0eff2da25e-marginTop40",
     "marginBottom40": "fd297e0eff2da25e-marginBottom40",
     "marginTop60": "fd297e0eff2da25e-marginTop60",
@@ -14002,6 +14001,7 @@
     "durationSelect": "d97f896195d9f57f-durationSelect"
   },
   "544165": {
+    "contentContainer": "_0ffb84f5c7e3b216-contentContainer",
     "wumpusContainer": "_0ffb84f5c7e3b216-wumpusContainer",
     "header": "_0ffb84f5c7e3b216-header",
     "textContainer": "_0ffb84f5c7e3b216-textContainer",
@@ -16904,6 +16904,7 @@
     "avatar": "_44b0c28be7879b7b-avatar",
     "avatarBorder": "_44b0c28be7879b7b-avatarBorder",
     "pointerEvents": "_44b0c28be7879b7b-pointerEvents",
+    "avatarDecorationContainer": "_44b0c28be7879b7b-avatarDecorationContainer",
     "avatarDecoration": "_44b0c28be7879b7b-avatarDecoration",
     "cutoutIcon": "_44b0c28be7879b7b-cutoutIcon",
     "largeEmoji": "_44b0c28be7879b7b-largeEmoji"
@@ -18766,7 +18767,6 @@
     "guildIcon": "fa285ee86b386220-guildIcon",
     "inviteResolvingGuildName": "fa285ee86b386220-inviteResolvingGuildName",
     "title": "fa285ee86b386220-title",
-    "activityCount": "fa285ee86b386220-activityCount",
     "directInviteSubTitle": "fa285ee86b386220-directInviteSubTitle",
     "guildContainer": "fa285ee86b386220-guildContainer",
     "appIn": "fa285ee86b386220-appIn",
@@ -19441,9 +19441,6 @@
   "753078": {
     "firstChildSpacingFix": "c9a59bd107b06cab-firstChildSpacingFix",
     "tabItem": "c9a59bd107b06cab-tabItem"
-  },
-  "753308": {
-    "icon": "e599633bf6c09eb3-icon"
   },
   "753720": {
     "hidden": "b54fe3a5fdb496f6-hidden"
@@ -21285,7 +21282,6 @@
     "avatar": "bbd19242e12654ad-avatar",
     "nickname": "bbd19242e12654ad-nickname",
     "friend": "bbd19242e12654ad-friend",
-    "twoRows": "bbd19242e12654ad-twoRows",
     "match": "bbd19242e12654ad-match",
     "discordTag": "bbd19242e12654ad-discordTag",
     "friendSelected": "bbd19242e12654ad-friendSelected"
@@ -24285,10 +24281,10 @@
     "container": "_9dfff3600436b3c3-container",
     "content": "_9dfff3600436b3c3-content",
     "applicationIcon": "_9dfff3600436b3c3-applicationIcon",
-    "rankImage": "_9dfff3600436b3c3-rankImage",
+    "previewIcon": "_9dfff3600436b3c3-previewIcon",
     "textContent": "_9dfff3600436b3c3-textContent",
-    "featuredCharacterImageContainer": "_9dfff3600436b3c3-featuredCharacterImageContainer",
-    "featuredCharacterImage": "_9dfff3600436b3c3-featuredCharacterImage"
+    "previewImageContainer": "_9dfff3600436b3c3-previewImageContainer",
+    "previewImage": "_9dfff3600436b3c3-previewImage"
   },
   "949285": {
     "container": "_333b3ea32cf2e64d-container",
