@@ -3177,7 +3177,6 @@
     "keybindMessage": "_740f25428e5fa983-keybindMessage",
     "item": "_740f25428e5fa983-item",
     "switch": "_740f25428e5fa983-switch",
-    "removeKeybindFloating": "_740f25428e5fa983-removeKeybindFloating",
     "removeKeybind": "_740f25428e5fa983-removeKeybind",
     "keybindGroup": "_740f25428e5fa983-keybindGroup",
     "keybindGroupContent": "_740f25428e5fa983-keybindGroupContent",
@@ -9975,7 +9974,6 @@
   },
   "380735": {
     "authedAppV2": "_50a5493e9d9cc496-authedAppV2",
-    "authedAppV2UserSettingsRedesign": "_50a5493e9d9cc496-authedAppV2UserSettingsRedesign",
     "headerV2": "_50a5493e9d9cc496-headerV2",
     "headerText": "_50a5493e9d9cc496-headerText",
     "headerTextContainerV2": "_50a5493e9d9cc496-headerTextContainerV2",
@@ -10616,7 +10614,8 @@
     "asset": "_7137c5e977587553-asset",
     "bannerContent": "_7137c5e977587553-bannerContent",
     "bannerDescription": "_7137c5e977587553-bannerDescription",
-    "buttonContainer": "_7137c5e977587553-buttonContainer"
+    "buttonContainer": "_7137c5e977587553-buttonContainer",
+    "termsApplyAnchor": "_7137c5e977587553-termsApplyAnchor"
   },
   "407518": {
     "mutuals": "_530ce51b6bf15868-mutuals",
@@ -11962,7 +11961,6 @@
     "accountAddInner": "c7f964e7e0fc8b47-accountAddInner",
     "connectionList": "c7f964e7e0fc8b47-connectionList",
     "connection": "c7f964e7e0fc8b47-connection",
-    "connectionUserSettingsRedesign": "c7f964e7e0fc8b47-connectionUserSettingsRedesign",
     "connectionHeader": "c7f964e7e0fc8b47-connectionHeader",
     "connectionAccountValue": "c7f964e7e0fc8b47-connectionAccountValue",
     "connectionAccountLabelContainer": "c7f964e7e0fc8b47-connectionAccountLabelContainer",
@@ -12840,8 +12838,6 @@
     "avatarPlaceholder": "_1df30b1a583f2fa3-avatarPlaceholder _1df30b1a583f2fa3-circular"
   },
   "494865": {
-    "serverBoostTabItem": "cbe0b48ace22cf15-serverBoostTabItem",
-    "icon": "cbe0b48ace22cf15-icon",
     "landingPageTabLink": "cbe0b48ace22cf15-landingPageTabLink",
     "roleSubLabel": "cbe0b48ace22cf15-roleSubLabel",
     "redDot": "cbe0b48ace22cf15-redDot"
@@ -17725,15 +17721,6 @@
     "scrolling": "_99f8cc7ad4790ce9-scrolling",
     "content": "_99f8cc7ad4790ce9-content"
   },
-  "690714": {
-    "heading": "_176c72b6f550dacc-heading",
-    "tier": "_176c72b6f550dacc-tier",
-    "perk": "_176c72b6f550dacc-perk",
-    "tier0Container": "_176c72b6f550dacc-tier0Container",
-    "tier0Card": "_176c72b6f550dacc-tier0Card",
-    "tier0Heading": "_176c72b6f550dacc-tier0Heading",
-    "tier0Button": "_176c72b6f550dacc-tier0Button"
-  },
   "690716": {
     "buttonSparkleStar1": "fc17233d555f9b19-buttonSparkleStar1",
     "buttonSparkleStar2": "fc17233d555f9b19-buttonSparkleStar2",
@@ -20332,15 +20319,12 @@
     "bar": "c44edb7a6ac077d8-bar",
     "background": "c44edb7a6ac077d8-background c44edb7a6ac077d8-bar",
     "foreground": "c44edb7a6ac077d8-foreground c44edb7a6ac077d8-bar",
-    "foregroundTooltipPosition": "c44edb7a6ac077d8-foregroundTooltipPosition",
     "tier": "c44edb7a6ac077d8-tier",
     "tierInProgress": "c44edb7a6ac077d8-tierInProgress c44edb7a6ac077d8-tier",
     "tierAccomplished": "c44edb7a6ac077d8-tierAccomplished c44edb7a6ac077d8-tier",
     "tierCurrent": "c44edb7a6ac077d8-tierCurrent c44edb7a6ac077d8-tier",
     "tierFirst": "c44edb7a6ac077d8-tierFirst c44edb7a6ac077d8-tier",
-    "currentTierIcon": "c44edb7a6ac077d8-currentTierIcon",
-    "foregroundTooltip": "c44edb7a6ac077d8-foregroundTooltip",
-    "tooltipMuted": "c44edb7a6ac077d8-tooltipMuted"
+    "currentTierIcon": "c44edb7a6ac077d8-currentTierIcon"
   },
   "788652": {
     "container": "d8f25bf4f76423e6-container",
@@ -22407,11 +22391,6 @@
   "873776": {
     "rootPopout": "b5970a992552fe37-rootPopout"
   },
-  "874176": {
-    "titleBlurb": "a5b35cb42b99d4de-titleBlurb",
-    "guildBoostingGracePeriodTitle": "a5b35cb42b99d4de-guildBoostingGracePeriodTitle",
-    "divider": "a5b35cb42b99d4de-divider"
-  },
   "874238": {
     "segmentedControlsContainer": "_9c01943db9d3d4b1-segmentedControlsContainer",
     "presetSeparator": "_9c01943db9d3d4b1-presetSeparator",
@@ -23058,11 +23037,6 @@
     "premiumBrandRefreshTier0Card": "_9e160b6a5c93de99-premiumBrandRefreshTier0Card",
     "narrowLayout": "_9e160b6a5c93de99-narrowLayout"
   },
-  "897065": {
-    "wrapper": "_53812fe32a3530aa-wrapper",
-    "heading": "_53812fe32a3530aa-heading",
-    "originalPrice": "_53812fe32a3530aa-originalPrice"
-  },
   "897192": {
     "profileCustomizationTab": "_994649ede0ea4c23-profileCustomizationTab",
     "textContainer": "_994649ede0ea4c23-textContainer",
@@ -23191,6 +23165,24 @@
     "container": "_5d1be9f36cbf55cf-container",
     "content": "_5d1be9f36cbf55cf-content",
     "tabBar": "_5d1be9f36cbf55cf-tabBar"
+  },
+  "902189": {
+    "wrapper": "_0a9d08ded4aaefea-wrapper",
+    "heading": "_0a9d08ded4aaefea-heading",
+    "tableWrapper": "_0a9d08ded4aaefea-tableWrapper",
+    "table": "_0a9d08ded4aaefea-table",
+    "row": "_0a9d08ded4aaefea-row",
+    "lastRow": "_0a9d08ded4aaefea-lastRow",
+    "headerRow": "_0a9d08ded4aaefea-headerRow",
+    "cell": "_0a9d08ded4aaefea-cell",
+    "perkCell": "_0a9d08ded4aaefea-perkCell",
+    "tierCell": "_0a9d08ded4aaefea-tierCell",
+    "checkIcon": "_0a9d08ded4aaefea-checkIcon",
+    "xIcon": "_0a9d08ded4aaefea-xIcon",
+    "recommendedTierHighlight": "_0a9d08ded4aaefea-recommendedTierHighlight",
+    "recommendedTierHighlightTier2": "_0a9d08ded4aaefea-recommendedTierHighlightTier2",
+    "recommendedTierHighlightTier3": "_0a9d08ded4aaefea-recommendedTierHighlightTier3",
+    "recommendedTierHighlightTag": "_0a9d08ded4aaefea-recommendedTierHighlightTag"
   },
   "902210": {
     "suggestedGames": "dbb3495cb2b616c2-suggestedGames"
@@ -23398,7 +23390,6 @@
     "emojiDisabled": "e7d73e5106887df1-emojiDisabled",
     "uploader": "e7d73e5106887df1-uploader",
     "fileInput": "e7d73e5106887df1-fileInput",
-    "emojiUploadUploadRequirementsList": "e7d73e5106887df1-emojiUploadUploadRequirementsList",
     "emojiSettings": "e7d73e5106887df1-emojiSettings",
     "emojiUploadContainer": "e7d73e5106887df1-emojiUploadContainer"
   },
@@ -23734,10 +23725,9 @@
     "heading": "_008433eb23445478-heading",
     "middleBodyContentWrapper": "_008433eb23445478-middleBodyContentWrapper _008433eb23445478-content",
     "lowerBody": "_008433eb23445478-lowerBody",
-    "lowerBodyBackgroundImage": "_008433eb23445478-lowerBodyBackgroundImage",
     "lowerBodyContentWrapper": "_008433eb23445478-lowerBodyContentWrapper _008433eb23445478-content",
     "persistentCtaSpacer": "_008433eb23445478-persistentCtaSpacer",
-    "tierComparisonTable": "_008433eb23445478-tierComparisonTable"
+    "perksTable": "_008433eb23445478-perksTable"
   },
   "925002": {
     "container": "_0f2e83213c878a13-container",
