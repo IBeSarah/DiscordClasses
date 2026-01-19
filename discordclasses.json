@@ -3706,6 +3706,12 @@
     "badgeGradientWrapper": "_89307899cb638aba-badgeGradientWrapper",
     "badgeImage": "_89307899cb638aba-badgeImage"
   },
+  "143867": {
+    "header": "b963df4b95a4e5ce-header",
+    "lineItemsContainer": "b963df4b95a4e5ce-lineItemsContainer",
+    "lineItem": "b963df4b95a4e5ce-lineItem",
+    "lineItemLabel": "b963df4b95a4e5ce-lineItemLabel"
+  },
   "144327": {
     "dotIn": "_64e6155a0667273d-dotIn",
     "fillIn": "_64e6155a0667273d-fillIn",
@@ -5488,7 +5494,7 @@
     "play": "_4577670752bdbe9c-play",
     "playPauseAnimation": "_4577670752bdbe9c-playPauseAnimation",
     "transcriptBodySpinner": "_4577670752bdbe9c-transcriptBodySpinner",
-    "pauseText": "_4577670752bdbe9c-pauseText",
+    "videoStatusMessage": "_4577670752bdbe9c-videoStatusMessage",
     "closeModalBtnWrapper": "_4577670752bdbe9c-closeModalBtnWrapper",
     "floatingShareButtonContainer": "_4577670752bdbe9c-floatingShareButtonContainer",
     "dotSpacer": "_4577670752bdbe9c-dotSpacer",
@@ -5940,6 +5946,9 @@
   },
   "223850": {
     "newMemberBadge": "f80704ca4ba27cf7-newMemberBadge"
+  },
+  "224319": {
+    "separator": "b776a7d050fd812f-separator"
   },
   "224438": {
     "container": "ddf599b22c154d9c-container",
@@ -6565,6 +6574,15 @@
     "collapseable": "_4546e2b07bad4954-collapseable",
     "header": "_4546e2b07bad4954-header",
     "arrow": "_4546e2b07bad4954-arrow"
+  },
+  "243850": {
+    "cardGroup": "_02e5035a3c510411-cardGroup",
+    "card": "_02e5035a3c510411-card",
+    "selectionIndicator": "_02e5035a3c510411-selectionIndicator",
+    "title": "_02e5035a3c510411-title",
+    "text": "_02e5035a3c510411-text",
+    "strikethrough": "_02e5035a3c510411-strikethrough",
+    "selectionIcon": "_02e5035a3c510411-selectionIcon"
   },
   "243902": {
     "scrollerBase": "d125d22cdfd32cfe-scrollerBase",
@@ -8293,6 +8311,9 @@
     "message": "b026d9374238d708-message",
     "secondaryButton": "b026d9374238d708-secondaryButton"
   },
+  "307940": {
+    "text": "eaab0b563fde0afe-text"
+  },
   "308779": {
     "content": "_22234b2370d4de10-content",
     "contentNoMedia": "_22234b2370d4de10-contentNoMedia _22234b2370d4de10-content",
@@ -8618,7 +8639,6 @@
     "unread": "_2ea32c412048f708-unread",
     "withGuildIcon": "_2ea32c412048f708-withGuildIcon",
     "modeUnreadImportant": "_2ea32c412048f708-modeUnreadImportant",
-    "modeMuted": "_2ea32c412048f708-modeMuted",
     "modeSelected": "_2ea32c412048f708-modeSelected",
     "modeLocked": "_2ea32c412048f708-modeLocked",
     "iconContainer": "_2ea32c412048f708-iconContainer",
@@ -8629,6 +8649,7 @@
     "linkBottom": "_2ea32c412048f708-linkBottom",
     "subtitle": "_2ea32c412048f708-subtitle",
     "children": "_2ea32c412048f708-children",
+    "modeMuted": "_2ea32c412048f708-modeMuted",
     "iconWithGuildIcon": "_2ea32c412048f708-iconWithGuildIcon",
     "modeConnected": "_2ea32c412048f708-modeConnected",
     "notInteractive": "_2ea32c412048f708-notInteractive",
@@ -9221,10 +9242,6 @@
     "container": "_0a560e193f2f334e-container",
     "buttons": "_0a560e193f2f334e-buttons",
     "iconInput": "_0a560e193f2f334e-iconInput"
-  },
-  "348955": {
-    "modal": "_487be5057417e7c4-modal",
-    "content": "_487be5057417e7c4-content"
   },
   "348962": {
     "actionBarIcon": "a7e304492e5ccc04-actionBarIcon"
@@ -9842,10 +9859,6 @@
   },
   "375460": {
     "divider": "ad82d8ee077e9029-divider",
-    "header": "ad82d8ee077e9029-header",
-    "totalSavings": "ad82d8ee077e9029-totalSavings",
-    "lineItemsContainer": "ad82d8ee077e9029-lineItemsContainer",
-    "lineItem": "ad82d8ee077e9029-lineItem",
     "totalDue": "ad82d8ee077e9029-totalDue"
   },
   "375862": {
@@ -11771,7 +11784,7 @@
     "inviteRow": "_67dba15a1ae9a3e9-inviteRow",
     "inviteRowAvatar": "_67dba15a1ae9a3e9-inviteRowAvatar",
     "inviteRowInfo": "_67dba15a1ae9a3e9-inviteRowInfo",
-    "inviteRowName": "_67dba15a1ae9a3e9-inviteRowName",
+    "inviteRowLabels": "_67dba15a1ae9a3e9-inviteRowLabels",
     "inviteRowEmptyState": "_67dba15a1ae9a3e9-inviteRowEmptyState",
     "warningContainer": "_67dba15a1ae9a3e9-warningContainer",
     "warningIcon": "_67dba15a1ae9a3e9-warningIcon",
@@ -14529,8 +14542,6 @@
   "558741": {
     "content": "_75e8ee170883da62-content",
     "innerContent": "_75e8ee170883da62-innerContent",
-    "innerGlow": "_75e8ee170883da62-innerGlow",
-    "outerGlow": "_75e8ee170883da62-outerGlow",
     "subContent": "_75e8ee170883da62-subContent",
     "avatars": "_75e8ee170883da62-avatars",
     "recipientUserAvatar": "_75e8ee170883da62-recipientUserAvatar",
@@ -14538,10 +14549,7 @@
     "textContainer": "_75e8ee170883da62-textContainer",
     "subHeaderContainer": "_75e8ee170883da62-subHeaderContainer",
     "subHeaderText": "_75e8ee170883da62-subHeaderText",
-    "buttonContainer": "_75e8ee170883da62-buttonContainer",
-    "connector": "_75e8ee170883da62-connector",
-    "rightPopoutConnector": "_75e8ee170883da62-rightPopoutConnector",
-    "leftPopoutConnector": "_75e8ee170883da62-leftPopoutConnector"
+    "buttonContainer": "_75e8ee170883da62-buttonContainer"
   },
   "558780": {
     "wrapper": "_8e08ce7f1f1b7f5a-wrapper",
@@ -15881,12 +15889,10 @@
     "disabled": "_622804cc784b0571-disabled",
     "identity": "_622804cc784b0571-identity",
     "labels": "_622804cc784b0571-labels",
-    "label": "_622804cc784b0571-label",
     "threadSubLabel": "_622804cc784b0571-threadSubLabel",
     "subLabelIcon": "_622804cc784b0571-subLabelIcon",
     "subLabelSeparator": "_622804cc784b0571-subLabelSeparator",
     "iconWrapper": "_622804cc784b0571-iconWrapper",
-    "subLabel": "_622804cc784b0571-subLabel",
     "checkbox": "_622804cc784b0571-checkbox",
     "noResults": "_622804cc784b0571-noResults",
     "messageInput": "_622804cc784b0571-messageInput",
@@ -16343,7 +16349,10 @@
     "iconContainer": "_83ef9b19c678150d-iconContainer",
     "coachtipContent": "_83ef9b19c678150d-coachtipContent",
     "nitroTabCoachtipContainer": "_83ef9b19c678150d-nitroTabCoachtipContainer",
-    "icon": "_83ef9b19c678150d-icon"
+    "icon": "_83ef9b19c678150d-icon",
+    "premiumTabTooltipContainer": "_83ef9b19c678150d-premiumTabTooltipContainer",
+    "premiumTabTooltipImage": "_83ef9b19c678150d-premiumTabTooltipImage",
+    "premiumTabTooltipContent": "_83ef9b19c678150d-premiumTabTooltipContent"
   },
   "631100": {
     "trialRecipientContainer": "_2441a9f87347380f-trialRecipientContainer",
@@ -20148,9 +20157,6 @@
     "layoutUnlocked": "eb35c57d03dec760-layoutUnlocked eb35c57d03dec760-layoutLocked",
     "windowContainerDebug": "eb35c57d03dec760-windowContainerDebug"
   },
-  "784890": {
-    "empty": "_1fd9f9c9c352e99c-empty"
-  },
   "784912": {
     "header": "_15d0e45315f98be4-header",
     "headerInner": "_15d0e45315f98be4-headerInner",
@@ -21812,7 +21818,6 @@
     "tileChild": "_2f4f7eb58b61c328-tileChild",
     "border": "_2f4f7eb58b61c328-border",
     "voiceChannelEffect": "_2f4f7eb58b61c328-voiceChannelEffect",
-    "speaking": "_2f4f7eb58b61c328-speaking",
     "latchedNotSpeaking": "_2f4f7eb58b61c328-latchedNotSpeaking",
     "noBorder": "_2f4f7eb58b61c328-noBorder",
     "overlayContainer": "_2f4f7eb58b61c328-overlayContainer",
@@ -24519,7 +24524,7 @@
     "shopMarketingTooltipText": "_4ed1af9a212b8f4f-shopMarketingTooltipText",
     "avatarContainer": "_4ed1af9a212b8f4f-avatarContainer",
     "avatar": "_4ed1af9a212b8f4f-avatar",
-    "newBadge": "_4ed1af9a212b8f4f-newBadge _4ed1af9a212b8f4f-eyebrow",
+    "newBadge": "_4ed1af9a212b8f4f-newBadge",
     "marketingButtonBackgroundNew": "_4ed1af9a212b8f4f-marketingButtonBackgroundNew",
     "marketingButtonBackgroundImage": "_4ed1af9a212b8f4f-marketingButtonBackgroundImage",
     "marketingButtonBackgroundImageFaded": "_4ed1af9a212b8f4f-marketingButtonBackgroundImageFaded"
@@ -24530,7 +24535,6 @@
     "icon": "b2d72f296411131a-icon",
     "foreground": "b2d72f296411131a-foreground",
     "avatar": "b2d72f296411131a-avatar",
-    "avatarSize": "b2d72f296411131a-avatarSize",
     "emptyUser": "b2d72f296411131a-emptyUser",
     "avatarMasked": "b2d72f296411131a-avatarMasked b2d72f296411131a-avatar",
     "moreUsers": "b2d72f296411131a-moreUsers"
