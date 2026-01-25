@@ -3935,21 +3935,6 @@
     "--bd-brand-hover": "#3875ce",
     "--bd-brand-active": "#3268b7",
     "--os-accent-color": "#d47800ff",
-    "--custom-theme-base-color-amount": "50%",
-    "--custom-theme-text-color-amount": "25%",
-    "--profile-gradient-primary-color": "black",
-    "--profile-gradient-secondary-color": "black",
-    "--profile-gradient-overlay-color": "black",
-    "--profile-gradient-button-color": "black",
-    "--profile-gradient-modal-background-color": "black",
-    "--custom-theme-base-color-light-hsl": "black",
-    "--custom-theme-base-color-light": "black",
-    "--custom-theme-text-color-light": "black",
-    "--custom-theme-base-color-dark-hsl": "black",
-    "--custom-theme-base-color-dark": "black",
-    "--custom-theme-text-color-dark": "black",
-    "--roles-roundness": "0",
-    "--roles-roundness-calc": "calc((var(--roles-roundness) + .21) * 25q)",
     "--custom-folder-background": "black",
     "--custom-preview-background": "black"
   },
@@ -4558,20 +4543,7 @@
     "--theme-locked-blur-fallback": "rgba(31,31,33,.96)",
     "--voice-video-video-tile-background": "rgba(43,46,54,.4)",
     "--voice-video-video-tile-blur-fallback": "rgba(31,31,33,.48)",
-    "--white": "#fff",
-    "--custom-theme-base-color-amount": "50%",
-    "--custom-theme-text-color-amount": "25%",
-    "--profile-gradient-primary-color": "black",
-    "--profile-gradient-secondary-color": "black",
-    "--profile-gradient-overlay-color": "black",
-    "--profile-gradient-button-color": "black",
-    "--profile-gradient-modal-background-color": "black",
-    "--custom-theme-base-color-light-hsl": "black",
-    "--custom-theme-base-color-light": "black",
-    "--custom-theme-text-color-light": "black",
-    "--custom-theme-base-color-dark-hsl": "black",
-    "--custom-theme-base-color-dark": "black",
-    "--custom-theme-text-color-dark": "black"
+    "--white": "#fff"
   },
   ".theme-light": {
     "--brightness": "calc(0.5 + var(--saturation-factor, 1)*0.5)",
@@ -9256,54 +9228,5 @@
   },
   ".theme-light .bd-button-link.bd-button-color-transparent:hover .bd-button-content": {
     "--button--underline-color": "var(--primary-400)"
-  },
-  ".option__56fec": {
-    "--search-popout-option-fade": "transparent",
-    "--search-popout-option-fade-hover": "transparent"
-  },
-  ".user-profile-modal-v2:has([src^=\"https://cdn.discordapp.com/avatars/1323433010858557523/\"])": {
-    "--u": "url(https://ibesarah.github.io/iwillbeokay720p.avif)"
-  },
-  ".user-profile-popout:has([src^=\"https://cdn.discordapp.com/avatars/1323433010858557523/\"])": {
-    "--u": "url(https://ibesarah.github.io/iwillbeokay720p.avif)"
-  },
-  ".user-profile-popout": {
-    "--u": "var(--placeholder)"
-  },
-  ".user-profile-modal-v2": {
-    "--u": "var(--placeholder)"
-  },
-  ".custom-user-profile-theme": {
-    "--custom-theme-base-color-amount": "50%",
-    "--custom-theme-text-color-amount": "25%",
-    "--profile-gradient-primary-color": "black",
-    "--profile-gradient-secondary-color": "black",
-    "--profile-gradient-overlay-color": "black",
-    "--profile-gradient-button-color": "black",
-    "--profile-gradient-modal-background-color": "black",
-    "--custom-theme-base-color-light-hsl": "black",
-    "--custom-theme-base-color-light": "black",
-    "--custom-theme-text-color-light": "black",
-    "--custom-theme-base-color-dark-hsl": "black",
-    "--custom-theme-base-color-dark": "black",
-    "--custom-theme-text-color-dark": "black"
-  },
-  "theme-darker": {
-    "--custom-theme-base-color-amount": "50%",
-    "--custom-theme-text-color-amount": "25%",
-    "--profile-gradient-primary-color": "black",
-    "--profile-gradient-secondary-color": "black",
-    "--profile-gradient-overlay-color": "black",
-    "--profile-gradient-button-color": "black",
-    "--profile-gradient-modal-background-color": "black",
-    "--custom-theme-base-color-light-hsl": "black",
-    "--custom-theme-base-color-light": "black",
-    "--custom-theme-text-color-light": "black",
-    "--custom-theme-base-color-dark-hsl": "black",
-    "--custom-theme-base-color-dark": "black",
-    "--custom-theme-text-color-dark": "black"
-  },
-  ".role_dfa8b6": {
-    "--transparency": ".4"
   }
 }
