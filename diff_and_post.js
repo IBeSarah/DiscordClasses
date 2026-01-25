@@ -140,31 +140,35 @@ function summarizeModules(added, removed, renamed, moved) {
 
 const { summaries, remainingChanges } = summarizeModules(addedModules, removedModules, renamedModules, movedModules);
 
-// Ensure GitHub comment posts if any keys exist (for CSS variables)
-const hasKeys = Object.keys(curr).length > 0;
-if (!hasKeys && summaries.length === 0) {
-  console.log('No module changes detected. Skipping Discord and GitHub post.');
-  process.exit(0);
+// Determine if there are any changes
+const totalChanges = 
+  Object.keys(addedModules).length +
+  Object.keys(removedModules).length +
+  Object.keys(renamedModules).length +
+  Object.keys(movedModules).length;
+
+// Only post Discord if there are real changes
+if (totalChanges > 0 || (isCssVariables && Object.keys(curr).length > 0)) {
+  const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
+  let discordMessage = isBase64 ? `**Base64 Module changes summary**\n` : `**Module changes summary**\n`;
+  discordMessage += summaries.join('\n');
+  if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
+  discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
+
+  // Discord length limit
+  if (discordMessage.length > 2000) {
+    discordMessage = discordMessage.slice(0, 1990) + '...';
+  }
+
+  axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
+    .then(() => console.log('Discord post successful'))
+    .catch(err => console.error('Discord post failed:', err.message));
+} else {
+  console.log('No changes detected. Skipping Discord post.');
 }
-
-// Discord summary
-const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-let discordMessage = isBase64 ? `**Base64 Module changes summary**\n` : `**Module changes summary**\n`;
-discordMessage += summaries.join('\n');
-if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
-discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
-
-// Discord length limit
-if (discordMessage.length > 2000) {
-  discordMessage = discordMessage.slice(0, 1990) + '...';
-}
-
-axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
-  .then(() => console.log('Discord post successful'))
-  .catch(err => console.error('Discord post failed:', err.message));
 
 // GitHub comment
-if (githubOutput || isCssVariables) {
+if (githubOutput || (isCssVariables && Object.keys(curr).length > 0)) {
   const githubChunks = splitText(githubOutput || `CSS Variables Module: ${Object.keys(curr).length} selectors`, MAX_COMMENT_LENGTH);
   (async () => {
     for (let i = 0; i < githubChunks.length; i++) {
