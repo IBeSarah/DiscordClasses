@@ -7,8 +7,7 @@ on:
     paths:
       - discordclasses.json
       - base64entries.json
-      - brokendiscordclasses121125.json
-      - base64entriesbroken.json
+      - css-variables.json
 
 jobs:
   post-diff:
@@ -25,8 +24,7 @@ jobs:
           FILES=(
             discordclasses.json
             base64entries.json
-            brokendiscordclasses121125.json
-            base64entriesbroken.json
+            css-variables.json
           )
 
           for file in "${FILES[@]}"; do
@@ -42,8 +40,7 @@ jobs:
           FILES=(
             discordclasses.json
             base64entries.json
-            brokendiscordclasses121125.json
-            base64entriesbroken.json
+            css-variables.json
           )
 
           for file in "${FILES[@]}"; do
