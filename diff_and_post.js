@@ -3,16 +3,20 @@ const _ = require('lodash');
 const axios = require('axios');
 const levenshtein = require('fast-levenshtein');
 const { Octokit } = require('@octokit/rest');
+
 const jsonFile = process.argv[2]; 
 const isBase64 = jsonFile.includes('base64');
+
 const prev = JSON.parse(fs.readFileSync(`previous_${jsonFile}`, 'utf8'));
 const curr = JSON.parse(fs.readFileSync(`current_${jsonFile}`, 'utf8'));
+
 const addedModules = {};
 const removedModules = {};
 const renamedModules = {};
 const movedModules = {};
 const usedCurr = new Set();
 
+// Detect moved modules based on key similarity
 for (const oldId of Object.keys(prev)) {
   if (curr[oldId]) continue;
   let bestMatch = null;
@@ -44,6 +48,7 @@ for (const oldId of Object.keys(prev)) {
   }
 }
 
+// Detect added, removed, renamed keys
 for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
   const oldMod = prev[key] || {};
   const newMod = curr[key] || {};
@@ -58,13 +63,13 @@ for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
     removedModules[key].push(k);
   }
 
-  for (const k of Object.keys(newMod)) if (oldMod[k] && oldMod[k] !== newMod[k]) {
+  for (const k of Object.keys(newMod)) if (oldMod.hasOwnProperty(k) && oldMod[k] !== newMod[k]) {
     renamedModules[key] = renamedModules[key] || [];
     renamedModules[key].push(k);
   }
 }
 
-
+// Format diff blocks
 function formatDiffBlock(title, moduleId, keys, type, toModuleId=null) {
   if (!keys || keys.length === 0) return '';
   const lines = keys.map(k => {
@@ -79,6 +84,7 @@ function formatDiffBlock(title, moduleId, keys, type, toModuleId=null) {
   return `### ${title} in module ${moduleId}${toModuleId ? ` -> ${toModuleId}` : ''}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
 }
 
+// Generate full GitHub comment
 let githubOutput = '';
 for (const [mod, keys] of Object.entries(addedModules)) githubOutput += formatDiffBlock('Added', mod, keys, 'added');
 for (const [mod, keys] of Object.entries(removedModules)) githubOutput += formatDiffBlock('Removed', mod, keys, 'removed');
@@ -98,6 +104,7 @@ function splitText(text, maxLength) {
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
+// Summarize module changes for Discord
 function summarizeModules(added, removed, renamed, moved) {
   const modules = new Set([...Object.keys(added), ...Object.keys(removed), ...Object.keys(renamed), ...Object.keys(moved)]);
   const summaries = [];
@@ -116,7 +123,7 @@ function summarizeModules(added, removed, renamed, moved) {
       if (removed[mod]?.length) parts.push(`Removed: ${removed[mod].length}`);
       if (renamed[mod]?.length) parts.push(`Renamed: ${renamed[mod].length}`);
       if (moved[mod]?.keys?.length) parts.push(`Moved: ${moved[mod].keys.length}`);
-      summaries.push(`Module ${mod}: ${parts.join(', ')}`);
+      if (parts.length) summaries.push(`Module ${mod}: ${parts.join(', ')}`);
     }
     count++;
   }
@@ -138,6 +145,7 @@ discordMessage += summaries.join('\n');
 if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
 discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
 
+// Discord limit
 if (discordMessage.length > 2000) {
   discordMessage = discordMessage.slice(0, 1990) + '...';
 }
@@ -146,6 +154,7 @@ axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
   .then(() => console.log('Discord post successful'))
   .catch(err => console.error('Discord post failed:', err.message));
 
+// GitHub comment
 if (githubOutput) {
   const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
   (async () => {
