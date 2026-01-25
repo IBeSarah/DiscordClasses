@@ -9,7 +9,7 @@ const isBase64 = jsonFile.includes('base64');
 const isCssVariables = jsonFile === 'css-variables.json';
 
 const prev = JSON.parse(fs.readFileSync(`previous_${jsonFile}`, 'utf8'));
-const curr = JSON.parse(fs.readFileSync(`current_${jsonFile}`, 'utf8`));
+const curr = JSON.parse(fs.readFileSync(`current_${jsonFile}`, 'utf8'));
 
 const addedModules = {};
 const removedModules = {};
