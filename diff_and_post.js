@@ -6,9 +6,10 @@ const { Octokit } = require('@octokit/rest');
 
 const jsonFile = process.argv[2]; 
 const isBase64 = jsonFile.includes('base64');
+const isCssVariables = jsonFile === 'css-variables.json';
 
 const prev = JSON.parse(fs.readFileSync(`previous_${jsonFile}`, 'utf8'));
-const curr = JSON.parse(fs.readFileSync(`current_${jsonFile}`, 'utf8'));
+const curr = JSON.parse(fs.readFileSync(`current_${jsonFile}`, 'utf8`));
 
 const addedModules = {};
 const removedModules = {};
@@ -69,7 +70,7 @@ for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
   }
 }
 
-// Format diff blocks
+// Format diff blocks for GitHub comment
 function formatDiffBlock(title, moduleId, keys, type, toModuleId=null) {
   if (!keys || keys.length === 0) return '';
   const lines = keys.map(k => {
@@ -84,7 +85,6 @@ function formatDiffBlock(title, moduleId, keys, type, toModuleId=null) {
   return `### ${title} in module ${moduleId}${toModuleId ? ` -> ${toModuleId}` : ''}\n\`\`\`diff\n${lines}\n\`\`\`\n`;
 }
 
-// Generate full GitHub comment
 let githubOutput = '';
 for (const [mod, keys] of Object.entries(addedModules)) githubOutput += formatDiffBlock('Added', mod, keys, 'added');
 for (const [mod, keys] of Object.entries(removedModules)) githubOutput += formatDiffBlock('Removed', mod, keys, 'removed');
@@ -110,22 +110,28 @@ function summarizeModules(added, removed, renamed, moved) {
   const summaries = [];
   let count = 0;
 
-  for (const mod of modules) {
-    if (count >= 5) break;
-    let parts = [];
-    if (isBase64) {
-      const a = added[mod]?.length || 0;
-      const r = removed[mod]?.length || 0;
-      const rn = renamed[mod]?.length || 0;
-      summaries.push(`Base64 Module ${mod}: ${a} added, ${r} removed, ${rn} renamed`);
-    } else {
-      if (added[mod]?.length) parts.push(`Added: ${added[mod].length}`);
-      if (removed[mod]?.length) parts.push(`Removed: ${removed[mod].length}`);
-      if (renamed[mod]?.length) parts.push(`Renamed: ${renamed[mod].length}`);
-      if (moved[mod]?.keys?.length) parts.push(`Moved: ${moved[mod].keys.length}`);
-      if (parts.length) summaries.push(`Module ${mod}: ${parts.join(', ')}`);
+  if (isCssVariables) {
+    const totalSelectors = Object.keys(curr).length;
+    const totalVariables = Object.values(curr).reduce((a, v) => a + Object.keys(v).length, 0);
+    if (totalSelectors > 0) summaries.push(`CSS Variables Module: ${totalSelectors} selectors, ${totalVariables} variables`);
+  } else {
+    for (const mod of modules) {
+      if (count >= 5) break;
+      let parts = [];
+      if (isBase64) {
+        const a = added[mod]?.length || 0;
+        const r = removed[mod]?.length || 0;
+        const rn = renamed[mod]?.length || 0;
+        summaries.push(`Base64 Module ${mod}: ${a} added, ${r} removed, ${rn} renamed`);
+      } else {
+        if (added[mod]?.length) parts.push(`Added: ${added[mod].length}`);
+        if (removed[mod]?.length) parts.push(`Removed: ${removed[mod].length}`);
+        if (renamed[mod]?.length) parts.push(`Renamed: ${renamed[mod].length}`);
+        if (moved[mod]?.keys?.length) parts.push(`Moved: ${moved[mod].keys.length}`);
+        if (parts.length) summaries.push(`Module ${mod}: ${parts.join(', ')}`);
+      }
+      count++;
     }
-    count++;
   }
 
   const remainingChanges = Math.max(modules.size - 5, 0);
@@ -134,18 +140,21 @@ function summarizeModules(added, removed, renamed, moved) {
 
 const { summaries, remainingChanges } = summarizeModules(addedModules, removedModules, renamedModules, movedModules);
 
-if (summaries.length === 0) {
+// Ensure GitHub comment posts if any keys exist (for CSS variables)
+const hasKeys = Object.keys(curr).length > 0;
+if (!hasKeys && summaries.length === 0) {
   console.log('No module changes detected. Skipping Discord and GitHub post.');
   process.exit(0);
 }
 
+// Discord summary
 const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
 let discordMessage = isBase64 ? `**Base64 Module changes summary**\n` : `**Module changes summary**\n`;
 discordMessage += summaries.join('\n');
 if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
 discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
 
-// Discord limit
+// Discord length limit
 if (discordMessage.length > 2000) {
   discordMessage = discordMessage.slice(0, 1990) + '...';
 }
@@ -155,8 +164,8 @@ axios.post(process.env.DISCORD_WEBHOOK_URL, { content: discordMessage })
   .catch(err => console.error('Discord post failed:', err.message));
 
 // GitHub comment
-if (githubOutput) {
-  const githubChunks = splitText(githubOutput, MAX_COMMENT_LENGTH);
+if (githubOutput || isCssVariables) {
+  const githubChunks = splitText(githubOutput || `CSS Variables Module: ${Object.keys(curr).length} selectors`, MAX_COMMENT_LENGTH);
   (async () => {
     for (let i = 0; i < githubChunks.length; i++) {
       const body = githubChunks.length > 1 ? `**Part ${i+1} of ${githubChunks.length}**\n\n${githubChunks[i]}` : githubChunks[i];
