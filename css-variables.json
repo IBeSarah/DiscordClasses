@@ -5299,6 +5299,9 @@
     "--custom-pop-stroke-width": "calc(1.2px + 0.04em)",
     "--custom-pop-bottom-translate_3d": "0.08em"
   },
+  ".container__0f2e8": {
+    "--custom-content-card-padding": "8px"
+  },
   ".root": {
     "--__spoiler-background-color--hidden": "var(--spoiler-hidden-background)",
     "--__spoiler-background-color--hidden--hover": "var(--spoiler-hidden-background-hover)",
@@ -5474,6 +5477,15 @@
   },
   ".cardsList__9d597:hover .backgroundCardContainer__9d597": {
     "--custom-transition-height-delay": "0ms"
+  },
+  ".card__39ec2": {
+    "--custom-activity-card-padding": "8px"
+  },
+  ".user-profile-sidebar .card__39ec2": {
+    "--custom-activity-card-padding": "12px"
+  },
+  ".user-profile-modal-v2 .card__39ec2": {
+    "--custom-activity-card-padding": "12px"
   },
   ".container__63ed3": {
     "--custom-nickname-line-height": "24px",
@@ -9026,10 +9038,10 @@
   ".refresh-fast-follow-avatars .panels__5e434": {
     "--custom-panels-spacing": "min(var(--space-xs),var(--space-8))"
   },
-  ".heroImageBlurredA__42d45": {
+  ".heroAssetBlurredA__42d45": {
     "--custom-image-blur-amount": "10px"
   },
-  ".heroImageBlurredB__42d45": {
+  ".heroAssetBlurredB__42d45": {
     "--custom-image-blur-amount": "5px"
   },
   ".messageInput__62280": {
