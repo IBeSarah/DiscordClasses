@@ -54,20 +54,59 @@ for (const key of new Set([...Object.keys(prev), ...Object.keys(curr)])) {
   const oldMod = prev[key] || {};
   const newMod = curr[key] || {};
   
-  for (const k of Object.keys(newMod)) if (!oldMod.hasOwnProperty(k)) {
-    addedModules[key] = addedModules[key] || [];
-    addedModules[key].push(k);
+  for (const k of Object.keys(newMod)) {
+    if (!oldMod.hasOwnProperty(k)) {
+      addedModules[key] = addedModules[key] || [];
+      addedModules[key].push(k);
+    }
   }
 
-  for (const k of Object.keys(oldMod)) if (!newMod.hasOwnProperty(k)) {
-    removedModules[key] = removedModules[key] || [];
-    removedModules[key].push(k);
+  for (const k of Object.keys(oldMod)) {
+    if (!newMod.hasOwnProperty(k)) {
+      removedModules[key] = removedModules[key] || [];
+      removedModules[key].push(k);
+    }
   }
 
-  for (const k of Object.keys(newMod)) if (oldMod.hasOwnProperty(k) && oldMod[k] !== newMod[k]) {
-    renamedModules[key] = renamedModules[key] || [];
-    renamedModules[key].push(k);
+  for (const k of Object.keys(newMod)) {
+    if (oldMod.hasOwnProperty(k) && oldMod[k] !== newMod[k]) {
+      renamedModules[key] = renamedModules[key] || [];
+      renamedModules[key].push(k);
+    }
   }
+}
+
+// CSS variable change summarizer
+function summarizeCssVariableChanges(prev, curr) {
+  let added = 0;
+  let removed = 0;
+  let renamed = 0;
+
+  const selectors = new Set([
+    ...Object.keys(prev),
+    ...Object.keys(curr)
+  ]);
+
+  for (const selector of selectors) {
+    const oldVars = prev[selector] || {};
+    const newVars = curr[selector] || {};
+
+    for (const v of Object.keys(newVars)) {
+      if (!oldVars.hasOwnProperty(v)) added++;
+    }
+
+    for (const v of Object.keys(oldVars)) {
+      if (!newVars.hasOwnProperty(v)) removed++;
+    }
+
+    for (const v of Object.keys(newVars)) {
+      if (oldVars.hasOwnProperty(v) && oldVars[v] !== newVars[v]) {
+        renamed++;
+      }
+    }
+  }
+
+  return { added, removed, renamed };
 }
 
 // Format diff blocks for GitHub comment
@@ -106,56 +145,74 @@ const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
 // Summarize module changes for Discord
 function summarizeModules(added, removed, renamed, moved) {
-  const modules = new Set([...Object.keys(added), ...Object.keys(removed), ...Object.keys(renamed), ...Object.keys(moved)]);
   const summaries = [];
-  let count = 0;
 
   if (isCssVariables) {
-    const totalSelectors = Object.keys(curr).length;
-    const totalVariables = Object.values(curr).reduce((a, v) => a + Object.keys(v).length, 0);
-    if (totalSelectors > 0) summaries.push(`CSS Variables Module: ${totalSelectors} selectors, ${totalVariables} variables`);
-  } else {
-    for (const mod of modules) {
-      if (count >= 5) break;
-      let parts = [];
-      if (isBase64) {
-        const a = added[mod]?.length || 0;
-        const r = removed[mod]?.length || 0;
-        const rn = renamed[mod]?.length || 0;
-        summaries.push(`Base64 Module ${mod}: ${a} added, ${r} removed, ${rn} renamed`);
-      } else {
-        if (added[mod]?.length) parts.push(`Added: ${added[mod].length}`);
-        if (removed[mod]?.length) parts.push(`Removed: ${removed[mod].length}`);
-        if (renamed[mod]?.length) parts.push(`Renamed: ${renamed[mod].length}`);
-        if (moved[mod]?.keys?.length) parts.push(`Moved: ${moved[mod].keys.length}`);
-        if (parts.length) summaries.push(`Module ${mod}: ${parts.join(', ')}`);
-      }
-      count++;
+    const { added, removed, renamed } = summarizeCssVariableChanges(prev, curr);
+    if (added || removed || renamed) {
+      summaries.push(`CSS Variables: ${added} added, ${removed} removed, ${renamed} renamed`);
     }
+    return { summaries, remainingChanges: 0 };
+  }
+
+  const modules = new Set([
+    ...Object.keys(added),
+    ...Object.keys(removed),
+    ...Object.keys(renamed),
+    ...Object.keys(moved)
+  ]);
+
+  let count = 0;
+
+  for (const mod of modules) {
+    if (count >= 5) break;
+
+    if (isBase64) {
+      const a = added[mod]?.length || 0;
+      const r = removed[mod]?.length || 0;
+      const rn = renamed[mod]?.length || 0;
+      summaries.push(`Base64 Module ${mod}: ${a} added, ${r} removed, ${rn} renamed`);
+    } else {
+      const parts = [];
+      if (added[mod]?.length) parts.push(`Added: ${added[mod].length}`);
+      if (removed[mod]?.length) parts.push(`Removed: ${removed[mod].length}`);
+      if (renamed[mod]?.length) parts.push(`Renamed: ${renamed[mod].length}`);
+      if (moved[mod]?.keys?.length) parts.push(`Moved: ${moved[mod].keys.length}`);
+      if (parts.length) summaries.push(`Module ${mod}: ${parts.join(', ')}`);
+    }
+
+    count++;
   }
 
   const remainingChanges = Math.max(modules.size - 5, 0);
   return { summaries, remainingChanges };
 }
 
-const { summaries, remainingChanges } = summarizeModules(addedModules, removedModules, renamedModules, movedModules);
+const { summaries, remainingChanges } = summarizeModules(
+  addedModules,
+  removedModules,
+  renamedModules,
+  movedModules
+);
 
 // Determine if there are any changes
-const totalChanges = 
+const totalChanges =
   Object.keys(addedModules).length +
   Object.keys(removedModules).length +
   Object.keys(renamedModules).length +
   Object.keys(movedModules).length;
 
 // Only post Discord if there are real changes
-if (totalChanges > 0 || (isCssVariables && Object.keys(curr).length > 0)) {
+if (totalChanges > 0 || (isCssVariables && summaries.length > 0)) {
   const commitUrl = `https://github.com/${process.env.GITHUB_REPOSITORY}/commit/${process.env.GITHUB_SHA}`;
-  let discordMessage = isBase64 ? `**Base64 Module changes summary**\n` : `**Module changes summary**\n`;
+  let discordMessage = isBase64
+    ? `**Base64 Module changes summary**\n`
+    : `**Module changes summary**\n`;
+
   discordMessage += summaries.join('\n');
   if (remainingChanges) discordMessage += `\n${remainingChanges} more changes not included`;
   discordMessage += `\nSee full list of changes here: <${commitUrl}>`;
 
-  // Discord length limit
   if (discordMessage.length > 2000) {
     discordMessage = discordMessage.slice(0, 1990) + '...';
   }
@@ -168,16 +225,24 @@ if (totalChanges > 0 || (isCssVariables && Object.keys(curr).length > 0)) {
 }
 
 // GitHub comment
-if (githubOutput || (isCssVariables && Object.keys(curr).length > 0)) {
-  const githubChunks = splitText(githubOutput || `CSS Variables Module: ${Object.keys(curr).length} selectors`, MAX_COMMENT_LENGTH);
+if (githubOutput || (isCssVariables && summaries.length > 0)) {
+  const githubChunks = splitText(
+    githubOutput || 'CSS Variables changes detected',
+    MAX_COMMENT_LENGTH
+  );
+
   (async () => {
     for (let i = 0; i < githubChunks.length; i++) {
-      const body = githubChunks.length > 1 ? `**Part ${i+1} of ${githubChunks.length}**\n\n${githubChunks[i]}` : githubChunks[i];
+      const body =
+        githubChunks.length > 1
+          ? `**Part ${i + 1} of ${githubChunks.length}**\n\n${githubChunks[i]}`
+          : githubChunks[i];
+
       await octokit.rest.repos.createCommitComment({
         owner: process.env.GITHUB_REPOSITORY.split('/')[0],
         repo: process.env.GITHUB_REPOSITORY.split('/')[1],
         commit_sha: process.env.GITHUB_SHA,
-        body,
+        body
       });
     }
   })();
