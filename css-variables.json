@@ -8963,9 +8963,6 @@
   ".inputRow__7116a": {
     "--control-input-height-md": "40px"
   },
-  ".channel__972a0": {
-    "--custom-name-line-height": "20px"
-  },
   ".chatHeaderBar_a53846": {
     "--__header-bar-background": "var(--background-base-lower)"
   },
