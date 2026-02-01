@@ -1338,6 +1338,15 @@
     "g2": "hintSubtleText__350af",
     "gr": "themePrimary__350af"
   },
+  "58812": {
+    "pc": "navItem__4ccc5",
+    "St": "navItemIconBadgeContainer__4ccc5",
+    "vT": "animatedHalfPillContainer__4ccc5",
+    "s": "tivNavItemIconContainer__4ccc5",
+    "lJ": "tivNavItemIconContainerSelected__4ccc5",
+    "Yc": "tivChannelTypeIcon__4ccc5",
+    "R": "hidden__4ccc5"
+  },
   "58855": {
     "C": "newMemberBadge_f80704"
   },
@@ -1667,6 +1676,9 @@
     "wx": "header__3eeee",
     "OA": "guildInfo__3eeee",
     "$f": "guildIcon__3eeee"
+  },
+  "75379": {
+    "R": "avatarWrapper__69074"
   },
   "75717": {
     "kL": "container__8f41e",
@@ -3195,6 +3207,10 @@
     "NZ": "questProgressCopy_ae7810",
     "FZ": "questProgressHint_ae7810"
   },
+  "128727": {
+    "Q": "content__2d9cc",
+    "T": "chat__2d9cc"
+  },
   "128906": {
     "uW": "section_efc71f",
     "R_": "heading_efc71f",
@@ -3497,6 +3513,12 @@
     "kL": "container__44153",
     "DD": "title__44153",
     "h_": "description__44153"
+  },
+  "141223": {
+    "kL": "container__5b1fc",
+    "pz": "sidebar__5b1fc",
+    "mF": "sidebarSeparator__5b1fc",
+    "oM": "chatArea__5b1fc"
   },
   "141482": {
     "H": "clearButtonContainer__6d62c",
@@ -4265,6 +4287,9 @@
   },
   "168221": {
     "F": "fastTravelButton_bbe3de"
+  },
+  "168389": {
+    "$r": "favoriteToggleButton_d84b4e"
   },
   "168785": {
     "Yr": "disabledButtonWrapper__0cb56",
@@ -6902,11 +6927,6 @@
   },
   "269608": {
     "g": "premiumOptionContainer__150bb"
-  },
-  "270430": {
-    "kL": "container__6c8a3",
-    "HI": "activityWrapper__6c8a3",
-    "qS": "statusText__6c8a3"
   },
   "270465": {
     "Dx": "expressionPickerButton__7b848",
@@ -10308,6 +10328,17 @@
   "416000": {
     "I": "applicationIcon__80465"
   },
+  "416001": {
+    "kL": "container__606e9",
+    "p_": "list__606e9",
+    "MT": "searchContainer__606e9",
+    "uW": "section__606e9",
+    "t4": "chevronIcon__606e9",
+    "Ws": "sectionCollapsible__606e9",
+    "bV": "nonGroupSectionHeaderRow__606e9",
+    "LQ": "nonGroupSectionHeaderHideButton__606e9",
+    "y7": "emptyStateContainer__606e9"
+  },
   "416179": {
     "zr": "root_dbec16",
     "G": "infoIcon_dbec16",
@@ -12252,6 +12283,13 @@
     "ur": "nameplatePreviewList_f7b5db",
     "tZ": "nameplatePreviewSampleItem_f7b5db"
   },
+  "488494": {
+    "EU": "reorderableGroupSection__672fc",
+    "Me": "draggingGroupSection__672fc",
+    "hV": "dropTargetGroupSection__672fc",
+    "nH": "dropBeforeGroupSection__672fc",
+    "_M": "dropAfterGroupSection__672fc"
+  },
   "489715": {
     "k": "errorText__38262"
   },
@@ -13273,6 +13311,17 @@
     "Sw": "guildStar__387d4",
     "AI": "sequencedAnimation__387d4"
   },
+  "532165": {
+    "XV": "topBar__31961",
+    "cB": "dragging__31961",
+    "LD": "headerLeft__31961",
+    "G1": "headerTitleRow__31961",
+    "oH": "parentChannelLink__31961",
+    "ln": "parentChannelSeparator__31961",
+    "IE": "headerRight__31961",
+    "DD": "title__31961",
+    "gr": "titleIcon__31961"
+  },
   "532485": {
     "q": "rowContainer__8a920"
   },
@@ -13856,8 +13905,8 @@
     "Hd": "pfxListItemFooter_a35735"
   },
   "553777": {
-    "k": "container__50c27",
-    "p": "list__50c27"
+    "kL": "container__50c27",
+    "Qs": "content__50c27"
   },
   "555064": {
     "kL": "container__5dbf8",
@@ -15641,6 +15690,20 @@
   "624452": {
     "D": "awaitingAuthenticationStep__4ede8"
   },
+  "624510": {
+    "zr": "root_df7f81",
+    "es": "mainGuildImage_df7f81",
+    "TT": "mainIcon_df7f81",
+    "q9": "acronym_df7f81",
+    "_C": "guildIconContainer_df7f81",
+    "H5": "guildIcon40_df7f81",
+    "OI": "guildIcon32_df7f81",
+    "d7": "guildIcon24_df7f81",
+    "J4": "typingMaskWrapper_df7f81",
+    "_S": "typingMaskSvg_df7f81",
+    "RL": "typingIndicator_df7f81",
+    "WQ": "channelTypingStatusFill_df7f81"
+  },
   "625587": {
     "$": "poggermodeIcon_bc2dd4"
   },
@@ -16856,6 +16919,12 @@
     "hj": "breadcrumbWrapper__0f692",
     "jQ": "breadcrumbFinalWrapper__0f692",
     "LJ": "breadcrumbArrow__0f692"
+  },
+  "665524": {
+    "Sl": "messagePreviewLine__1f6cf",
+    "BK": "messageContent__1f6cf",
+    "sl": "messageContentTrailingIcon__1f6cf",
+    "Vz": "colorTextFeedbackPositive__1f6cf"
   },
   "665646": {
     "nd": "panel__1d8b2",
@@ -18689,6 +18758,25 @@
   "742282": {
     "f": "orbIconAligned__18bf6"
   },
+  "742466": {
+    "kL": "container__49ef0",
+    "CK": "profileBanner__49ef0",
+    "vK": "userBannerContainer__49ef0",
+    "iy": "userBanner__49ef0",
+    "cI": "bannerContainer__49ef0",
+    "my": "avatar__49ef0",
+    "ic": "userTextContainer__49ef0",
+    "nU": "secondaryLine__49ef0",
+    "Xh": "username__49ef0",
+    "Wo": "secondaryIcon__49ef0",
+    "Yg": "secondaryText__49ef0",
+    "tR": "customStatusContainer__49ef0",
+    "qp": "customStatusEmoji__49ef0",
+    "p0": "duration__49ef0",
+    "vR": "tabs__49ef0",
+    "Mf": "tab__49ef0",
+    "jP": "tabSelected__49ef0"
+  },
   "742898": {
     "z": "error__6e36d"
   },
@@ -19037,25 +19125,6 @@
     "jD": "hide_ea5470",
     "XD": "caughtUpContent_ea5470",
     "vi": "caughtUpText_ea5470"
-  },
-  "760799": {
-    "kL": "container_e73f2a",
-    "wx": "header_e73f2a",
-    "xv": "controlButtons_e73f2a",
-    "MT": "searchContainer_e73f2a",
-    "p_": "list_e73f2a",
-    "uW": "section_e73f2a",
-    "Ke": "dropping_e73f2a",
-    "cB": "dragging_e73f2a",
-    "t4": "chevronIcon_e73f2a",
-    "Ws": "sectionCollapsible_e73f2a",
-    "nM": "row_e73f2a",
-    "bL": "rowInner_e73f2a",
-    "my": "avatar_e73f2a",
-    "Xh": "username_e73f2a",
-    "cV": "badgesContainer_e73f2a",
-    "S3": "hoverBar_e73f2a",
-    "y7": "emptyStateContainer_e73f2a"
   },
   "761121": {
     "H": "widget_d0f34c"
@@ -19474,6 +19543,27 @@
     "Dq": "victorAnswerText_f69538",
     "To": "victorIcon_f69538"
   },
+  "783346": {
+    "nM": "row__771da",
+    "oT": "leftIndicatorContainer__771da",
+    "p": "channelIcon__771da",
+    "SS": "offlineRow__771da",
+    "bL": "rowInner__771da",
+    "fc": "rowRecentlyAdded__771da",
+    "ox": "friendsWidgetRowRecentlyAdded__771da",
+    "my": "avatar__771da",
+    "Xh": "username__771da",
+    "QV": "usernameContainer__771da",
+    "im": "activityIconContainer__771da",
+    "cm": "rowActions__771da",
+    "cV": "badgesContainer__771da",
+    "fE": "friendVoiceStatus__771da",
+    "_9": "voiceStatusContainer__771da",
+    "Qo": "voiceText__771da",
+    "j1": "friendVoiceStatusGuildContainer__771da",
+    "J5": "guildName__771da",
+    "WT": "voiceStatusIcon__771da"
+  },
   "783821": {
     "J": "canvas__0efdf"
   },
@@ -19884,9 +19974,6 @@
   "798521": {
     "w": "header_d55719",
     "L": "loading_d55719"
-  },
-  "799067": {
-    "Q": "content__16b50"
   },
   "799559": {
     "vk": "clickable_efa868",
@@ -22481,6 +22568,17 @@
   "905208": {
     "P": "iconWrapper_d13236",
     "K": "icon_d13236"
+  },
+  "905777": {
+    "Nz": "expandedUsersContainer_e72588",
+    "gD": "expandedUsersRow_e72588",
+    "X0": "facepileContainer_e72588",
+    "h6": "expandedUserRow_e72588",
+    "m2": "expandedUserName_e72588",
+    "rg": "expandedUserNameContainer_e72588",
+    "YT": "actionsRow_e72588",
+    "ZA": "voiceIcons_e72588",
+    "Ow": "voiceIcon_e72588"
   },
   "906135": {
     "rs": "mainContainer__44492",

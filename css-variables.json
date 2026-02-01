@@ -3928,6 +3928,7 @@
     "--custom-forum-post-form-control-size": "40px",
     "--custom-cursor": "url(https://cdn.discordapp.com/assets/content/527086a44d0ff5f70f330b661759a3764b4dbe872056587509f3c7b896646f77.png) 8 4,auto",
     "--custom-cursor-pointer": "url(https://cdn.discordapp.com/assets/content/8d848077f0b56a958fcec921fb38275c32dd75983550e9353eb1b890bf17dfc3.png) 4 4,pointer",
+    "--custom-bg-surface-overlay": "rgba(33,34,41,.8)",
     "--custom-zindex-emoji-studio-top": "3",
     "--custom-zindex-emoji-studio-middle": "2",
     "--custom-zindex-emoji-studio-bottom": "1",
@@ -8926,6 +8927,9 @@
     "--custom-voice-filter-icon-bg-color-one": "#7fe987",
     "--custom-voice-filter-icon-bg-color-two": "#fdb12d"
   },
+  ".chatHeaderBar_a53846": {
+    "--__header-bar-background": "var(--background-base-lower)"
+  },
   ".thumbnailContainer_faa96b": {
     "--__post-thumbnail-size": "72px"
   },
@@ -8962,9 +8966,6 @@
   },
   ".inputRow__7116a": {
     "--control-input-height-md": "40px"
-  },
-  ".chatHeaderBar_a53846": {
-    "--__header-bar-background": "var(--background-base-lower)"
   },
   ".theme-light.custom-client-theme .title_f75fb0": {
     "--background-gradient-lowest": "var(--background-gradient-chat)"
@@ -9026,9 +9027,6 @@
   ".platform-win.density-compact .backForwardButtons__63abb": {
     "--custom-bf-button-radius": "5px"
   },
-  ".activityWrapper__6c8a3": {
-    "--custom-activity-status-icon-size": "12px"
-  },
   ".clickable_c99c29": {
     "--custom-horizontal-padding": "4px"
   },
@@ -9049,12 +9047,6 @@
   },
   ".messageInput__62280": {
     "--custom-channel-textarea-text-area-height": "38px"
-  },
-  ".extras__58ece": {
-    "--custom-offset": "0"
-  },
-  ".full-motion .extras__58ece": {
-    "--custom-offset": "6px"
   },
   ".container_c8f358": {
     "--custom-activity-popout-header-height": "48px",
@@ -9090,16 +9082,6 @@
   ".pinkCountdown__9d860": {
     "--countdown-color": "#4838a9"
   },
-  ".custom-user-profile-theme .profile__9c3be": {
-    "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",
-    "--profile-gradient-end": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-secondary-color))"
-  },
-  ".voters__01c8c": {
-    "--custom-list-scrollbar-top-padding": "12px"
-  },
-  ".splashBackground__742a4": {
-    "--background-mobile-primary": "var(--primary-700) center /cover no-repeat url(/assets/4d81e06416805e7d.png)"
-  },
   ".widgetContainer__0ea1a": {
     "--custom-container-gap": "var(--space-8)",
     "--custom-text-placeholder-width": "15ch",
@@ -9133,6 +9115,25 @@
   },
   ".custom-user-profile-theme .tabBarItem__37bfc": {
     "--selected-tab-item-color": "var(--text-strong)"
+  },
+  ".custom-user-profile-theme .profile__9c3be": {
+    "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",
+    "--profile-gradient-end": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-secondary-color))"
+  },
+  ".extras__58ece": {
+    "--custom-offset": "0"
+  },
+  ".full-motion .extras__58ece": {
+    "--custom-offset": "6px"
+  },
+  ".tivNavItemIconContainer__4ccc5": {
+    "--custom-interactive-normal": "var(--interactive-normal)"
+  },
+  ".voters__01c8c": {
+    "--custom-list-scrollbar-top-padding": "12px"
+  },
+  ".splashBackground__742a4": {
+    "--background-mobile-primary": "var(--primary-700) center /cover no-repeat url(/assets/4d81e06416805e7d.png)"
   },
   ".nativePickerGuide_afdbcd": {
     "--custom-icon-highlight-stop1": "#5f6be9",
