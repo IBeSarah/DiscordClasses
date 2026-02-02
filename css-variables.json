@@ -9068,20 +9068,6 @@
   ".container_cf0b5e": {
     "--__trimmer-height": "72px"
   },
-  ".container__4d61a": {
-    "--countdown-color": "var(--background-accent)"
-  },
-  ".shop__08415": {
-    "--custom-spacing": "16px",
-    "--custom-gap": "24px"
-  },
-  ".jumbleWrapper__014df": {
-    "--custom-guild-gutter": "72px",
-    "--custom-channel-gutter": "240px"
-  },
-  ".pinkCountdown__9d860": {
-    "--countdown-color": "#4838a9"
-  },
   ".widgetContainer__0ea1a": {
     "--custom-container-gap": "var(--space-8)",
     "--custom-text-placeholder-width": "15ch",
@@ -9115,6 +9101,20 @@
   },
   ".custom-user-profile-theme .tabBarItem__37bfc": {
     "--selected-tab-item-color": "var(--text-strong)"
+  },
+  ".container__4d61a": {
+    "--countdown-color": "var(--background-accent)"
+  },
+  ".shop__08415": {
+    "--custom-spacing": "16px",
+    "--custom-gap": "24px"
+  },
+  ".jumbleWrapper__014df": {
+    "--custom-guild-gutter": "72px",
+    "--custom-channel-gutter": "240px"
+  },
+  ".pinkCountdown__9d860": {
+    "--countdown-color": "#4838a9"
   },
   ".custom-user-profile-theme .profile__9c3be": {
     "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",

@@ -2550,7 +2550,6 @@
   },
   "107550": {
     "BK": "helpText_db0ee9",
-    "q4": "migrationInfoBox_db0ee9",
     "MT": "searchContainer_db0ee9",
     "kA": "rolesTable_db0ee9",
     "qd": "tableHeader_db0ee9",
@@ -5635,6 +5634,7 @@
   },
   "219974": {
     "lO": "productVariantsContainer__2c397",
+    "LV": "wrap__2c397",
     "bP": "productVariant__2c397",
     "U": "productVariantCheckmark__2c397",
     "sz": "expanded__2c397",
@@ -12144,6 +12144,8 @@
     "v7": "headingWithItemTypePill_c50f62",
     "H$": "disabledReason_c50f62",
     "Oj": "variantsContainer_c50f62",
+    "OJ": "nameOnTop_c50f62",
+    "L$": "variantName_c50f62",
     "Ms": "externalProductProfilePreview_c50f62",
     "ij": "wishlistButton_c50f62",
     "fN": "orbIconAligned_c50f62",
@@ -13930,6 +13932,11 @@
     "ML": "scaledSkuPreview__73abe",
     "_P": "avatarDecorationPreview__73abe",
     "ZY": "collectiblesSkuPreview__73abe"
+  },
+  "556918": {
+    "Fx": "itemIcon_d9866f",
+    "Be": "itemIconHeart_d9866f",
+    "rY": "itemIconShop_d9866f"
   },
   "557724": {
     "K": "icon__80514"
@@ -20159,6 +20166,11 @@
     "_": "voiceChannelEffectEmojiContainer__66db8",
     "F": "voiceChannelEffectEmoji__66db8"
   },
+  "804810": {
+    "Nr": "card_d87184",
+    "Eo": "bundleSkuPreview_d87184",
+    "qF": "nameplate_d87184"
+  },
   "805176": {
     "p": "locatorEntry__19739",
     "_": "entryAuthor__19739"
@@ -24732,6 +24744,9 @@
     "uf": "verticallyCenterAlign_c3d3d9",
     "LP": "accessory_c3d3d9",
     "HQ": "restrictWidth_c3d3d9"
+  },
+  "996150": {
+    "V": "multiLineTitleHack__53030"
   },
   "996316": {
     "kL": "container__16eb0",
