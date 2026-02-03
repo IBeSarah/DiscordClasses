@@ -3226,7 +3226,8 @@
     "Ui": "cardContainer_efc71f",
     "qO": "centerAlignSection_efc71f",
     "W0": "showAllPerksButton_efc71f",
-    "xk": "showAllPerksButtonCenter_efc71f"
+    "xk": "showAllPerksButtonCenter_efc71f",
+    "qr": "footer_efc71f"
   },
   "129115": {
     "h": "description_c524f4",
@@ -6872,7 +6873,20 @@
     "columns3": "columns3__1b670",
     "columns4": "columns4__1b670",
     "columns5": "columns5__1b670",
-    "columns6": "columns6__1b670"
+    "columns6": "columns6__1b670",
+    "gridItem": "gridItem__1b670",
+    "gridItemColumns1": "gridItemColumns1__1b670",
+    "gridItemColumns2": "gridItemColumns2__1b670",
+    "gridItemColumns3": "gridItemColumns3__1b670",
+    "gridItemColumns4": "gridItemColumns4__1b670",
+    "gridItemColumns5": "gridItemColumns5__1b670",
+    "gridItemColumns6": "gridItemColumns6__1b670",
+    "gridItemRows1": "gridItemRows1__1b670",
+    "gridItemRows2": "gridItemRows2__1b670",
+    "gridItemRows3": "gridItemRows3__1b670",
+    "gridItemRows4": "gridItemRows4__1b670",
+    "gridItemRows5": "gridItemRows5__1b670",
+    "gridItemRows6": "gridItemRows6__1b670"
   },
   "266371": {
     "k": "container_c368fe"
