@@ -3566,6 +3566,12 @@
     "Kk": "icon_a629d4",
     "qS": "badge_a629d4"
   },
+  "143335": {
+    "Tp": "background_eff18d",
+    "kL": "container_eff18d",
+    "h_": "description_eff18d",
+    "DD": "title_eff18d"
+  },
   "144365": {
     "XO": "ephemeralMessage__124d2",
     "rd": "userAppsBetaContent__124d2",
@@ -10175,6 +10181,7 @@
     "sz": "expanded__7a70a",
     "L9": "blockedSystemMessage__7a70a",
     "Q6": "blockedIcon__7a70a",
+    "Y4": "blockedIconClickable__7a70a",
     "Fo": "blockedMessageText__7a70a",
     "rB": "blockedAction__7a70a"
   },

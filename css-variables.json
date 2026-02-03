@@ -3923,11 +3923,11 @@
     "--custom-app-message-embed-base-info-gap": "4px",
     "--custom-app-message-embed-base-info-top": "calc(var(--custom-app-message-embed-base-info-gap) - 2px)",
     "--custom-premium-marketing-hero-heading-padding-top": "120px",
+    "--custom-cursor": "url(https://cdn.discordapp.com/assets/content/527086a44d0ff5f70f330b661759a3764b4dbe872056587509f3c7b896646f77.png) 8 4,auto",
+    "--custom-cursor-pointer": "url(https://cdn.discordapp.com/assets/content/8d848077f0b56a958fcec921fb38275c32dd75983550e9353eb1b890bf17dfc3.png) 4 4,pointer",
     "--emojiInputHorizontalPadding": "8px",
     "--custom-forum-post-form-padding": "var(--space-8)",
     "--custom-forum-post-form-control-size": "40px",
-    "--custom-cursor": "url(https://cdn.discordapp.com/assets/content/527086a44d0ff5f70f330b661759a3764b4dbe872056587509f3c7b896646f77.png) 8 4,auto",
-    "--custom-cursor-pointer": "url(https://cdn.discordapp.com/assets/content/8d848077f0b56a958fcec921fb38275c32dd75983550e9353eb1b890bf17dfc3.png) 4 4,pointer",
     "--custom-bg-surface-overlay": "rgba(33,34,41,.8)",
     "--custom-zindex-emoji-studio-top": "3",
     "--custom-zindex-emoji-studio-middle": "2",
@@ -9066,6 +9066,20 @@
   ".heroAssetBlurredB__42d45": {
     "--custom-image-blur-amount": "5px"
   },
+  ".container__4d61a": {
+    "--countdown-color": "var(--background-accent)"
+  },
+  ".shop__08415": {
+    "--custom-spacing": "16px",
+    "--custom-gap": "24px"
+  },
+  ".jumbleWrapper__014df": {
+    "--custom-guild-gutter": "72px",
+    "--custom-channel-gutter": "240px"
+  },
+  ".pinkCountdown__9d860": {
+    "--countdown-color": "#4838a9"
+  },
   ".messageInput__62280": {
     "--custom-channel-textarea-text-area-height": "38px"
   },
@@ -9122,20 +9136,6 @@
   },
   ".custom-user-profile-theme .tabBarItem__37bfc": {
     "--selected-tab-item-color": "var(--text-strong)"
-  },
-  ".container__4d61a": {
-    "--countdown-color": "var(--background-accent)"
-  },
-  ".shop__08415": {
-    "--custom-spacing": "16px",
-    "--custom-gap": "24px"
-  },
-  ".jumbleWrapper__014df": {
-    "--custom-guild-gutter": "72px",
-    "--custom-channel-gutter": "240px"
-  },
-  ".pinkCountdown__9d860": {
-    "--countdown-color": "#4838a9"
   },
   ".custom-user-profile-theme .profile__9c3be": {
     "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",
