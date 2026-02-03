@@ -8927,9 +8927,6 @@
     "--custom-voice-filter-icon-bg-color-one": "#7fe987",
     "--custom-voice-filter-icon-bg-color-two": "#fdb12d"
   },
-  ".chatHeaderBar_a53846": {
-    "--__header-bar-background": "var(--background-base-lower)"
-  },
   ".thumbnailContainer_faa96b": {
     "--__post-thumbnail-size": "72px"
   },

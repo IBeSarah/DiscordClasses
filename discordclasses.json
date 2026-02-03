@@ -4287,9 +4287,6 @@
   "168221": {
     "F": "fastTravelButton_bbe3de"
   },
-  "168389": {
-    "$r": "favoriteToggleButton_d84b4e"
-  },
   "168785": {
     "Yr": "disabledButtonWrapper__0cb56",
     "p5": "disabledButtonOverlay__0cb56"
@@ -7444,16 +7441,6 @@
     "h_": "description__3e6b4",
     "c8": "heroImage__3e6b4",
     "lG": "safetyTips__3e6b4"
-  },
-  "287278": {
-    "JD": "chatHeaderBar_a53846",
-    "hP": "chatHeaderBarInfo_a53846",
-    "E5": "chatHeaderBarText_a53846",
-    "$f": "guildIcon_a53846",
-    "dK": "mask_a53846",
-    "Hj": "guildAcronym_a53846",
-    "Gc": "guildIconWithoutImage_a53846",
-    "Sp": "themed_a53846"
   },
   "288198": {
     "kL": "container_aa69cc",
@@ -13322,6 +13309,7 @@
     "ln": "parentChannelSeparator__31961",
     "IE": "headerRight__31961",
     "DD": "title__31961",
+    "X7": "currentlyPlaying__31961",
     "gr": "titleIcon__31961"
   },
   "532485": {
@@ -19793,6 +19781,9 @@
   },
   "791218": {
     "h": "contentContainer__77062"
+  },
+  "791895": {
+    "k": "iconOnlyButton__068c6"
   },
   "792039": {
     "N1": "headerContainer__095fe",
