@@ -8951,6 +8951,15 @@
     "--custom-voice-filter-icon-bg-color-one": "#7fe987",
     "--custom-voice-filter-icon-bg-color-two": "#fdb12d"
   },
+  ".theme-light.custom-client-theme .title_f75fb0": {
+    "--background-gradient-lowest": "var(--background-gradient-chat)"
+  },
+  ".timer_f2170c": {
+    "--custom-voice-invite-suggestions-timer-stroke-width": "2"
+  },
+  ".inputRow__7116a": {
+    "--control-input-height-md": "40px"
+  },
   ".thumbnailContainer_faa96b": {
     "--__post-thumbnail-size": "72px"
   },
@@ -8981,15 +8990,6 @@
   },
   ".collapsed__29444 .icon__29444": {
     "--custom-icon-collapse-rotate": "-90deg"
-  },
-  ".timer_f2170c": {
-    "--custom-voice-invite-suggestions-timer-stroke-width": "2"
-  },
-  ".inputRow__7116a": {
-    "--control-input-height-md": "40px"
-  },
-  ".theme-light.custom-client-theme .title_f75fb0": {
-    "--background-gradient-lowest": "var(--background-gradient-chat)"
   },
   ".container__7a78a": {
     "--custom-game-cover-width": "87px",
