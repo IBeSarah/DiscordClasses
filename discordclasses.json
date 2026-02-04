@@ -6020,6 +6020,9 @@
   "235201": {
     "k": "container__98113"
   },
+  "235376": {
+    "k": "container_e7911b"
+  },
   "235545": {
     "nK": "perkCard_a1e8da",
     "r9": "disabled_a1e8da",
@@ -7453,6 +7456,7 @@
     "r9": "disabled__28842"
   },
   "289920": {
+    "eL": "transitionRail__014df",
     "rA": "jumbleWrapper__014df",
     "LY": "asset__014df",
     "Kb": "peaking__014df",
@@ -12569,6 +12573,7 @@
     "vk": "clickable_f910d0",
     "iE": "wrapper_f910d0",
     "tb": "ringingOutgoing_f910d0",
+    "EX": "small_f910d0",
     "hs": "ringingIncoming_f910d0",
     "II": "statusContainer_f910d0",
     "h5": "status_f910d0",
@@ -13198,6 +13203,13 @@
     "lm": "notice__56dee",
     "G": "infoIcon__56dee",
     "me": "separator__56dee"
+  },
+  "526295": {
+    "kL": "container__96168",
+    "Ui": "cardContainer__96168",
+    "RL": "contextContainer__96168",
+    "fd": "contextIcon__96168",
+    "I$": "fireIcon__96168"
   },
   "527518": {
     "value": "alignRight__44ee9",
@@ -14350,10 +14362,10 @@
     "yt": "streamPreviewWrapper__0489e",
     "Rh": "streamPreview__0489e",
     "WG": "streamHeader__0489e",
+    "mg": "streamHeaderVoiceUserActivities__0489e",
     "lK": "streamHeaderIcon__0489e",
     "i1": "previewContainer__0489e",
     "xD": "previewHover__0489e",
-    "Tb": "skipContainer__0489e",
     "oz": "previewImage__0489e",
     "rf": "body__0489e",
     "lx": "activityActions__0489e",
@@ -14909,8 +14921,7 @@
     "pV": "noItemsIcon_e335a7",
     "yW": "boostingDesktopAppBlurb_e335a7",
     "oU": "duplicateSubscriptionsBanner_e335a7",
-    "dk": "duplicateSubscriptionsBannerText_e335a7",
-    "dn": "helpNoticeDismissIcon_e335a7"
+    "dk": "duplicateSubscriptionsBannerText_e335a7"
   },
   "596020": {
     "r": "menuIcon__62974"
@@ -15280,6 +15291,7 @@
     "name": "name__2ef49",
     "timeBarActivityFeed": "timeBarActivityFeed__2ef49",
     "timeBarVoiceChannel": "timeBarVoiceChannel__2ef49",
+    "activityNameUserActivityHover": "activityNameUserActivityHover__2ef49",
     "activityName": "activityName__2ef49",
     "twitchImageContainer": "twitchImageContainer__2ef49",
     "twitchImageOverlay": "twitchImageOverlay__2ef49",
@@ -15288,6 +15300,7 @@
     "streamName": "streamName__2ef49",
     "streamGame": "streamGame__2ef49",
     "activityVoiceChannel": "activityVoiceChannel__2ef49",
+    "activityVoiceChannelUserHover": "activityVoiceChannelUserHover__2ef49",
     "platformIcon": "platformIcon__2ef49",
     "icon": "icon__2ef49",
     "wrap": "wrap__2ef49",
@@ -16748,8 +16761,8 @@
     "A": "dropIndicatorBefore_d2b0e4",
     "oz": "previewImage_d2b0e4",
     "YB": "centeredSection_d2b0e4",
-    "vn": "suggestedChannelsHeader_d2b0e4",
     "rS": "suggestedChannelsSection_d2b0e4",
+    "vn": "suggestedChannelsHeader_d2b0e4",
     "cF": "suggestedChannels_d2b0e4",
     "TG": "suggestedChannel_d2b0e4",
     "cC": "suggestedChannelIcon_d2b0e4",
@@ -19805,8 +19818,9 @@
     "wT": "toggleExpandIcon__095fe"
   },
   "792352": {
-    "t": "themeSelector_c85552",
-    "H": "themePillItemSelected_c85552"
+    "t7": "themeSelector_c85552",
+    "aF": "themePillItem_c85552",
+    "HE": "themePillItemSelected_c85552"
   },
   "792427": {
     "jC": "popoutContainer__02e2b",
@@ -20254,7 +20268,8 @@
     "In": "applicationIcon__3a590",
     "ld": "items__3a590",
     "u1": "spinner__3a590",
-    "RL": "contextContainer__3a590"
+    "RL": "contextContainer__3a590",
+    "tM": "smallSquareCard__3a590"
   },
   "809719": {
     "ev": "entryActions__3f339",
@@ -20488,9 +20503,6 @@
     "r7": "shadow__68e91",
     "W_": "nux__68e91",
     "cb": "noAnimation__68e91"
-  },
-  "816917": {
-    "T3": "customCursors__90b04"
   },
   "816925": {
     "ft": "keywordTextAreaContainer__4546e",
@@ -22780,6 +22792,8 @@
     "XG": "scroller_d529e9"
   },
   "912579": {
+    "cs": "outgoing-call-pulse__67dba",
+    "u9": "outgoing-call-ellipsis__67dba",
     "iE": "wrapper__67dba",
     "VL": "hasSections__67dba",
     "p": "channelIcon__67dba",
@@ -22789,7 +22803,9 @@
     "hO": "inviteRowAvatar__67dba",
     "mQ": "inviteRowInfo__67dba",
     "BT": "inviteRowLabels__67dba",
+    "DF": "ringing__67dba",
     "Iq": "inviteRowEmptyState__67dba",
+    "t$": "inviteRowActions__67dba",
     "UW": "warningContainer__67dba",
     "QW": "warningIcon__67dba",
     "Sv": "subText__67dba",
@@ -22797,7 +22813,8 @@
     "gJ": "errorMessage__67dba",
     "P5": "errorLink__67dba",
     "q9": "acronym__67dba",
-    "xF": "footerWithCheckbox__67dba"
+    "xF": "footerWithCheckbox__67dba",
+    "J2": "subLabel__67dba"
   },
   "913941": {
     "Dg": "imgContainer__8f9ad",
@@ -23370,7 +23387,6 @@
     "Qs": "content_d77702",
     "R$": "radioGroup_d77702",
     "Gt": "gameIcon_d77702",
-    "Oh": "searchNoToggle_d77702",
     "Gr": "detectedGameFrame_d77702",
     "q_": "detectedGameIcon_d77702",
     "x_": "detectedGameIconPlaceholder_d77702"
@@ -23987,9 +24003,7 @@
     "Ak": "hangStatusActivity__218f7",
     "AF": "hangStatusContent__218f7",
     "W9": "hangStatusIcon__218f7",
-    "YJ": "hangStatusText__218f7",
-    "yt": "streamPreviewWrapper__218f7",
-    "P0": "mounted__218f7"
+    "YJ": "hangStatusText__218f7"
   },
   "963879": {
     "kL": "container_d55c24",
@@ -24077,7 +24091,6 @@
     "Hc": "baseContainer__40d5b",
     "Nr": "card__40d5b",
     "Ki": "video__40d5b",
-    "aZ": "betaBadge__40d5b",
     "L$": "progressContainer__40d5b",
     "zK": "bannerImageContainer__40d5b",
     "_e": "bannerImage__40d5b",
