@@ -8867,6 +8867,9 @@
   ".reactors_b7f4b4": {
     "--custom-list-scrollbar-top-padding": "12px"
   },
+  ".divider__6131a": {
+    "--custom-divider-margin": "calc(var(--space-xxl) + var(--space-xs))"
+  },
   ".bioTextArea__6a919": {
     "--channel-text-area-placeholder": "var(--input-placeholder-text-default)"
   },
