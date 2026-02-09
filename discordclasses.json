@@ -4868,9 +4868,6 @@
     "_d": "buttonText__82222",
     "ez": "giftIcon__82222"
   },
-  "194845": {
-    "k": "container_be506c"
-  },
   "194878": {
     "k": "container__0ccef"
   },
@@ -23935,6 +23932,14 @@
     "kL": "container__33d66",
     "Io": "pill__33d66",
     "r9": "disabled__33d66"
+  },
+  "958237": {
+    "XG": "scroller__19a29",
+    "Qs": "content__19a29",
+    "u6": "cardsRow__19a29",
+    "jf": "wishlistSection__19a29",
+    "KN": "wishlistGrid__19a29",
+    "lV": "wishlistPlaceholder__19a29"
   },
   "958404": {
     "kL": "container__143a4",
