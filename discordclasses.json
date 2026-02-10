@@ -10966,7 +10966,8 @@
     "oT": "popoutHeaderContainer__4e30a",
     "zN": "headerDivider__4e30a",
     "Vo": "settingNudgeText__4e30a",
-    "L": "voiceChannelGiftingBreadcrumb__4e30a"
+    "L": "voiceChannelGiftingBreadcrumb__4e30a",
+    "iA": "isStandardGap__4e30a"
   },
   "440526": {
     "I": "applicationIcon_c4891f",
@@ -13402,6 +13403,7 @@
   },
   "533848": {
     "SW": "popout__76f04",
+    "iA": "isStandardGap__76f04",
     "OS": "more__76f04",
     "nM": "row__76f04",
     "DD": "title__76f04",
@@ -13426,6 +13428,16 @@
   "534205": {
     "kL": "container__72c38",
     "iE": "wrapper__72c38"
+  },
+  "534393": {
+    "OS": "singleSelectOption__12eef",
+    "Mg": "deviceContainer__12eef",
+    "Sy": "withIcon__12eef",
+    "S2": "multiLine__12eef",
+    "VT": "deviceSubLabel__12eef",
+    "Kt": "deviceIcon__12eef",
+    "hV": "deviceLabel__12eef",
+    "pN": "deviceCertifiedPill__12eef"
   },
   "535134": {
     "WG": "animationMiddle__8177b",
@@ -17603,6 +17615,7 @@
     "pN": "noPadding__5dac8"
   },
   "690552": {
+    "zr": "root__5b8f4",
     "av": "lockedPickerItem__5b8f4",
     "n2": "guildBadge__5b8f4",
     "WZ": "previewBadge__5b8f4",
@@ -18768,7 +18781,9 @@
     "vR": "tabs__49ef0",
     "Mf": "tab__49ef0",
     "jP": "tabSelected__49ef0",
-    "OD": "unreadFavoritesDot__49ef0"
+    "OD": "unreadFavoritesDot__49ef0",
+    "S": "unreadFavoritesDotPulsing__49ef0",
+    "Me": "favoritesDotPulse__49ef0"
   },
   "742898": {
     "z": "error__6e36d"
@@ -19110,16 +19125,6 @@
     "kV": "authorizedSuccessExternal_b76614",
     "fv": "authorizedSuccessExternalCopy_b76614",
     "LR": "authorizedSuccessExternalIcon_b76614"
-  },
-  "756774": {
-    "OS": "singleSelectOption__12eef",
-    "Mg": "deviceContainer__12eef",
-    "Sy": "withIcon__12eef",
-    "S2": "multiLine__12eef",
-    "VT": "deviceSubLabel__12eef",
-    "Kt": "deviceIcon__12eef",
-    "hV": "deviceLabel__12eef",
-    "pN": "deviceCertifiedPill__12eef"
   },
   "758382": {
     "K": "icon__0e5a2"
@@ -22089,6 +22094,7 @@
     "h_": "burstEmoji_b7f4b4",
     "u1": "spinner_b7f4b4",
     "Px": "reactor_b7f4b4",
+    "Z7": "reactorClickable_b7f4b4",
     "Bi": "reactorInfo_b7f4b4",
     "UU": "name_b7f4b4",
     "Ci": "ellipsized_b7f4b4",
@@ -23667,6 +23673,7 @@
   "945354": {
     "yt": "streamPreviewWrapper__6da2d",
     "P0": "mounted__6da2d",
+    "iA": "isStandardGap__6da2d",
     "Rh": "streamPreview__6da2d"
   },
   "945586": {
@@ -24029,6 +24036,7 @@
   },
   "962966": {
     "kL": "container__218f7",
+    "iA": "isStandardGap__218f7",
     "zN": "headerDivider__218f7",
     "L": "voiceChannelGiftingBreadcrumb__218f7",
     "Ak": "hangStatusActivity__218f7",
