@@ -286,6 +286,13 @@
     "vY": "cardsContainer__09fde",
     "u1": "spinner__09fde"
   },
+  "10855": {
+    "qV": "skeleton__2d717",
+    "jf": "child__2d717",
+    "Y_": "children__2d717",
+    "iM": "shimmer__2d717",
+    "U6": "pulse__2d717"
+  },
   "10879": {
     "i": "brokenImageIcon_f68fcb"
   },
@@ -678,6 +685,15 @@
     "r9": "disabled__920ab",
     "gM": "optionals__920ab",
     "$2": "optionalNames__920ab"
+  },
+  "27112": {
+    "YB": "centeredSection_dedbae",
+    "kL": "container_dedbae",
+    "b": "closeButton_dedbae",
+    "xf": "promoSection_dedbae",
+    "qw": "offerNoticeContainer_dedbae",
+    "B5": "headingRow_dedbae",
+    "$2": "cardGrid_dedbae"
   },
   "27192": {
     "BOX": "box__09aca",
@@ -1597,6 +1613,7 @@
   "71862": {
     "AS": "item_caf372",
     "vu": "active_caf372",
+    "RD": "destructive_caf372",
     "Kk": "icon_caf372",
     "Ly": "itemContent_caf372",
     "DB": "itemContainer_caf372"
