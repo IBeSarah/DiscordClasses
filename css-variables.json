@@ -3800,6 +3800,8 @@
     "--custom-emoji-picker-constants-category-separator-size": "1px",
     "--custom-emoji-picker-constants-category-separator-margin-vertical": "12px",
     "--custom-emoji-picker-constants-diversity-emoji-size": "24px",
+    "--custom-emoji-picker-constants-diversity-emoji-container-padding-vertical": "7px",
+    "--custom-emoji-picker-constants-diversity-emoji-container-padding-horizontal": "7px",
     "--custom-emoji-picker-constants-emoji-premium-upsell-height": "54px",
     "--custom-emoji-picker-constants-emoji-premium-upsell-margin-top": "16px",
     "--custom-emoji-picker-constants-newly-added-emoji-badge-height": "16px",
@@ -8924,7 +8926,11 @@
     "--custom-card-border-radius": "20px"
   },
   ".container__80907": {
+    "--custom-premium-home-max-width": "1066px",
     "--custom-content-width-with-padding": "calc(100% - 32px)"
+  },
+  ".container__94da4": {
+    "--custom-premium-home-max-width": "1066px"
   },
   ".bioTextArea__6a919": {
     "--channel-text-area-placeholder": "var(--input-placeholder-text-default)"
