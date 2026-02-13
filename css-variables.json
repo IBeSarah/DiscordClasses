@@ -8972,6 +8972,70 @@
   ".container_d878e7": {
     "--__card-accent-color": "transparent"
   },
+  ".widgetContainer__0ea1a": {
+    "--custom-container-gap": "var(--space-8)",
+    "--custom-text-placeholder-width": "15ch",
+    "--custom-widget-header-height": "24px",
+    "--custom-widget-container-padding-block": "var(--space-12)",
+    "--custom-widget-container-padding-inline": "var(--space-16)"
+  },
+  ".heroImageContainer__0ea1a": {
+    "--custom-peek-amount": "var(--space-8)",
+    "--custom-top-offset": "calc(var(--custom-widget-header-height)*-1 + var(--custom-widget-container-padding-block)*-1 + var(--custom-peek-amount)*-1)"
+  },
+  ".grid__0ea1a": {
+    "--custom-text-placeholder-width": "8ch"
+  },
+  ".container__7a78a": {
+    "--custom-game-cover-width": "87px",
+    "--custom-game-cover-height": "116px",
+    "--custom-game-cover-grid-row-size": "4",
+    "--custom-game-cover-gap": "16px",
+    "--custom-placeholder-text-size": "20px",
+    "--custom-placeholder-text-gap": "9px"
+  },
+  ".container__7a78a.sizeMedium__7a78a": {
+    "--custom-game-cover-width": "72px",
+    "--custom-game-cover-height": "96px",
+    "--custom-game-cover-grid-row-size": "4",
+    "--custom-game-cover-gap": "10px",
+    "--custom-placeholder-text-size": "20px",
+    "--custom-placeholder-text-gap": "9px"
+  },
+  ".container__7a78a.sizeSmall__7a78a": {
+    "--custom-game-cover-width": "56px",
+    "--custom-game-cover-height": "75px",
+    "--custom-game-cover-grid-row-size": "3",
+    "--custom-game-cover-gap": "9px",
+    "--custom-placeholder-text-size": "12px",
+    "--custom-placeholder-text-gap": "8px"
+  },
+  ".container_ab64fd": {
+    "--custom-widget-preview-width": "422px",
+    "--custom-game-cover-width": "90px",
+    "--custom-game-cover-height": "120px"
+  },
+  ".container__203bc": {
+    "--custom-game-cover-width": "56px",
+    "--custom-game-cover-height": "74px",
+    "--custom-game-cover-grid-row-size": "6"
+  },
+  ".addButtonContent__4a011": {
+    "--custom-option-add-button-padding": "16px"
+  },
+  ".addButtonContent__4a011.sizeSmall__4a011": {
+    "--custom-option-add-button-padding": "12px"
+  },
+  ".container__37bfc": {
+    "--custom-gutter-left": "32px",
+    "--custom-scrollbar-offset-right": "16px"
+  },
+  ".tabBarItem__37bfc": {
+    "--selected-tab-item-color": "var(--text-brand)"
+  },
+  ".custom-user-profile-theme .tabBarItem__37bfc": {
+    "--selected-tab-item-color": "var(--text-strong)"
+  },
   ".skye_ed0705": {
     "--custom-voice-filter-icon-bg-color-one": "#35ed7e",
     "--custom-voice-filter-icon-bg-color-two": "#f260c3"
@@ -9072,39 +9136,13 @@
   ".theme-light.custom-client-theme .title_f75fb0": {
     "--background-gradient-lowest": "var(--background-gradient-chat)"
   },
-  ".container__7a78a": {
-    "--custom-game-cover-width": "87px",
-    "--custom-game-cover-height": "116px",
-    "--custom-game-cover-grid-row-size": "4",
-    "--custom-game-cover-gap": "16px",
-    "--custom-placeholder-text-size": "20px",
-    "--custom-placeholder-text-gap": "9px"
-  },
-  ".container__7a78a.sizeMedium__7a78a": {
-    "--custom-game-cover-width": "72px",
-    "--custom-game-cover-height": "96px",
-    "--custom-game-cover-grid-row-size": "4",
-    "--custom-game-cover-gap": "10px",
-    "--custom-placeholder-text-size": "20px",
-    "--custom-placeholder-text-gap": "9px"
-  },
-  ".container__7a78a.sizeSmall__7a78a": {
-    "--custom-game-cover-width": "56px",
-    "--custom-game-cover-height": "75px",
-    "--custom-game-cover-grid-row-size": "3",
-    "--custom-game-cover-gap": "9px",
-    "--custom-placeholder-text-size": "12px",
-    "--custom-placeholder-text-gap": "8px"
-  },
-  ".addButtonContent__4a011": {
-    "--custom-option-add-button-padding": "16px"
-  },
-  ".addButtonContent__4a011.sizeSmall__4a011": {
-    "--custom-option-add-button-padding": "12px"
-  },
   ".options__60a25": {
     "--custom-game-cover-width": "72px",
     "--custom-game-cover-height": "96px"
+  },
+  ".custom-user-profile-theme .profile__9c3be": {
+    "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",
+    "--profile-gradient-end": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-secondary-color))"
   },
   ".tab__65d41": {
     "--selected-tab-item-color": "var(--text-default)"
@@ -9147,40 +9185,6 @@
   ".heroAssetBlurredB__42d45": {
     "--custom-image-blur-amount": "5px"
   },
-  ".widgetContainer__0ea1a": {
-    "--custom-container-gap": "var(--space-8)",
-    "--custom-text-placeholder-width": "15ch",
-    "--custom-widget-header-height": "24px",
-    "--custom-widget-container-padding-block": "var(--space-12)",
-    "--custom-widget-container-padding-inline": "var(--space-16)"
-  },
-  ".heroImageContainer__0ea1a": {
-    "--custom-peek-amount": "var(--space-8)",
-    "--custom-top-offset": "calc(var(--custom-widget-header-height)*-1 + var(--custom-widget-container-padding-block)*-1 + var(--custom-peek-amount)*-1)"
-  },
-  ".grid__0ea1a": {
-    "--custom-text-placeholder-width": "8ch"
-  },
-  ".container_ab64fd": {
-    "--custom-widget-preview-width": "422px",
-    "--custom-game-cover-width": "90px",
-    "--custom-game-cover-height": "120px"
-  },
-  ".container__203bc": {
-    "--custom-game-cover-width": "56px",
-    "--custom-game-cover-height": "74px",
-    "--custom-game-cover-grid-row-size": "6"
-  },
-  ".container__37bfc": {
-    "--custom-gutter-left": "32px",
-    "--custom-scrollbar-offset-right": "16px"
-  },
-  ".tabBarItem__37bfc": {
-    "--selected-tab-item-color": "var(--text-brand)"
-  },
-  ".custom-user-profile-theme .tabBarItem__37bfc": {
-    "--selected-tab-item-color": "var(--text-strong)"
-  },
   ".messageInput__62280": {
     "--custom-channel-textarea-text-area-height": "38px"
   },
@@ -9213,10 +9217,6 @@
   },
   ".pinkCountdown__9d860": {
     "--countdown-color": "#4838a9"
-  },
-  ".custom-user-profile-theme .profile__9c3be": {
-    "--profile-gradient-start": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-primary-color))",
-    "--profile-gradient-end": "color-mix(in oklab,var(--profile-gradient-overlay-color) 100%,var(--profile-gradient-secondary-color))"
   },
   ".extras__58ece": {
     "--custom-offset": "0"

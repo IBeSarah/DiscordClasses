@@ -223,7 +223,8 @@
   "7946": {
     "ZS": "imageContainer_a1bfef",
     "Sl": "image_a1bfef",
-    "SV": "levelImage_a1bfef"
+    "SV": "levelImage_a1bfef",
+    "Lj": "animatedImage_a1bfef"
   },
   "8056": {
     "mA": "productPreview__00f8b",
@@ -1344,9 +1345,7 @@
     "VD": "progressCellHeader__49035",
     "so": "progressCellBody__49035",
     "NO": "progressCellText__49035",
-    "hP": "actionButton__49035",
-    "DX": "actionButtonContents__49035",
-    "gE": "actionIcon__49035"
+    "sG": "actionButtonGroup__49035"
   },
   "60090": {
     "Kk": "icon__1a58a",
@@ -2500,10 +2499,10 @@
     "VU": "withGradient__553bf",
     "pC": "withTakeoverContent__553bf",
     "jR": "withOnboardingContent__553bf",
+    "VG": "takeoverBackgroundImage__553bf",
     "qS": "badge__553bf",
     "q2": "shine__553bf",
     "ys": "glow__553bf",
-    "VG": "takeoverBackgroundImage__553bf",
     "cl": "takeoverTooltipImage__553bf"
   },
   "106467": {
@@ -3186,7 +3185,6 @@
   },
   "128478": {
     "Z0": "questProgressWrapper_ae7810",
-    "vt": "questProgressRewardTile_ae7810",
     "NZ": "questProgressCopy_ae7810",
     "FZ": "questProgressHint_ae7810"
   },
@@ -3467,7 +3465,6 @@
     "vN": "phoneRevealer__2666b",
     "PA": "inlineNoticeText__2666b",
     "Uc": "backupCode__2666b",
-    "s6": "noticeTextButton__2666b",
     "SZ": "tabPanel__2666b"
   },
   "140030": {
@@ -3872,7 +3869,7 @@
     "Xh": "username__0a06e",
     "D2": "discriminator__0a06e",
     "yo": "hovered__0a06e",
-    "ID": "alignPomelo__0a06e"
+    "Nu": "alignUniqueUsername__0a06e"
   },
   "157650": {
     "container": "container__59141",
@@ -4342,15 +4339,6 @@
     "fT": "pickerItemSelected_a84c50",
     "n8": "disabledForm_a84c50",
     "so": "sidebarContainer_a84c50"
-  },
-  "176115": {
-    "qr": "footer_d9f765",
-    "G3": "closeContainer_d9f765",
-    "hQ": "contentContainer_d9f765",
-    "VN": "close_d9f765",
-    "mG": "inline_d9f765",
-    "I": "unfilledButton_d9f765",
-    "CR": "modalRoot_d9f765"
   },
   "176187": {
     "kL": "container__9fa5a",
@@ -4939,8 +4927,6 @@
     "t_": "confetti__956c6",
     "Nz": "completionAnimation__956c6",
     "Tr": "progressWrapper__956c6",
-    "yv": "circularRewardTileWrapper__956c6",
-    "ve": "circularQuestRewardTileAsset__956c6",
     "eB": "questRewardTileAsset__956c6",
     "c6": "assetWrapper__956c6",
     "FS": "textContainer__956c6",
@@ -5773,6 +5759,8 @@
   },
   "228851": {
     "Yb": "paymentSourceRow__0eeee",
+    "zy": "giftCardRowRight__0eeee",
+    "Tq": "giftCardBalance__0eeee",
     "Sv": "subText__0eeee",
     "qr": "footer__0eeee",
     "z8": "footerContent__0eeee",
@@ -6101,7 +6089,7 @@
     "p9": "fieldTitle__1fed1",
     "PU": "fieldButtonList__1fed1",
     "pr": "fieldButton__1fed1",
-    "d6": "pomeloWarning__1fed1",
+    "a$": "uniqueUsernameWarning__1fed1",
     "DT": "removeButton__1fed1",
     "mx": "avatarError__1fed1",
     "NQ": "constrainedRow__1fed1",
@@ -7630,37 +7618,6 @@
   "298922": {
     "IN": "hotspotsSection__16e9e",
     "I8": "statusIcon__16e9e"
-  },
-  "299043": {
-    "DD": "title_a76279",
-    "VA": "subtitle_a76279",
-    "nf": "link_a76279",
-    "AC": "subtitleFinish_a76279",
-    "z$": "subtitleInfo_a76279",
-    "J1": "prompt_a76279",
-    "mO": "promptFinish_a76279",
-    "qQ": "finishTitle_a76279",
-    "x6": "button_a76279",
-    "op": "infoContainer_a76279",
-    "oU": "infoItem_a76279",
-    "P8": "infoItemSpacing_a76279",
-    "G": "infoIcon_a76279",
-    "B": "infoPicture_a76279",
-    "d3": "userCardContainer_a76279",
-    "Kg": "userCard_a76279",
-    "Kq": "profileCard_a76279",
-    "my": "avatar_a76279",
-    "xm": "displayNameContainer_a76279",
-    "u1": "formMessage_a76279",
-    "JK": "formMessageNegative_a76279",
-    "jn": "formMessagePositive_a76279",
-    "zC": "messageContainer_a76279",
-    "Kf": "inputContainer_a76279",
-    "WI": "memberText_a76279",
-    "E4": "reflect_a76279",
-    "Sr": "shinyCard_a76279",
-    "kB": "legacyUsernameBadgeContainer_a76279",
-    "zF": "legacyUsernameBadge_a76279"
   },
   "299198": {
     "i": "wrapper_b97385",
@@ -12517,8 +12474,7 @@
   "500271": {
     "Tr": "progressWrapper__4264a",
     "t_": "confetti__4264a",
-    "md": "progressCont__4264a",
-    "vt": "questProgressRewardTile__4264a"
+    "md": "progressCont__4264a"
   },
   "500320": {
     "Qg": "visuallyHidden__0d242",
@@ -13917,7 +13873,9 @@
     "eL": "previewCardFooter_a35735",
     "VH": "preview_a35735",
     "KJ": "profileEffectPreviewContent_a35735",
-    "p6": "userProfilePreview_a35735",
+    "jq": "fullProfilePreview_a35735",
+    "JB": "userProfileThemeContainer_a35735",
+    "f5": "condensedProfilePreview_a35735",
     "cD": "dangerControls_a35735",
     "OO": "checkBox_a35735",
     "au": "uploadButton_a35735",
@@ -14444,6 +14402,8 @@
   "574268": {
     "uW": "section_f2af23",
     "R_": "heading_f2af23",
+    "Lq": "filterTabs_f2af23",
+    "IC": "filterTab_f2af23",
     "Nr": "card_f2af23"
   },
   "574377": {
@@ -15570,6 +15530,14 @@
     "o1": "actions_e1ecd3",
     "ou": "staffIndicator_e1ecd3",
     "P9": "applicationSublabel_e1ecd3"
+  },
+  "615305": {
+    "I6": "inputWrapper_ba2c2e",
+    "Cl": "confirmCountryContainer_ba2c2e",
+    "IM": "headerFlag_ba2c2e",
+    "Vl": "giftCardStatusIcons_ba2c2e",
+    "vn": "statusFlag_ba2c2e",
+    "ZY": "giftCodeInputWrapper_ba2c2e"
   },
   "615434": {
     "kL": "container__61306",
@@ -19453,6 +19421,7 @@
   },
   "773570": {
     "al": "questRewardTile__28141",
+    "Ij": "fullWidth__28141",
     "Yi": "rewardHighlight__28141",
     "a$": "questRewardTileInteractive__28141",
     "eB": "questRewardTileAsset__28141",
@@ -19802,7 +19771,8 @@
   "789863": {
     "Wi": "descriptionWrapper__43963",
     "Sv": "subText__43963",
-    "q3": "indicator__43963"
+    "q3": "indicator__43963",
+    "k7": "giftCardIcon__43963"
   },
   "789906": {
     "i": "wrapper__63f6b",
