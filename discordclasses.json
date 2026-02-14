@@ -1973,8 +1973,7 @@
     "ij": "wishlistButton__38ccf",
     "r$": "logoContainer__38ccf",
     "wm": "logo__38ccf",
-    "p6": "priceContainer__38ccf",
-    "xN": "orbsTextContainer__38ccf"
+    "p6": "priceContainer__38ccf"
   },
   "88808": {
     "y_": "backForwardButtons__63abb",
@@ -2497,13 +2496,13 @@
   "106417": {
     "iE": "wrapper__553bf",
     "VU": "withGradient__553bf",
-    "pC": "withTakeoverContent__553bf",
+    "XO": "withQuestHomeHeroContent__553bf",
     "jR": "withOnboardingContent__553bf",
-    "VG": "takeoverBackgroundImage__553bf",
+    "Nd": "questHomeHeroBackgroundImage__553bf",
     "qS": "badge__553bf",
     "q2": "shine__553bf",
     "ys": "glow__553bf",
-    "cl": "takeoverTooltipImage__553bf"
+    "ut": "questHomeHeroTooltipImage__553bf"
   },
   "106467": {
     "D4": "checklist__42e04",
@@ -6775,10 +6774,10 @@
   "265891": {
     "kL": "container__011b7",
     "ak": "micTest__011b7",
+    "EX": "small__011b7",
+    "mi": "meterOnly__011b7",
     "Qe": "micTestCaption__011b7",
-    "km": "buttonSizer__011b7",
-    "qB": "buttonSizerSpacer__011b7",
-    "_o": "buttonWrapper__011b7"
+    "km": "buttonSizer__011b7"
   },
   "266341": {
     "grid": "grid__1b670",
@@ -8629,7 +8628,8 @@
     "im": "fineprint_b44961",
     "qY": "skuHeading_b44961",
     "nI": "skuHeadingText_b44961",
-    "lm": "socialLayerGameItemDisclaimer_b44961"
+    "lm": "socialLayerGameItemDisclaimer_b44961",
+    "o7": "orbsRewardNotice_b44961"
   },
   "342860": {
     "uR": "collapseable__217b7",
@@ -10821,6 +10821,25 @@
     "nM": "row__95bea",
     "aL": "rowIcon__95bea",
     "qg": "rowText__95bea"
+  },
+  "437176": {
+    "iE": "wrapper__5d00f",
+    "Qx": "wrapperWithOldDiscoveryHeader__5d00f",
+    "FG": "contentWrapper__5d00f",
+    "B3": "contentWrapperLoading__5d00f",
+    "Qs": "content__5d00f",
+    "Tv": "heroBackground__5d00f",
+    "Np": "backgroundOverlay__5d00f",
+    "LO": "heroAsset__5d00f",
+    "LY": "asset__5d00f",
+    "jx": "heroAssetBlurred__5d00f",
+    "Co": "heroAssetBlurredA__5d00f",
+    "hw": "heroAssetBlurredB__5d00f",
+    "yp": "contentBody__5d00f",
+    "wm": "logo__5d00f",
+    "DD": "title__5d00f",
+    "VA": "subtitle__5d00f",
+    "yu": "sponsoredTag__5d00f"
   },
   "437504": {
     "A": "sectionContainer_f8758b",
@@ -19893,25 +19912,6 @@
     "hQ": "contentContainer__1a51c",
     "RH": "footerHeader__1a51c"
   },
-  "794053": {
-    "iE": "wrapper__42d45",
-    "Qx": "wrapperWithOldDiscoveryHeader__42d45",
-    "FG": "contentWrapper__42d45",
-    "B3": "contentWrapperLoading__42d45",
-    "Qs": "content__42d45",
-    "Tv": "heroBackground__42d45",
-    "Np": "backgroundOverlay__42d45",
-    "LO": "heroAsset__42d45",
-    "LY": "asset__42d45",
-    "jx": "heroAssetBlurred__42d45",
-    "Co": "heroAssetBlurredA__42d45",
-    "hw": "heroAssetBlurredB__42d45",
-    "yp": "contentBody__42d45",
-    "wm": "logo__42d45",
-    "DD": "title__42d45",
-    "VA": "subtitle__42d45",
-    "yu": "sponsoredTag__42d45"
-  },
   "794118": {
     "v": "clickable__65fc9",
     "K": "icon__65fc9"
@@ -20885,7 +20885,6 @@
     "Qq": "text_e1e832"
   },
   "835818": {
-    "a": "micTest__169b3",
     "X": "micTestHelpLink__169b3"
   },
   "836263": {
@@ -24254,7 +24253,7 @@
     "jt": "offerNoticeContainerShared__005bd",
     "qw": "offerNoticeContainer__005bd",
     "mQ": "standard__005bd",
-    "Ky": "offerNoticeHeader__005bd",
+    "Yu": "offerNoticeContent__005bd",
     "fb": "offerNoticeBody__005bd",
     "Cu": "offerNoticeOneLineContainer__005bd",
     "Ct": "offerNoticeOneLineText__005bd"
