@@ -1,4 +1,4 @@
-{"host":{"version":"1.0.1164 x64 (90586)"},"channel":{"canary":"610229 (cbf637c)"},
+{"host":{"version":"1.0.1165 x64 (90604)"},"channel":{"canary":"610330 (121bf06)"},
   "684": {
     "container": "container__93e55",
     "messageContainer": "messageContainer__93e55"
@@ -5630,10 +5630,10 @@
     "details": "details_e1364f",
     "commentIcon": "commentIcon_e1364f",
     "tags": "tags_e1364f",
-    "textAreaContainer": "textAreaContainer_e1364f text-sm/normal_e1364f",
-    "editableCommentContainer": "editableCommentContainer_e1364f",
+    "textAreaContainer": "textAreaContainer_e1364f",
     "editableCommentText": "editableCommentText_e1364f",
     "placeholder": "placeholder_e1364f",
+    "comment": "comment_e1364f text-sm/normal_e1364f",
     "dropTarget": "dropTarget_e1364f",
     "dropIndicatorAfter": "dropIndicatorAfter_e1364f",
     "dropIndicatorBefore": "dropIndicatorBefore_e1364f",
@@ -15722,6 +15722,7 @@
     "field": "field__62663",
     "input": "input__62663",
     "multiline": "multiline__62663",
+    "clamped": "clamped__62663",
     "hasPreview": "hasPreview__62663",
     "sizer": "sizer__62663",
     "placeholderSizer": "placeholderSizer__62663",
