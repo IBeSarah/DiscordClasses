@@ -1,4 +1,4 @@
-{"host":{"version":"1.0.1166 x64 (90658)"},"channel":{"canary":"611191 (dde8720)"},
+{"host":{"version":"1.0.1166 x64 (90658)"},"channel":{"canary":"611198 (0317778)"},
   "684": {
     "container": "container__93e55",
     "messageContainer": "messageContainer__93e55"
@@ -5491,6 +5491,10 @@
   "199023": {
     "backgroundImage": "backgroundImage__4b1a9",
     "backgroundContainer": "backgroundContainer__4b1a9"
+  },
+  "199457": {
+    "stateContainer": "stateContainer__402a1",
+    "stateText": "stateText__402a1"
   },
   "200307": {
     "imageWrapper": "imageWrapper__313d2",
@@ -19553,6 +19557,12 @@
     "questProgressCopy": "questProgressCopy_ae7810",
     "questProgressHint": "questProgressHint_ae7810"
   },
+  "649914": {
+    "surface": "surface_f7cd6e",
+    "stage": "stage_f7cd6e",
+    "frameTarget": "frameTarget_f7cd6e",
+    "hosted": "hosted_f7cd6e"
+  },
   "650228": {
     "avatarPreviewContainer": "avatarPreviewContainer__349b1",
     "pfxPreviewContainer": "pfxPreviewContainer__349b1",
@@ -21680,8 +21690,10 @@
   },
   "728846": {
     "frameTarget": "frameTarget_e92794",
-    "stateContainer": "stateContainer_e92794",
-    "stateText": "stateText_e92794"
+    "state": "state_e92794"
+  },
+  "730006": {
+    "appIcon": "appIcon__46ba7"
   },
   "730393": {
     "participantsButton": "participantsButton__211d1",
@@ -23527,6 +23539,14 @@
     "detailsWrapper": "detailsWrapper__4a3a5",
     "headerDetailsWrapper": "headerDetailsWrapper__4a3a5",
     "premiumIcon": "premiumIcon__4a3a5"
+  },
+  "783842": {
+    "splitButton": "splitButton_d0002b",
+    "splitButtonMain": "splitButtonMain_d0002b",
+    "soloMain": "soloMain_d0002b",
+    "splitButtonCaretHalf": "splitButtonCaretHalf_d0002b",
+    "splitButtonCaret": "splitButtonCaret_d0002b",
+    "splitButtonOpen": "splitButtonOpen_d0002b"
   },
   "784039": {
     "spacer": "spacer__01c8c",
